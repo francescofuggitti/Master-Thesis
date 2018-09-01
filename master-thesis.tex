@@ -1,0 +1,176 @@
+% !TeX root = thesis.tex
+% !TeX spellcheck = en_US
+% !TeX encoding = UTF-8
+\documentclass[english, LaM, oneside]{sapthesis}%remove "english" for a thesis written in Italian
+
+%\usepackage[utf8]{inputenx}
+%\usepackage{xcolor}
+%\usepackage{indentfirst}
+%\usepackage{microtype}
+
+%\usepackage{lettrine}
+%\linespread{0.9}
+
+% This can be used to make space between section names more compact. The titlesec package allows changing how chapters are displayed, numerated, etc.
+%\usepackage[compact]{titlesec}
+% to get the bibliography in the toc
+\usepackage[nottoc,notlot,notlof,chapter]{tocbibind}
+
+\newcommand{\thesistitle}{FOND Planning for {\sc ltl}$_f$ Goals: Theory and Implementation}
+
+\usepackage{index}
+\usepackage{hyperref}
+\usepackage{wrapfig}
+\usepackage[round]{natbib}
+\bibliographystyle{plainnat}
+
+\usepackage[intoc,refpage]{nomencl} %refeq
+\makenomenclature
+
+%\usepackage{qtree}
+% The algorithm packages have to be after hyperref.
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+
+\usepackage{mathtools}
+\usepackage{amssymb, amsmath, amsthm}
+\usepackage{xspace, float, graphicx, pstricks}
+
+\usepackage{caption}% http://ctan.org/pkg/caption
+\captionsetup[ruled]{labelsep=period}
+\makeatletter
+\@addtoreset{algorithm}{chapter}% algorithm counter resets every chapter
+\makeatother
+\renewcommand{\thealgorithm}{\thechapter.\arabic{algorithm}}% Algorithm # is <chapter>.<algorithm>
+
+
+\usepackage{subcaption}
+%\usepackage[autostyle]{csquotes}  
+\usepackage{graphicx}
+%\graphicspath{{./images/}}
+\usepackage{rotating}
+
+%\usepackage{tikz}
+%\usetikzlibrary{automata}
+%\usetikzlibrary{positioning}
+
+\usepackage{listings}
+% Custom colors
+\usepackage{color}
+\definecolor{deepblue}{rgb}{0,0,0.5}
+\definecolor{deepred}{rgb}{0.6,0,0}
+\definecolor{deepgreen}{rgb}{0,0.5,0}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+
+\usepackage{accsupp}    
+\newcommand{\noncopynumber}[1]{
+	\BeginAccSupp{method=escape,ActualText={}}
+	#1
+	\EndAccSupp{}
+}
+\lstdefinestyle{Python}{
+	language        = Python,
+	backgroundcolor=\color{backcolour},
+	basicstyle      = \ttfamily,
+	keywordstyle    = \color{deepblue},
+	stringstyle     = \color{deepgreen},
+	commentstyle    = \color{codegray}\ttfamily,
+	numberstyle=\tiny\color{codegray}\noncopynumber,
+	columns=flexible,
+	numbers=left,
+	stepnumber=1
+}
+
+\hypersetup{
+	hyperfootnotes=true,            
+	bookmarks=true,         
+	colorlinks=true,
+	linkcolor=red,
+	linktoc=page,
+	anchorcolor=black,
+	citecolor=red,
+	urlcolor=blue,
+	pdftitle={\thesistitle},
+	pdfsubject = {Master Thesis, University of Rome "La Sapienza"},
+	pdfauthor={Francesco Fuggitti},
+	pdfkeywords={master thesis, sapienza, roma, university, francesco fuggitti}
+	pdfauthor = {\textcopyright\ \today\ Francesco Fuggitti},
+}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[chapter] % reset theorem numbering for each chapter
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[chapter]
+\newtheorem{example}{Example}[chapter]
+
+\newgeometry{twoside}
+
+%opening
+\title{\thesistitle}
+\author{Francesco Fuggitti}
+\IDnumber{1735212}
+\course[]{Engineering in Computer Science}
+\courseorganizer{Facoltà di Ingegneria dell'Informazione, Informatica e Statistica}
+\submitdate{2017/2018}
+\copyyear{2018}
+\advisor{Prof. Giuseppe De Giacomo}
+\authoremail{fuggitti.1735212@studenti.uniroma1.it}
+%\examdate{$22^{\text{th}}$ October 2018}
+%\examiner{Prof. }
+%\examiner{Prof. }
+%\examiner{Prof. }
+%\examiner{Prof. }
+%\examiner{Prof. }
+%\examiner{Prof. }
+%\examiner{Prof. }    
+
+\allowdisplaybreaks
+
+\begin{document}
+	\input{macros}
+	
+	\frontmatter	
+	\maketitle
+	
+	\begin{abstract}
+		MDPs extended with \LTLf non-Markovian rewards
+		have recently attracted interest as a way to specify rewards	declaratively. In this thesis, we discuss how a reinforcement learning agent can learn policies fulfilling \LLf goals.
+		In particular we focus on the case where we have two separate representations of the world: one for the agent, using the
+		(predefined, possibly low-level) features available to it, and
+		one for the goal, expressed in terms of high-level (human-understandable) fluents. We formally define the problem and
+		show how it can be solved. Moreover, we provide experimental evidence that keeping the RL agent feature space separated from the goal's can work in practice, showing interesting cases where the agent can indeed learn a policy that fulfills the \LLf goal using only its features (augmented
+		with additional memory).
+	\end{abstract}
+	
+%\dedication{to my grandparents}
+	
+%	\begin{acknowledgments}
+%	\end{acknowledgments}
+	
+	\tableofcontents
+	
+	\mainmatter
+%	\input{chapters/introduction}
+%	\input{chapters/ltl}
+	\input{chapters/ltlf2dfa}
+%	\input{chapters/comparison}
+%	\input{chapters/pddl}
+%	\input{chapters/dfagame}
+%	\input{chapters/janus}
+%	\input{chapters/experiments}
+%	\input{chapters/conclusions}
+	
+%	\appendix 
+%	\input{chapters/appendix-flloat}
+%	\input{chapters/appendix-rltg}
+
+	
+	\backmatter
+	\phantomsection
+	
+	\bibliography{bib.bib}
+	
+
+\end{document}
