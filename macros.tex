@@ -32,9 +32,11 @@
 
 %% LTL
 \newcommand{\Atom}{A}
+\newcommand{\Always}{\raisebox{-0.27ex}{$\square$}}
 \newcommand{\Next}{\raisebox{-0.27ex}{\LARGE$\circ$}}
 \newcommand{\Wnext}{\raisebox{-0.27ex}{\LARGE$\bullet$}}
 \newcommand{\lUntil}{\mathop{\U}}
+\newcommand{\Yesterday}{\raisebox{-0.27ex}{$\ominus$}}
 \newcommand{\Since}{\mathop{\S}}
 \newcommand{\Release}{\mathop{\R}}
 \newcommand{\Wuntil}{\mathop{\W}}
@@ -63,6 +65,7 @@
 \newcommand{\PL}{{\sc pl}\xspace}
 \newcommand{\LTL}{{\sc ltl}\xspace}
 \newcommand{\LTLf}{{\sc ltl}$_f$\xspace}
+\newcommand{\PLTLf}{{\sc pltl}$_f$\xspace}
 \newcommand{\LDL}{{\sc ldl}\xspace}
 \newcommand{\LDLf}{{\sc ldl}$_f$\xspace}
 \newcommand{\RE}{{\sc re}$_f$\xspace}
@@ -167,7 +170,7 @@
 \newcommand{\DfunEps}[1]{\DfunSym\lparen #1, \epsilon\rparen}
 \newcommand{\lAND}{\wedge}
 \newcommand{\lOR}{\vee}
-%\newcommand{\NOT}{\lnot}
+\newcommand{\NOT}{\lnot}
 \newcommand{\regexp}{\varrho}
 \newcommand{\TrueDelta}[1]{\textit{\textbf{\texttt{T}}}_{#1}}
 \newcommand{\FalseDelta}[1]{\textit{\textbf{\texttt{F}}}_{#1}}
