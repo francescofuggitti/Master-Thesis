@@ -1,7 +1,56 @@
 \chapter{\PLTL and \LTLf}
-intro to the chapter
-\section{\LTL, \LTLf and \PLTL}
-talk about theory of logics future and past finite and infinite
+This chapter will deal with the theoretical framework on which all topics present in the thesis are based. Initially, we will introduce the widely known Linear-Time Temporal Logic (\LTL) and the Past Linear Time Temporal Logic (\PLTL), focusing on their syntax and semantic. Secondly, we will talk about the concept of \textit{Finite Trace} in these formal languages and how it changes them. Specifically, we will describe the Linear Time Temporal Logic over Finite Traces (\LTLf). Then, we will illustrate the theory behind the transformation of an \LTLf or \PLTL formula to a Deterministic Finite State Automaton (\DFA). Finally, we will describe the translation of an \LTLf or \PLTL formula to the classic First-Order Logic formalism (\FOL) and the translation of a \FOL formula into a program that the \MONA, a tool that translates formulas into a \DFA, can manage. Some examples will be provided, but we will suppose the reader to be confident with classical logic and automata theory.
+\section{Linear Temporal Logic (\LTL)}
+\textit{Temporal Logic} formalisms are a set of formal languages designed for representing temporal information and reasoning about time within a logical framework \citep{sep-logic-temporal}. Indeed, these logics are used when propositions have their truth value dependent on time. Hence, this kind of formal languages are able to specify properties about how a system changes over time.
+
+In this scenario, we find the \textit{Linear Temporal Logic} (\LTL) \citep{Pnueli:1977:TLP:1382431.1382534} which is a modal temporal logic with modalities referring to time. \LTL is a very well known temporal logic since it has been extensively used in AI and CS. For instance, it has been employed in planning, reasoning about actions, declarative process mining and verification of software/hardware systems.
+\subsection{Syntax}
+Given a set of propositional symbols $\P$, a valid \LTL formula $\varphi$ is defined as follows:
+\[\begin{array}{rcl}
+\varphi &::=& \top \mid \bot \mid a \mid \lnot \varphi \mid \varphi_1\land \varphi_2 \mid \Next\varphi \mid \varphi_1 \lUntil \varphi_2
+\end{array}
+\]
+where $a\in \P$. The unary operator \Next  (\emph{next-time}) and the binary operator $\lUntil$  (\emph{until}) are temporal operators and we use $\top$ and $\bot$ to denote $\true$ and $\false$ respectively. Moreover, all classical logic operators $\lOR, \Rightarrow, \Leftrightarrow$ can be used. 
+Intuitively, \Next $\varphi$ says that $\varphi$ is true at the \textit{next} instant, $\varphi_1 \lUntil \varphi_2$ says that at some future instant, $\varphi_2$ will hold and \textit{until} that point $\varphi_1$ holds. We also define common abbreviations for some specific temporal formulas: \emph{eventually} as $\Diamond \varphi \doteq \true \lUntil \varphi$, \emph{always} as $\Box \varphi \doteq \lnot \Diamond \lnot \varphi$, \emph{weak-next} as $\W \doteq \lnot \Next \lnot \varphi$ and \emph{release} as $\varphi_1 \Release \varphi_2 \doteq \lnot (\lnot \varphi_1 \lUntil \lnot \varphi_2)$. 
+
+\LTL allows to express a lot of interesting properties defined over time. In the Example \ref{ltl-formula-examples} we show some of them.
+\begin{example}\label{ltl-formula-examples}
+Interesting \LTL patterns:
+\begin{itemize}
+	\item \emph{Safety}: $\Box \lnot \varphi$, which means "it is always true that property in $\varphi$ will never happen" or "something bad will not happen". For instance, $\Box \lnot (reactor-temp > 1000)$ (the temperature of the reactor must never be over 1000).
+	\item \emph{Liveness}: $\Diamond \varphi$, which means "sooner or later $\varphi$ will hold" or "something good will happen". For instance, $\Diamond rich$ (eventually I will become rich).
+	\item \emph{Strong fairness}: $\Box \Diamond \varphi_1 \Rightarrow \Box \Diamond \varphi_2$, "if something is attempted/requested infinitely often, then it will be successful/allocated infinitely often". For instance, $\Box \Diamond ready \Rightarrow \Box \Diamond run$ (if a process is in ready state infinitely often, then it will be selected by the scheduler infinitely often).
+\end{itemize}
+\end{example}
+\subsection{Semantics}
+The semantics of the main operators of \LTL over \textit{infinite traces} are expressed as an $\omega$-word over the alphabet $2^\P$. We give the following definitions:
+\begin{definition}\label{ltl-semantics}
+	Given an infinite trace $\trace$, we inductively define when an \LTL formula $\varphi$ is $true$ at an instant $i$, in symbols $\trace, i \models \varphi$, as follows:
+	\begin{align*}
+	\trace, i &\models a, \tm{for} a\in\P \tiff a \in \trace(i)\\
+	\trace, i &\models \lnot \varphi \tiff \trace, i \not\models \varphi\\
+	\trace, i &\models \varphi_1 \lAND \varphi_2 \tiff \trace, i \models \varphi_1 \lAND \trace, i \models \varphi_2\\
+	\trace, i &\models \Next\varphi \tiff \trace,i+1 \models \varphi\\
+	\trace, i &\models \varphi_1 \lUntil \varphi_2 \tiff \exists j. (j\ge i) \lAND \trace,j \models \varphi_2 \lAND\forall k. (i\le k < j) \Rightarrow \trace, k \models \varphi_1\\
+	\end{align*}
+\end{definition}
+\begin{definition}\label{ltl-sat-val-ent}
+An \LTL formula $\varphi$ is \emph{true} in $\trace$, in notation $\trace \models \varphi$, if $\trace, 0 \models \varphi$. A formula $\varphi$ is \emph{satisfiable} if it is true in some $\trace$ and is \emph{valid} if it is true in every $\trace$. A formula $\varphi_1$ logically implies another formula $\varphi_2$, in symbols $\varphi_1 \models \varphi_2 \tiff \forall \trace, \trace \models \varphi_1 \Rightarrow \trace \models \varphi_2$.
+\end{definition}
+Notice that satisfiability, validity and logical implication are all mutually reducible one to each other.
+\begin{example}\label{ltl-sat-examples}
+Validity and logical implication as satisfiability
+\begin{itemize}
+\item $\varphi$ is valid $\tiff \lnot \varphi$ is unsatisfiable.
+\item $\varphi_1 \models \varphi_2 \tiff \varphi_1 \lAND \lnot \varphi_2$ is unsatisfiable.
+\end{itemize}
+\end{example}
+Finally, we can state the following fundamental theorem:
+\begin{theorem}[\cite{Sistla:1985:CPL:3828.3837}]
+Satisfiability, validity, and logical implication for \LTL formulas are \PSPACE-complete.
+\end{theorem}
+\section{Linear Temporal Logic on Finite Traces (\LTLf)}
+\section{Past Linear Temporal Logic (\PLTL)}
 \section{\LTLfToDFA}
 talk about theory behind conversion to automata in future
 \section{\PLTLToDFA}

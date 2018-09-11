@@ -42,13 +42,15 @@ class MyLexer(object):
         'true':     'TRUE',
         'false':    'FALSE',
         'X':        'NEXT',
+        'W':        'WEAKNEXT',
+        'R':        'RELEASE',        
         'U':        'UNTIL',
-        'E':        'EVENTUALLY',
+        'F':        'EVENTUALLY',
         'G':        'GLOBALLY',
         'Y':        'PASTNEXT', #PREVIOUS
         'S':        'PASTUNTIL', #SINCE
         'O':        'PASTEVENTUALLY', #ONCE
-        'H':        'PASTGLOBALLY'
+        'H':        'PASTGLOBALLY' #HISTORICALLY
     }
     # List of token names.   This is always required
     tokens = (
@@ -63,8 +65,8 @@ class MyLexer(object):
     ) + tuple(reserved.values())
 
     # Regular expression rules for simple tokens
-    t_TRUE = r'T'
-    t_FALSE = r'F'
+    t_TRUE = r'true'
+    t_FALSE = r'false'
     t_AND = r'\&'
     t_OR = r'\|'
     t_IMPLIES = r'\->'
@@ -74,8 +76,10 @@ class MyLexer(object):
     t_RPAR = r'\)'
     # FUTURE OPERATORS
     t_NEXT = r'X'
+    t_WEAKNEXT = r'W'
+    t_RELEASE = r'R'    
     t_UNTIL = r'U'
-    t_EVENTUALLY = r'E'
+    t_EVENTUALLY = r'F'
     t_GLOBALLY = r'G'
     # PAST OPERATOR
     t_PASTNEXT = r'Y'
@@ -86,7 +90,7 @@ class MyLexer(object):
     t_ignore = r' '+'\n'
 
     def t_TERM(self, t):£\label{line:lexer-term}£
-        r'[a-z]+'
+        r'(?<![a-z])(?!true|false)[a-z]+'
         t.type = MyLexer.reserved.get(t.value, 'TERM')
         return t  # Check for reserved words
 
@@ -118,9 +122,9 @@ class MyParser(object):
 
             ('nonassoc', 'LPAR', 'RPAR'),
             ('left', 'AND', 'OR', 'IMPLIES', 'DIMPLIES', 'UNTIL', \
-             'PASTUNTIL'),
-            ('right', 'NEXT', 'EVENTUALLY', 'GLOBALLY', \
-            'PASTNEXT', 'PASTEVENTUALLY', 'PASTGLOBALLY'),
+              'RELEASE', 'PASTUNTIL'),
+            ('right', 'NEXT',  'WEAKNEXT', 'EVENTUALLY', \
+            'GLOBALLY', 'PASTNEXT', 'PASTEVENTUALLY', 'PASTGLOBALLY'),
             ('right', 'NOT')
         )
 
@@ -134,8 +138,10 @@ class MyParser(object):
                  | formula IMPLIES formula
                  | formula DIMPLIES formula
                  | formula UNTIL formula
+                 | formula RELEASE formula                 
                  | formula PASTUNTIL formula
                  | NEXT formula
+                 | WEAKNEXT formula                 
                  | EVENTUALLY formula
                  | GLOBALLY formula
                  | PASTNEXT formula
@@ -149,14 +155,16 @@ class MyParser(object):
 
         if len(p) == 2: p[0] = p[1]
         elif len(p) == 3:
-            if p[1] == 'E': # E(a) == true UNITL A
-                p[0] = ('U','T', p[2])
+            if p[1] == 'F': # F(a) == true UNITL A
+                p[0] = ('U','true', p[2])
             elif p[1] == 'G': # G(a) == not(eventually (not A))
-                p[0] = ('~',('U', 'T', ('~',p[2])))
+                p[0] = ('~',('U', 'true', ('~',p[2])))
             elif p[1] == 'O': # O(a) = true SINCE A
-                p[0] = ('S','T', p[2])
+                p[0] = ('S','true', p[2])
             elif p[1] == 'H': # H(a) == not(pasteventually(not A))
-                p[0] = ('~',('S', 'T', ('~',p[2])))
+                p[0] = ('~',('S', 'true', ('~',p[2])))
+            elif p[1] == 'W':
+                p[0] = ('~', ('X', ('~', p[2])))                
             else:
                 p[0] = (p[1], p[2])
         elif len(p) == 4:
@@ -165,6 +173,8 @@ class MyParser(object):
             elif p[2] == '<->':
                 p[0] = ('&', ('|', ('~', p[1]), p[3]), ('|', ('~', p[3]),\
                 p[1]))
+            elif p[2] == 'R':
+                p[0] = ('~', ('U', ('~', p[1]), ('~', p[3])))                
             else:
                 p[0] = (p[2],p[1],p[3])
         else: raise ValueError
@@ -181,7 +191,7 @@ class MyParser(object):
 \end{lstlisting}
 As we can see, as soon as the parser is instantiated it builds the lexer, gets the tokens and defines their precedence if needed. Then, we have defined methods of the \texttt{MyParser} class that are in charge of constructing the syntax tree structure from tokens found by the lexer in the input string. In our case, we have chosen to use as data structure a tuple of tuples as it is the one of the simplest data structure in Python. In general, a tuple of tuples represents a tree where each node represents an item present in the formula.
 
-For instance, the \LTLf formula $\varphi= G(a \rightarrow X b)$ is represented as $('\thicksim', ('U', 'T', ('\thicksim',('|', ('\thicksim', 'a'), ('X', 'b')))))$ and it corresponds to a tree as the one depicted in Figure \ref{fig:formula-syntax-tree}.
+For instance, the \LTLf formula $\varphi= G(a \rightarrow X b)$ is represented as $('\thicksim', ('U', '\true', ('\thicksim',('|', ('\thicksim', 'a'), ('X', 'b')))))$ and it corresponds to a tree as the one depicted in Figure \ref{fig:formula-syntax-tree}.
 \begin{figure}[h]
 	\centering
 	\includegraphics[height=15em, width=7.5em]{images/formula-syntax-tree}
@@ -237,7 +247,6 @@ def translate_bis(formula_tree, var):£\label{line:translate_bis}£
             # print('computed tree: '+ str(self.parsed_formula))
             if var == 'v_0':
                 a = translate_bis(formula_tree[1], '0')
-                # a = translate_bis(self.parsed_formula[1], '0')
                 b = translate_bis(formula_tree[2], '0')
             else:
                 a = translate_bis(formula_tree[1], var)
@@ -246,6 +255,7 @@ def translate_bis(formula_tree, var):£\label{line:translate_bis}£
                 return 'false'
             elif a == 'true':
                 if b == 'true': return 'true'
+                else: return b
             elif b == 'true': return a
             else: return '('+a+' & '+b+')'
         elif formula_tree[0] == '|':
@@ -355,8 +365,8 @@ def translate_bis(formula_tree, var):£\label{line:translate_bis}£
                 new_new_var+' <= '+var+' => '+b+' )'
     else:
         # handling non-tuple cases
-        if formula_tree[0] == 'T': return 'true'
-        elif formula_tree[0] == 'F': return 'false'
+        if formula_tree == 'true': return 'true'
+        elif formula_tree == 'true': return 'false'
 
         # enable if you want to see recursion
         # print('computed tree: '+ str(self.parsed_formula))
@@ -557,8 +567,23 @@ For instance, in Figure \ref{fig:pre-post-automaton} we can see graphically what
 \label{fig:pre-post-automaton}
 \end{figure}
 \section{Comparison with \FLLOAT}
+In this section, we will see how \LTLfToDFA performs compared to \href{https://pypi.org/project/flloat/}{\FLLOAT}\footnote{https://github.com/MarcoFavorito/flloat}, which is another Python package having the conversion of an \LTLf formula to a \DFA as one of its features.
+In particular, \FLLOAT handles \LTLf/\LDLf formulas, but not \PLTL ones (i.e. \LTLf formulas with past temporal operators), but it provides support for syntax, semantics and parsing of \PL, \LTLf and \LDLf formal languages.  Additionally, its conversion is based on a different theoretical result with respect to \LTLfToDFA. Nevertheless, we can compare them on the generation of a \DFA from an \LTLf formula.
+
+The time execution benchmarks between these two packages was done over a set of $13$ different interesting \LTLf formulas of different length.
+The comparison consisted of executing each package over the same set of formulas $n$ number of times and, then, repeating the multiple execution $m$ number of times. Thus, for each formula to be converted we obtained $n \times m$ results and, finally, we kept the minimum one (i.e. the best time execution result).
+After gathering the results, we can show them on an histogram where on the $x-$axis there are the \LTLf formulas and on the $y-$axis there is the minimum time (in seconds) needed for the package to convert it into a \DFA (Figure \ref{fig:time-comparison}).
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{images/time-comparison.png}
+\caption{Time benchmarking of \LTLfToDFA wrt \FLLOAT.} 
+\label{fig:time-comparison}
+\end{figure}
+In the histogram, \FLLOAT results are coloured in red, while \LTLfToDFA ones are depicted in blue. As we can see from the bar chart, in both packages the time needed to convert the formula increases as the length of the formula grows. However, it is notable that \LTLfToDFA is overall $2x$ faster that \FLLOAT.
+This behaviour is due to the fact that these two packages operates in a different way. Indeed, while \FLLOAT is a pure Python package, \LTLfToDFA uses, for the heavy task of the generation of the automaton, \MONA that is written in C++. Hence, the real difference relies on the performance differences between C++ and Python programs.
+As a final remark, although \LTLfToDFA is much faster than \FLLOAT, its time execution depends on the I/O system performance which can drastically reduce it. Thus, \LTLfToDFA results may arise depending on various factors such as disk speed, caching and filesystem.
 \section{Discussion}
-In this chapter, we have presented the \LTLfToDFA Python package. We have also described the structure of the package, discussed in detail its implementation highlighting all the main features and, finally, seen how it performs with respect to time and memory relatively to the \FLLOAT Python package.
+In this chapter, we have presented the \LTLfToDFA Python package. We have also described the structure of the package, discussed in detail its implementation highlighting all the main features and, finally, seen how it performs in time relatively to the \FLLOAT Python package.
 
 
 
