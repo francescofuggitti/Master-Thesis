@@ -1,25 +1,27 @@
 \chapter{\PLTL and \LTLf}
 This chapter will deal with the theoretical framework on which all topics present in the thesis are based. Initially, we will introduce the widely known Linear-Time Temporal Logic (\LTL) and the Past Linear Time Temporal Logic (\PLTL), focusing on their syntax and semantic. Secondly, we will talk about the concept of \textit{Finite Trace} in these formal languages and how it changes them. Specifically, we will describe the Linear Time Temporal Logic over Finite Traces (\LTLf). Then, we will illustrate the theory behind the transformation of an \LTLf or \PLTL formula to a Deterministic Finite State Automaton (\DFA). Finally, we will describe the translation of an \LTLf or \PLTL formula to the classic First-Order Logic formalism (\FOL) and the translation of a \FOL formula into a program that the \MONA, a tool that translates formulas into a \DFA, can manage. Some examples will be provided, but we will suppose the reader to be confident with classical logic and automata theory.
-\section{Linear Temporal Logic (\LTL)}
-\textit{Temporal Logic} formalisms are a set of formal languages designed for representing temporal information and reasoning about time within a logical framework \citep{sep-logic-temporal}. Indeed, these logics are used when propositions have their truth value dependent on time. Hence, this kind of formal languages are able to specify properties about how a system changes over time.
+\section{Linear Temporal Logic (\LTL)}\label{sec:ltl-definition}
+\textit{Temporal Logic} formalisms are a set of formal languages designed for representing temporal information and reasoning about time within a logical framework \citep{sep-logic-temporal}. Indeed, these logics are used when propositions have their truth value dependent on time.
 
-In this scenario, we find the \textit{Linear Temporal Logic} (\LTL) \citep{Pnueli:1977:TLP:1382431.1382534} which is a modal temporal logic with modalities referring to time. \LTL is a very well known temporal logic since it has been extensively used in AI and CS. For instance, it has been employed in planning, reasoning about actions, declarative process mining and verification of software/hardware systems.
+In this scenario, we find the \textit{Linear Temporal Logic} (\LTL) which is a a very well known modal temporal logic with modalities referring to time. It was originally proposed in \citep{Pnueli:1977:TLP:1382431.1382534} as a specification language for concurrent programs. Consequently, \LTL has been extensively used in Artificial Intelligence and Computer Science. For instance, it has been employed in planning, reasoning about actions, declarative process mining and verification of software/hardware systems.
 \subsection{Syntax}
 Given a set of propositional symbols $\P$, a valid \LTL formula $\varphi$ is defined as follows:
 \[\begin{array}{rcl}
-\varphi &::=& \top \mid \bot \mid a \mid \lnot \varphi \mid \varphi_1\land \varphi_2 \mid \Next\varphi \mid \varphi_1 \lUntil \varphi_2
+\varphi &::=& a \mid \lnot \varphi \mid \varphi_1\land \varphi_2 \mid \Next\varphi \mid \varphi_1 \lUntil \varphi_2
 \end{array}
 \]
-where $a\in \P$. The unary operator \Next  (\emph{next-time}) and the binary operator $\lUntil$  (\emph{until}) are temporal operators and we use $\top$ and $\bot$ to denote $\true$ and $\false$ respectively. Moreover, all classical logic operators $\lOR, \Rightarrow, \Leftrightarrow$ can be used. 
-Intuitively, \Next $\varphi$ says that $\varphi$ is true at the \textit{next} instant, $\varphi_1 \lUntil \varphi_2$ says that at some future instant, $\varphi_2$ will hold and \textit{until} that point $\varphi_1$ holds. We also define common abbreviations for some specific temporal formulas: \emph{eventually} as $\Diamond \varphi \doteq \true \lUntil \varphi$, \emph{always} as $\Box \varphi \doteq \lnot \Diamond \lnot \varphi$, \emph{weak-next} as $\W \doteq \lnot \Next \lnot \varphi$ and \emph{release} as $\varphi_1 \Release \varphi_2 \doteq \lnot (\lnot \varphi_1 \lUntil \lnot \varphi_2)$. 
+where $a\in \P$. The unary operator \Next  (\emph{next-time}) and the binary operator $\lUntil$  (\emph{until}) are temporal operators and we use $\top$ and $\bot$ to denote $\true$ and $\false$ respectively. Moreover, all classical logic operators $\lOR, \Rightarrow, \Leftrightarrow, true$ and $false$ can be used. 
+Intuitively, \Next $\varphi$ says that $\varphi$ is true at the \textit{next} instant, $\varphi_1 \lUntil \varphi_2$ says that at some future instant, $\varphi_2$ will hold and \textit{until} that point $\varphi_1$ holds. We also define common abbreviations for some specific temporal formulas: \emph{eventually} as $\Diamond \varphi \doteq \true \lUntil \varphi$, \emph{always} as $\Box \varphi \doteq \lnot \Diamond \lnot \varphi$, \emph{weak-next} as $\Wnext \varphi \doteq \lnot \Next \lnot \varphi$ and \emph{release} as $\varphi_1 \Release \varphi_2 \doteq \lnot (\lnot \varphi_1 \lUntil \lnot \varphi_2)$. 
 
 \LTL allows to express a lot of interesting properties defined over time. In the Example \ref{ltl-formula-examples} we show some of them.
 \begin{example}\label{ltl-formula-examples}
 Interesting \LTL patterns:
 \begin{itemize}
-	\item \emph{Safety}: $\Box \lnot \varphi$, which means "it is always true that property in $\varphi$ will never happen" or "something bad will not happen". For instance, $\Box \lnot (reactor-temp > 1000)$ (the temperature of the reactor must never be over 1000).
-	\item \emph{Liveness}: $\Diamond \varphi$, which means "sooner or later $\varphi$ will hold" or "something good will happen". For instance, $\Diamond rich$ (eventually I will become rich).
-	\item \emph{Strong fairness}: $\Box \Diamond \varphi_1 \Rightarrow \Box \Diamond \varphi_2$, "if something is attempted/requested infinitely often, then it will be successful/allocated infinitely often". For instance, $\Box \Diamond ready \Rightarrow \Box \Diamond run$ (if a process is in ready state infinitely often, then it will be selected by the scheduler infinitely often).
+	\item \emph{Safety}: $\Box \varphi$, which means \emph{it is always true that property in $\varphi$ will happen} or \emph{$\varphi$ will hold forever}. For instance, $\Box \lnot (reactorTemp > 1000)$ (the temperature of the reactor must never exceed 1000).
+	\item \emph{Liveness}: $\Diamond \varphi$, which means \emph{sooner or later $\varphi$ will hold} or \emph{something good will eventually happen}. For instance, $\Diamond rich$ (eventually I will become rich).
+	\item \emph{Response}: $\Box \Diamond \varphi$ which means \emph{for every point in time, there is a point later where $\varphi$ holds}.
+	\item \emph{Persistence}: $\Diamond \Box \varphi$, which means \emph{there exists a point in the future such that from then on $\varphi$ always holds}.
+	\item \emph{Strong fairness}: $\Box \Diamond \varphi_1 \Rightarrow \Box \Diamond \varphi_2$, \emph{if something is attempted/requested infinitely often, then it will be successful/allocated infinitely often}. For instance, $\Box \Diamond ready \Rightarrow \Box \Diamond run$ (if a process is in ready state infinitely often, then it will be selected by the scheduler infinitely often).
 \end{itemize}
 \end{example}
 \subsection{Semantics}
@@ -45,11 +47,66 @@ Validity and logical implication as satisfiability
 \item $\varphi_1 \models \varphi_2 \tiff \varphi_1 \lAND \lnot \varphi_2$ is unsatisfiable.
 \end{itemize}
 \end{example}
-Finally, we can state the following fundamental theorem:
+\subsection{Complexity}
+About \LTL complexity, we can state the following fundamental theorem:
 \begin{theorem}[\cite{Sistla:1985:CPL:3828.3837}]
 Satisfiability, validity, and logical implication for \LTL formulas are \PSPACE-complete.
 \end{theorem}
 \section{Linear Temporal Logic on Finite Traces (\LTLf)}
+\textit{Linear Temporal Logic on Finite Traces} (\LTLf) is the variant of \LTL described in Section \ref{sec:ltl-definition} interpreted over \textit{finite traces} \citep{de2013linear}. Although it seems a little difference, in some cases, the interpretation of a formula over finite traces completely changes its meaning with respect to the one over inifinite traces.
+\subsection{Syntax}
+The syntax of \LTLf is exactly the same of \LTL. Indeed, formulas of \LTLf are built from a set $\P$ of propositional symbols and are closed under the boolean connectives, the unary temporal operator \Next (\emph{next-time}) and the binary operator $\lUntil$ (\emph{until}). Formulas can be defined as follows:
+\[\begin{array}{rcl}
+\varphi &::=& a \mid \lnot \varphi \mid \varphi_1\land \varphi_2 \mid \Next\varphi \mid \varphi_1 \lUntil \varphi_2
+\end{array}
+\]
+where $a\in \P$. All usual logical operators such as $\lOR, \Rightarrow, \Leftrightarrow, true$ and $false$ are also used. Similarly to \LTL, we can define the following common abbreviations for temporal operators:
+\begin{align}
+\Diamond\varphi &\doteq \true\lUntil\varphi \label{ltlf-eve}\\
+\Box\varphi &\doteq\lnot\Diamond\lnot\varphi \label{ltlf-alw}\\
+\Wnext \varphi &\doteq \lnot \Next \lnot \varphi \label{ltlf-wn}\\
+\varphi_1 \Release \varphi_2 &\doteq \lnot (\lnot \varphi_1 \lUntil \lnot \varphi_2) \label{ltlf-release}\\
+\Last &\doteq \Wnext\false \label{ltlf-last}\\
+\Ended &\doteq \Box\false \label{ltlf-ended}
+\end{align}
+Compared with \LTL, in \LTLf there have been defined also \ref{ltlf-last} and \ref{ltlf-ended} which denotes the last instance of the trace and that the trace is ended, respectively.
+As we have seen in Example \ref{ltl-formula-examples} with \LTL, now we will see in Example \ref{ltlf-formula-examples} how properties expressed in \LTLf have changed their meaning with the interpretation over finite traces.
+\begin{example}\label{ltlf-formula-examples}
+Interesting \LTLf patterns:
+\begin{itemize}
+	\item \emph{Safety}: $\Box \varphi$, which now means always \emph{till the end of the trace} $\varphi$ holds.
+	\item \emph{Liveness}: $\Diamond \varphi$, which now means eventually \emph{before the end of the trace} $\varphi$ holds.
+	\item \emph{Responce}: $\Box \Diamond \varphi$, which means for any point in the trace there exist a point later in the trace where $\varphi$ holds.
+This property, interpreted over finite traces, can be seen also as $\Diamond (\Last\land\varphi)$ because $\Box \Diamond \varphi$ implies that the \emph{last point in the trace satisfies} $\varphi$.
+	\item \emph{Persistance}: $\Diamond \Box \varphi$ means that there is a point in the trace such that from then on until the end of the trace $\varphi$ holds. Also here the meaning can me seen as $\Diamond (\Last\land\varphi)$ since $\Diamond \Box \varphi$ implies that at the last point of the trace $ \Box \varphi$, and so $\varphi$, holds.
+\end{itemize}
+\end{example}
+In other words, no direct nesting of \textit{eventually} and \textit{always} connectives is meaningful in \LTLf. However, indirect nesting of \textit{eventually} and \textit{always} connectives can still produce meaningful and interesting properties. One example could be $\Box(\psi \Rightarrow \Diamond\varphi)$, which stands for \emph{always, before the end of the trace, if $\psi$ holds then $\varphi$ will eventually hold}.
+\subsection{Semantics}
+The semantics of \LTLf is given as \LT-interpretations, namely interpretations over a \emph{finite traces} denoting a finite sequence of consecutive instants of time. Formally, \LT-interpretations are expressed as finite words $\trace$ over the alphabet $2^\P$, i.e. as alphabet we have all the possible propositional interpretations of the propositional symbols in $\P$. We use the following notation. We denote the \emph{length} of a trace $\trace$ as $\length(\trace)$. We denote the \emph{positions}, i.e. instants, on the trace as $\trace(i)$ with $0 \le i \le \last$ where $\last = \length(\trace)-1$ is the last element of the trace. We denote by $\trace(i, j)$, the \emph{segment} (i.e., the subword) of $\trace$, the trace $\trace' = \tup{\trace(i), \trace(i+1), \dots, \trace(j)}$, with $0 \le i \le j \le \last$. We now give the following definitions:
+\begin{definition}\label{ltlf-semantics}
+Given an \LT-interpretation $\trace$, we define when an \LTLf formula $\varphi$ is \emph{true} at position $i$ $($for $0 \le i \le \last)$, in symbols $\trace, i \models \varphi$, inductively as follows:
+\begin{align}
+\trace, i &\models a, \tm{for} a\in\P \tiff a \in \trace(i)\nonumber\\
+\trace, i &\models \lnot \varphi \tiff \trace, i \not\models \varphi\nonumber\\
+\trace, i &\models \varphi_1 \lAND \varphi_2 \tiff \trace, i \models \varphi_1 \lAND \trace, i \models \varphi_2\nonumber\\
+\trace, i &\models \Next\varphi \tiff i<\last \lAND \trace,i+1 \models \varphi \label{ltlf-sat-next}\\
+\trace, i &\models \varphi_1 \lUntil \varphi_2 \tiff \exists j. (i\le j \le \last) \lAND \trace,j \models\varphi_2 \lAND  \forall k. (i\le k < j) \Rightarrow \trace, k \models \varphi_1 \label{ltlf-sat-until}
+\end{align}
+\end{definition}
+The Definition \ref{ltlf-semantics} is exactly the same Definiiton \ref{ltl-semantics} seen for \LTL except for \ref{ltlf-sat-next} and \ref{ltlf-sat-until} in which the only difference lies on the intervals bounded by the last element of the trace.
+\begin{definition}\label{ltlf-sat-val-ent}
+An \LTLf formula is \emph{true} in $\trace$, in notation $\trace \models \varphi$, if $\trace, 0 \models \varphi$. A formula $\varphi$ is \emph{satisfiable} if it is true in some \LT-interpretation, and is \emph{valid} if it is true in every \LT-interpretation. A formula $\varphi_1$ logically implies another formula $\varphi_2$, in symbols $\varphi_1 \models \varphi_2$ iff for every \LT-interpretation $\trace$ we have that $\trace \models \varphi_1$ implies $ \trace \models \varphi_2$.
+\end{definition}
+\subsection{Complexity}
+About \LTLf complexity, we can state the following theorem:
+\begin{theorem}[\cite{de2013linear}]
+Satisfiability, validity and entailment for \LTLf formulas are \PSPACE-complete.
+\end{theorem}
+\noindent About \LTLf expressiveness, we have that:
+\begin{theorem}[\cite{de2013linear,Gabbay:1997:TAF:903586}]
+\LTLf has exactly the same expressive power of \FOL over finite ordered sequences.
+\end{theorem}
 \section{Past Linear Temporal Logic (\PLTL)}
 \section{\LTLfToDFA}
 talk about theory behind conversion to automata in future
