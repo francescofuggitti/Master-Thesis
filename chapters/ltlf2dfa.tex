@@ -568,18 +568,18 @@ For instance, in Figure \ref{fig:pre-post-automaton} we can see graphically what
 \end{figure}
 \section{Comparison with \FLLOAT}
 In this section, we will see how \LTLfToDFA performs compared to \href{https://pypi.org/project/flloat/}{\FLLOAT}\footnote{https://github.com/MarcoFavorito/flloat}, which is another Python package having the conversion of an \LTLf formula to a \DFA as one of its features.
-In particular, \FLLOAT handles \LTLf/\LDLf formulas, but not \PLTL ones (i.e. \LTLf formulas with past temporal operators), but it provides support for syntax, semantics and parsing of \PL, \LTLf and \LDLf formal languages.  Additionally, its conversion is based on a different theoretical result with respect to \LTLfToDFA. Nevertheless, we can compare them on the generation of a \DFA from an \LTLf formula.
+In particular, \FLLOAT handles \LTLf and \LDLf (\textit{Linear Dynamic Logic on Finite Traces}) formulas, but not \PLTL ones, but it provides support for syntax, semantics and parsing of \PL (\textit{Propositional Logic}), \LTLf and \LDLf formal languages.  Additionally, its conversion is based on a different theoretical result with respect to \LTLfToDFA. Nevertheless, we can compare them on the generation of a \DFA from an \LTLf formula.
 
 The time execution benchmarks between these two packages was done over a set of $13$ different interesting \LTLf formulas of different length.
 The comparison consisted of executing each package over the same set of formulas $n$ number of times and, then, repeating the multiple execution $m$ number of times. Thus, for each formula to be converted we obtained $n \times m$ results and, finally, we kept the minimum one (i.e. the best time execution result).
-After gathering the results, we can show them on an histogram where on the $x-$axis there are the \LTLf formulas and on the $y-$axis there is the minimum time (in seconds) needed for the package to convert it into a \DFA (Figure \ref{fig:time-comparison}).
+After gathering the results, we can show them on a histogram where on the $x-$axis there are the \LTLf formulas and on the $y-$axis there is the minimum time (in seconds) needed for the package to convert it into a \DFA (Figure \ref{fig:time-comparison}).
 \begin{figure}[h]
 \centering
 \includegraphics[width=\linewidth]{images/time-comparison.png}
 \caption{Time benchmarking of \LTLfToDFA wrt \FLLOAT.} 
 \label{fig:time-comparison}
 \end{figure}
-In the histogram, \FLLOAT results are coloured in red, while \LTLfToDFA ones are depicted in blue. As we can see from the bar chart, in both packages the time needed to convert the formula increases as the length of the formula grows. However, it is notable that \LTLfToDFA is overall $2x$ faster that \FLLOAT.
+In the histogram, \FLLOAT results are coloured in red, while \LTLfToDFA ones are depicted in blue. As we can see from the bar chart, in both packages the time needed to convert the formula increases as the length of the formula grows. However, it is notable that \LTLfToDFA is overall twice as fast as  \FLLOAT.
 This behaviour is due to the fact that these two packages operates in a different way. Indeed, while \FLLOAT is a pure Python package, \LTLfToDFA uses, for the heavy task of the generation of the automaton, \MONA that is written in C++. Hence, the real difference relies on the performance differences between C++ and Python programs.
 As a final remark, although \LTLfToDFA is much faster than \FLLOAT, its time execution depends on the I/O system performance which can drastically reduce it. Thus, \LTLfToDFA results may arise depending on various factors such as disk speed, caching and filesystem.
 \section{Discussion}

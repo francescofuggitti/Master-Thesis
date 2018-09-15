@@ -30,6 +30,12 @@
 \newcommand{\limp}{\mathbin{\rightarrow}}
 \newcommand{\ind}{\hspace*{.18in}}
 
+\newcommand{\cla}[1]{\makebox[0pt]{\hss#1\hss}}
+\newcommand{\Once}{%
+  \sbox0{$\Diamond$}%
+  \usebox0\kern-.5\wd0\cla{\raisebox{.1ex}{\scalebox{.7}[1]{$-$}}}\kern.5\wd0%
+}
+
 %% LTL
 \newcommand{\Atom}{A}
 \newcommand{\Always}{\raisebox{-0.27ex}{$\square$}}
@@ -83,8 +89,15 @@
 \newcommand{\NFA}{{\sc nfa}\xspace}
 \newcommand{\DFA}{{\sc dfa}\xspace}
 \newcommand{\DFAs}{{\sc dfa}s\xspace}
+\newcommand{\GTAs}{{\sc gta}s\xspace}
 \newcommand{\declare}{{\sc declare}\xspace}
+\newcommand{\wsos}{{\sc ws1s}\xspace}
+\newcommand{\wsts}{{\sc ws2s}\xspace}
+\newcommand{\bdds}{{\sc bdd}s\xspace}
+\newcommand{\bdd}{{\sc bdd}\xspace}
+\newcommand{\mls}{{\sc m2l-s}tr\xspace}
 \newcommand{\fol}{\mathit{fol}}
+\newcommand{\folp}{\mathit{fol_p}}
 \newcommand{\f}{\mathit{f}}
 %\newcommand{\g}{\mathit{g}}
 \newcommand{\re}{\mathit{re}}
@@ -117,6 +130,9 @@
 % misc
 \newcommand{\MONA}{{\sc mona}\xspace}
 \newcommand{\FLLOAT}{{\sc flloat}\xspace}
+\newcommand{\suc}{\textit{succ}\xspace}
+\newcommand{\pre}{\textit{prev}\xspace}
+\newcommand{\folInter}{$\I = (\Delta^I,\cdot^{\I})$\xspace}
 
 %RL
 \newcommand{\MDP}{\M}

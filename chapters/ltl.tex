@@ -4,7 +4,7 @@ This chapter will deal with the theoretical framework on which all topics presen
 \textit{Temporal Logic} formalisms are a set of formal languages designed for representing temporal information and reasoning about time within a logical framework \citep{sep-logic-temporal}. Indeed, these logics are used when propositions have their truth value dependent on time.
 
 In this scenario, we find the \textit{Linear Temporal Logic} (\LTL) which is a a very well known modal temporal logic with modalities referring to time. It was originally proposed in \citep{Pnueli:1977:TLP:1382431.1382534} as a specification language for concurrent programs. Consequently, \LTL has been extensively used in Artificial Intelligence and Computer Science. For instance, it has been employed in planning, reasoning about actions, declarative process mining and verification of software/hardware systems.
-\subsection{Syntax}
+\subsection{Syntax}\label{ltl-syntax}
 Given a set of propositional symbols $\P$, a valid \LTL formula $\varphi$ is defined as follows:
 \[\begin{array}{rcl}
 \varphi &::=& a \mid \lnot \varphi \mid \varphi_1\land \varphi_2 \mid \Next\varphi \mid \varphi_1 \lUntil \varphi_2
@@ -27,17 +27,17 @@ Interesting \LTL patterns:
 \subsection{Semantics}
 The semantics of the main operators of \LTL over \textit{infinite traces} are expressed as an $\omega$-word over the alphabet $2^\P$. We give the following definitions:
 \begin{definition}\label{ltl-semantics}
-	Given an infinite trace $\trace$, we inductively define when an \LTL formula $\varphi$ is $true$ at an instant $i$, in symbols $\trace, i \models \varphi$, as follows:
-	\begin{align*}
-	\trace, i &\models a, \tm{for} a\in\P \tiff a \in \trace(i)\\
-	\trace, i &\models \lnot \varphi \tiff \trace, i \not\models \varphi\\
-	\trace, i &\models \varphi_1 \lAND \varphi_2 \tiff \trace, i \models \varphi_1 \lAND \trace, i \models \varphi_2\\
-	\trace, i &\models \Next\varphi \tiff \trace,i+1 \models \varphi\\
-	\trace, i &\models \varphi_1 \lUntil \varphi_2 \tiff \exists j. (j\ge i) \lAND \trace,j \models \varphi_2 \lAND\forall k. (i\le k < j) \Rightarrow \trace, k \models \varphi_1\\
-	\end{align*}
+Given an infinite trace $\trace$, we inductively define when an \LTL formula $\varphi$ is $true$ at an instant $i$, in symbols $\trace, i \models \varphi$, as follows:
+\begin{align*}
+\trace, i &\models a, \tm{for} a\in\P \tiff a \in \trace(i)\\
+\trace, i &\models \lnot \varphi \tiff \trace, i \not\models \varphi\\
+\trace, i &\models \varphi_1 \lAND \varphi_2 \tiff \trace, i \models \varphi_1 \lAND \trace, i \models \varphi_2\\
+\trace, i &\models \Next\varphi \tiff \trace,i+1 \models \varphi\\
+\trace, i &\models \varphi_1 \lUntil \varphi_2 \tiff \exists j. (j\ge i) \lAND \trace,j \models \varphi_2 \lAND\forall k. (i\le k < j) \Rightarrow \trace, k \models \varphi_1\\
+\end{align*}
 \end{definition}
 \begin{definition}\label{ltl-sat-val-ent}
-An \LTL formula $\varphi$ is \emph{true} in $\trace$, in notation $\trace \models \varphi$, if $\trace, 0 \models \varphi$. A formula $\varphi$ is \emph{satisfiable} if it is true in some $\trace$ and is \emph{valid} if it is true in every $\trace$. A formula $\varphi_1$ logically implies another formula $\varphi_2$, in symbols $\varphi_1 \models \varphi_2 \tiff \forall \trace, \trace \models \varphi_1 \Rightarrow \trace \models \varphi_2$.
+An \LTL formula $\varphi$ is \emph{true} in $\trace$, in notation $\trace \models \varphi$, if $\trace, 0 \models \varphi$. A formula $\varphi$ is \emph{satisfiable} if it is true in some $\trace$ and is \emph{valid} if it is true in every $\trace$. A formula $\varphi_1$ \emph{logically implies} another formula $\varphi_2$, in symbols $\varphi_1 \models \varphi_2 \tiff \forall \trace, \trace \models \varphi_1 \Rightarrow \trace \models \varphi_2$.
 \end{definition}
 Notice that satisfiability, validity and logical implication are all mutually reducible one to each other.
 \begin{example}\label{ltl-sat-examples}
@@ -49,13 +49,13 @@ Validity and logical implication as satisfiability
 \end{example}
 \subsection{Complexity}
 About \LTL complexity, we can state the following fundamental theorem:
-\begin{theorem}[\cite{Sistla:1985:CPL:3828.3837}]
+\begin{theorem}\citep{Sistla:1985:CPL:3828.3837}
 Satisfiability, validity, and logical implication for \LTL formulas are \PSPACE-complete.
 \end{theorem}
 \section{Linear Temporal Logic on Finite Traces (\LTLf)}
 \textit{Linear Temporal Logic on Finite Traces} (\LTLf) is the variant of \LTL described in Section \ref{sec:ltl-definition} interpreted over \textit{finite traces} \citep{de2013linear}. Although it seems a little difference, in some cases, the interpretation of a formula over finite traces completely changes its meaning with respect to the one over inifinite traces.
-\subsection{Syntax}
-The syntax of \LTLf is exactly the same of \LTL. Indeed, formulas of \LTLf are built from a set $\P$ of propositional symbols and are closed under the boolean connectives, the unary temporal operator \Next (\emph{next-time}) and the binary operator $\lUntil$ (\emph{until}). Formulas can be defined as follows:
+\subsection{Syntax}\label{ltlf-syntax}
+The syntax of \LTLf is exactly the same of \LTL. Indeed, \LTLf formulas are built from a set $\P$ of propositional symbols and are closed under the boolean connectives, the unary temporal operator \Next (\emph{next-time}) and the binary operator $\lUntil$ (\emph{until}). Formulas can be defined as follows:
 \[\begin{array}{rcl}
 \varphi &::=& a \mid \lnot \varphi \mid \varphi_1\land \varphi_2 \mid \Next\varphi \mid \varphi_1 \lUntil \varphi_2
 \end{array}
@@ -94,25 +94,266 @@ Given an \LT-interpretation $\trace$, we define when an \LTLf formula $\varphi$ 
 \trace, i &\models \varphi_1 \lUntil \varphi_2 \tiff \exists j. (i\le j \le \last) \lAND \trace,j \models\varphi_2 \lAND  \forall k. (i\le k < j) \Rightarrow \trace, k \models \varphi_1 \label{ltlf-sat-until}
 \end{align}
 \end{definition}
-The Definition \ref{ltlf-semantics} is exactly the same Definiiton \ref{ltl-semantics} seen for \LTL except for \ref{ltlf-sat-next} and \ref{ltlf-sat-until} in which the only difference lies on the intervals bounded by the last element of the trace.
+The Definition \ref{ltlf-semantics} is exactly the same Definiton \ref{ltl-semantics} seen for \LTL except for \ref{ltlf-sat-next} and \ref{ltlf-sat-until} in which the only difference lies on the intervals bounded by the last element of the trace.
 \begin{definition}\label{ltlf-sat-val-ent}
-An \LTLf formula is \emph{true} in $\trace$, in notation $\trace \models \varphi$, if $\trace, 0 \models \varphi$. A formula $\varphi$ is \emph{satisfiable} if it is true in some \LT-interpretation, and is \emph{valid} if it is true in every \LT-interpretation. A formula $\varphi_1$ logically implies another formula $\varphi_2$, in symbols $\varphi_1 \models \varphi_2$ iff for every \LT-interpretation $\trace$ we have that $\trace \models \varphi_1$ implies $ \trace \models \varphi_2$.
+An \LTLf formula is \emph{true} in $\trace$, in notation $\trace \models \varphi$, if $\trace, 0 \models \varphi$. A formula $\varphi$ is \emph{satisfiable} if it is true in some \LT-interpretation, and is \emph{valid} if it is true in every \LT-interpretation. A formula $\varphi_1$ \emph{logically implies} another formula $\varphi_2$, in symbols $\varphi_1 \models \varphi_2$ iff for every \LT-interpretation $\trace$ we have that $\trace \models \varphi_1$ implies $ \trace \models \varphi_2$.
 \end{definition}
 \subsection{Complexity}
 About \LTLf complexity, we can state the following theorem:
-\begin{theorem}[\cite{de2013linear}]
-Satisfiability, validity and entailment for \LTLf formulas are \PSPACE-complete.
+\begin{theorem}\citep{de2013linear}
+Satisfiability, validity and logical implication for \LTLf formulas are \PSPACE-complete.
 \end{theorem}
 \noindent About \LTLf expressiveness, we have that:
-\begin{theorem}[\cite{de2013linear,Gabbay:1997:TAF:903586}]
+\begin{theorem}\citep{de2013linear,Gabbay:1997:TAF:903586}
 \LTLf has exactly the same expressive power of \FOL over finite ordered sequences.
 \end{theorem}
 \section{Past Linear Temporal Logic (\PLTL)}
-\section{\LTLfToDFA}
-talk about theory behind conversion to automata in future
-\section{\PLTLToDFA}
-talk about theory behind conversion to automata in past
-\section{\LTLfToFOL and \MONA}
-talk about theory behind translation and intro with mona future
-\section{\PLTLToFOL and \MONA}
-talk about theory behind translation and intro with mona past
+So far we have seen \LTL and \LTLf languages, over infinite and finite traces respectively, that look into the future events. On the contrary, now we describe the so called \textit{Past Linear Temporal Logic} (\PLTL) which is the counterpart of the \LTL and \LTLf because it uses temporal modalities for referring to past events, instead of future ones.
+\subsection{Syntax}
+The syntax of \PLTL is exactly the same of the one seen in Section \ref{ltl-syntax} for \LTL and in Section \ref{ltlf-syntax} for \LTLf except for past temporal operators that are the inverse of the future ones. As stated before, \PLTL formulas are built on top from a set $\P$ of propositional symbols and are closed under the boolean connectives, the unary temporal operator \Yesterday (\emph{previous-time}) and the binaty operator $\Since$ (\emph{since}). Formulas can be defined as follows:
+\[\begin{array}{rcl}
+\varphi &::=& a \mid \lnot \varphi \mid \varphi_1\land \varphi_2 \mid \Yesterday\varphi \mid \varphi_1 \Since \varphi_2
+\end{array}
+\]
+where $a\in \P$. All usual logical operators such as $\lOR, \Rightarrow, \Leftrightarrow, true$ and $false$ can be derived.
+Similarly to \LTL and \LTLf, we define the following common abbreviations for temporal operator:
+\begin{align}
+\Once\varphi &\doteq \true\Since\varphi \label{pltlf-eve}\\
+\boxminus\varphi &\doteq\lnot\Once\lnot\varphi \label{pltlf-alw}\
+\end{align}
+In particular, $\Once\varphi$ in \ref{pltlf-eve} is called \emph{once} while $\boxminus\varphi$ in \ref{pltlf-alw} is known as \emph{historically}. Furthermore, both temporal operators \emph{previous-time}, \emph{since} and the two common abbreviations \emph{once}, \emph{historically} just defined above could be seen also as the inverse operators of  future operators in \LTL/\LTLf:
+\begin{align}
+\Yesterday\varphi &\equiv \Next^{-1}\varphi \nonumber\\
+\varphi_1\Since\varphi_2 &\equiv \varphi_1\mathcal{U}^{-1}\varphi_2 \nonumber\\
+\Once\varphi &\equiv \Diamond^{-1}\varphi \nonumber\\
+\boxminus\varphi &\equiv \Box^{-1}\varphi \nonumber\
+\end{align}
+%Now, we will see some example of \PLTL formulas.
+%\begin{example}\label{pltlf-formula-examples}
+%Interesting \LTLf patterns:
+%\begin{itemize}
+%	\item \emph{Safety}: $\Box \varphi$, which now means always \emph{till the end of the trace} $\varphi$ holds.
+%	\item \emph{Liveness}: $\Diamond \varphi$, which now means eventually \emph{before the end of the trace} $\varphi$ holds.
+%	\item \emph{Responce}: $\Box \Diamond \varphi$, which means for any point in the trace there exist a point later in the trace where $\varphi$ holds.
+%This property, interpreted over finite traces, can be seen also as $\Diamond (\Last\land\varphi)$ because $\Box \Diamond \varphi$ implies that the \emph{last point in the trace satisfies} $\varphi$.
+%	\item \emph{Persistance}: $\Diamond \Box \varphi$ means that there is a point in the trace such that from then on until the end of the trace $\varphi$ holds. Also here the meaning can me seen as $\Diamond (\Last\land\varphi)$ since $\Diamond \Box \varphi$ implies that at the last point of the trace $ \Box \varphi$, and so $\varphi$, holds.
+%\end{itemize}
+%\end{example}
+\subsection{Semantics}
+As we did previously with \LTL and then with \LTLf, here we define a semantics to \PLTL. The first important thing to notice is that a \PLTL formula could be only interpreted over \emph{finite} traces. This is due to the fact that, no matter how long the trace is, there must be a starting point in the past. Formally, a trace $\trace$ is a word over the alphabet $2^\P$ and as alphabet we have all possible propositional interpretations of the propositional symbols in $\P$. We can now give the following definitions:
+\begin{definition}\label{pltl-semantics}
+Given a trace $\trace$, we inductively define when a \PLTL formula $\varphi$ is $true$ at time $i$, in symbols $\trace, i \models \varphi$, as follows:
+\begin{align*}
+\trace, i &\models a, \tm{for} a\in\P \tiff a \in \trace(i)\\
+\trace, i &\models \lnot \varphi \tiff \trace, i \not\models \varphi\\
+\trace, i &\models \varphi_1 \lAND \varphi_2 \tiff \trace, i \models \varphi_1 \lAND \trace, i \models \varphi_2\\
+\trace, i &\models \Yesterday\varphi \tiff i > 0 \lAND \trace,i-1 \models \varphi\\
+\trace, i &\models \varphi_1 \Since \varphi_2 \tiff \exists j. (j\le i) \lAND \trace,j \models \varphi_2 \lAND\forall k. (j < k \le i) \Rightarrow \trace, k \models \varphi_1\\
+\end{align*}
+\end{definition}
+The Definition \ref{pltl-semantics} is quite similar to Definitions \ref{ltl-semantics} and \ref{ltlf-semantics}. The only difference lies on the position in time of instances, indeed, in this case, we go backward.
+\subsection{Complexity and Expressiveness}
+About \PLTL complexity, we can state the following theorem:
+\begin{theorem}
+Satisfiability, validity and logical implication for \PLTL formulas are \PSPACE-complete.
+\end{theorem}
+
+\noindent About expressiveness of \PLTL, we can state the following theorem:
+\begin{theorem}
+\PLTL has exactly the same expressive power of \LTLf.
+\end{theorem}
+
+\noindent However, it is worth to say that the \LTLf formalism augmented with past temporal operators present in \PLTL can be exponentially more succinct that \LTLf (with only future operators) \citep{markey2003temporal}.
+Indeed, having at the same time past and future temporal operators is really useful because, in general, expressions given in natural language use references to events occurred in the past. We give an example in the following.
+\begin{example}\label{succinctness-example}
+Succinctness of \LTLf with Past:
+\begin{align}
+&\Box(grant \Rightarrow \Once request)\label{ltlf-with-past-example}\\
+&\lnot((\lnot request) \lUntil (grant \lAND \lnot request))\label{ltlf-without-past-example}
+\end{align}
+Both formulas mean \emph{every grant is preceeded by a request}. The  former (\ref{ltlf-with-past-example}) is in \LTLf with past modalities whereas the latter (\ref{ltlf-without-past-example}) is pure \LTLf. It is pretty evident that the \ref{ltlf-with-past-example} is less intricate than the one in \ref{ltlf-without-past-example}.
+\end{example}
+Finally, this property of \LTLf augmented with past temporal operators is interesting, however it is out of the scope of this thesis.
+\section{\LTLf and \PLTL translation to  automata}
+Given an \LTLf/\PLTL formula $\varphi$, we can build a deterministic finite state automaton (\DFA) \citep{Rabin:1959:FAD:1661907.1661909} 
+$\automaton_\varphi$ that accepts the same finite traces that makes $\varphi$ true. To achieve this, we proceed in two steps: first, we translate \LTLf and \PLTL formulas into an (\NFA) \citep{DeGiacomo:2015:SLL:2832415.2832466} following a simple direct algorithm; secondly, the obtained \NFA can be converted into a \DFA following the standard \emph{determinization}  procedure.
+
+Now, we recall definitions of \NFA and \DFA:
+\begin{definition}\label{nfa}
+An \NFA is a tuple $\automaton = \tup{\Sigma, Q, q_0 , \delta, F}$, where:
+\begin{itemize}		
+\item $\Sigma$ is the input alphabet;
+\item $Q$ is the finite set of states;
+\item $q_0 \in Q$ is the initial state;
+\item $\delta \subseteq Q \times \Sigma \times Q$ is the transition relation;
+\item $F \subseteq Q$ is the set of final states;
+\end{itemize}
+\end{definition}
+\begin{definition}
+A \DFA is a \NFA where $\delta$ is a function $\delta: Q \times \Sigma \to Q$
+\end{definition}
+To denote the set of all traces over $\Sigma$ accepted by $\automaton$ we will use $\L(A)$ henceforth.
+
+In the next subsections, we will provide some definitions and we will illustrate the algorithm for the translation also giving an example.
+\subsection{$\DfunSym$ function for \LTLf}\label{ltlf-delta-section}
+In order to build the \NFA, we need to define an auxiliary function $\DfunSym$ as follows:
+\begin{definition}\label{ltlf-delta-def}
+The \emph{delta function $\DfunSym$ for \LTLf formulas} is a function that takes as input an (implicitly quoted) \LTLf formula $\varphi$ (in negation normal form (NNF)\footnote{A formula is in \textit{negation normal form} if negation ($\lnot$) occurs only in front of atoms.}) and a propositional interpretation $\PropInt$ for $\P$ (including $\Last$), and returns a positive boolean formula whose atoms are (implicitly
+quoted) $\varphi$ subformulas. It is defined as follows:
+\input{chapters/misc/ltlf_delta}
+where $\Ended$ is defined as Equation \ref{ltlf-ended}. As a consequence of Definition \ref{ltlf-delta-def} and from Equation \ref{ltlf-eve} and \ref{ltlf-alw}, we can deduce that 
+\begin{align*}
+\Dfun{\Diamond \varphi} 	\ind &= \ind   \Dfun{\varphi} \lOR \Dfun{\Next \Diamond \varphi}\\
+\Dfun{\Box \varphi} 	\ind &= \ind   \Dfun{\varphi} \lAND \Dfun{\Wnext \Box \varphi}
+\end{align*}
+	
+Moreover, we define $\DfunEps{\varphi}$ which is inductively defined as Equation \ref{delta-ltlf}, except for the following cases:
+\begin{align}
+\begin{aligned}
+\DfunEps{A} 			\ind &= \ind \false\\
+\DfunEps{\lnot A} 			\ind &= \ind  \false\\
+\DfunEps{\Next \varphi} 	\ind &= \ind   \false\\
+\DfunEps{\Wnext \varphi} 	\ind &= \ind   \true\\
+\DfunEps{\varphi_1 \lUntil \varphi_2} 	\ind &= \ind   \false\\
+\DfunEps{\varphi_1 \Release \varphi_2} 	\ind &= \ind   \true\\
+\label{delta-ltlf-eps}
+\end{aligned}					
+\end{align}
+\end{definition}
+Note that $\DfunEps{\varphi}$ is always either $\true$ or $\false$. It is worth to observe for future use that from Equation \ref{delta-ltlf-eps} we can say $\DfunEps{\Diamond \varphi} = \false$ and $\DfunEps{\Box \varphi} = \true$.
+\subsection{$\DfunSym$ function for \PLTL}\label{pltl-delta-section}
+%We give the following definition:
+%\begin{definition}\label{ltlf-delta-def}
+%The \emph{delta function $\DfunSym$ for \LTLf formulas} is a function that takes as input an (implicitly quoted) \LTLf
+%formula $\varphi$ in NNF and a propositional interpretation $\PropInt$ for $\Prop$, and returns a positive boolean formula whose atoms are (implicitly
+%quoted) $\varphi$ subformulas. It is defined as follows:
+%\input{chapters/misc/ltlf_delta}
+%where $\Ended$ is defined as Equation \ref{ltlf-ended}. As a consequence of Definition \ref{ltlf-delta-def} and from Equation \ref{ltlf-eve} and \ref{ltlf-alw}, we can deduce that 
+%\begin{align*}
+%\Dfun{\Diamond \varphi} 	\ind &= \ind   \Dfun{\varphi} \lOR \Dfun{\Next \Diamond \varphi}\\
+%\Dfun{\Box \varphi} 	\ind &= \ind   \Dfun{\varphi} \lAND \Dfun{\Wnext \Box \varphi}
+%\end{align*}
+%	
+%Moreover, we define $\DfunEps{\varphi}$ which is inductively defined as Equation \ref{delta-ltlf}, except for the following cases:
+%\begin{align}
+%\begin{aligned}
+%\DfunEps{A} 			\ind &= \ind \false\\
+%\DfunEps{\lnot A} 			\ind &= \ind  \false\\
+%\DfunEps{\Next \varphi} 	\ind &= \ind   \false\\
+%\DfunEps{\Wnext \varphi} 	\ind &= \ind   \true\\
+%\DfunEps{\varphi_1 \lUntil \varphi_2} 	\ind &= \ind   \false\\
+%\DfunEps{\varphi_1 \Release \varphi_2} 	\ind &= \ind   \true\\
+%\label{delta-ltlf-eps}
+%\end{aligned}					
+%\end{align}
+%\end{definition}
+%Note that $\DfunEps{\varphi}$ is always either $\true$ or $\false$. It is worth to observe for future use that from Equation \ref{delta-ltlf-eps} we can say $\DfunEps{\Diamond \varphi} = \false$ and $\DfunEps{\Box \varphi} = \true$.
+%\section{\PLTLToDFA}
+%talk about theory behind conversion to automata in past
+\section{\LTLf/\PLTL to \FOL Encoding and \MONA}
+In this section, we will illustrate how to translate an \LTLf and a \PLTL formula into \emph{first-order logic} (\FOL) over finite linear ordered sequences\footnote{More precisely \textit{monadic first-order logic on finite linearly ordered domains}, sometimes denoted as \sc fo[<].} \citep{de2013linear,zpv2018}. Then, we will present the \MONA tool with its syntax and we will explain the translation procedure from a \FOL encoding to the \MONA enconding.
+\subsection{\LTLf-to-\FOL Encoding}\label{subsec:ltlf-to-fol}
+In the following we deal with a first-order language augmented with monadic predicates $\suc$, $<$ and $=$ plus two constants $0$ and $\last$. Afterwards, we focus our attention to \emph{finite linear ordered \FOL interpretations} under the form of \folInter, where the domain is $\Delta^{I} = \{0,\dots,n\}$ with $n \in \mathbb{N}$, and the interpretation function $\cdot^{\I}$ interprets binary predicates and constants as follows:
+\begin{align}
+\begin{aligned}
+\suc^{\I} &= \{ (i,i+1) \mid i \in \{0,\dots,n-1\}\}\\
+<^{\I} &= \{ (i,j) \mid i,j \in \{0,\dots,n\} \lAND i<j\}\\
+=^{\I} &= \{ (i,i) \mid i \in \{0,\dots,n\}\}\\
+0^{\I} &= 0\\
+last^{\I} &= n
+\label{monadic-predicates}
+\end{aligned}
+\end{align}
+Actually, all these operators can be derived from $<$ as follows:
+\begin{align*}
+\suc(x,y) &\doteq x<y \lAND \lnot \exists z. x<z<y\\
+x=y &\doteq \forall z. x<z \equiv y<z\\
+0 &\doteq x \mid \lnot \exists y.\suc(y,x)\\
+\last &\doteq x \mid \lnot \exists y.\suc(x,y)
+\end{align*}
+Although there could be possible differences in notation, the relation between \LT-intepretations and finite linear ordered \FOL interpretations is isomorphic. Indeed, given an \LT-interpretation $\trace$ we can define the corresponding \FOL interpretation \folInter as follows: $\Delta^{I} = \{0,\dots,\last\}$, with $\last = length(\trace)-1$, with the predefined predicates and constants interpretation and, for each $a \in \P$ its interpretation is $a^{\I} = \{i \mid a \in \trace(i)\}$. On the contrary, given a finite linear ordered \FOL interpretation \folInter, with $\Delta^{I} = \{0,\dots,n\}$, we determine the corresponding \LT-interpretation $\trace$ as follows: $length(\trace) = n+1$, for each instant $0 \le i \le last$ (with $last = n$), we obtain $\trace(i)=\{a \mid i \in a^{\I}\}$.
+
+At this moment, we can define the translation function $\fol(\varphi,x)$ in the following way.
+\begin{definition}
+Given an \LTLf formula $\varphi$ and a variable $x$, the translation function $\fol(\varphi,x)$, inductively defined on the \LTLf formula's structure, returns the corresponding \FOL formula open in $x$:
+\begin{align*}
+&\fol(a,x) = a(x)\\
+&\fol(\lnot \varphi, x) = \lnot \fol(\varphi, x)\\
+&\fol(\varphi_1 \lAND \varphi_2,x) = \fol(\varphi_1,x) \lAND \fol(\varphi_2,x)\\
+&\fol(\varphi_1 \lOR \varphi_2,x) = \fol(\varphi_1,x) \lOR \fol(\varphi_2,x)\\
+&\fol(\Next \varphi, x) = \exists y.\suc(x,y) \lAND \fol(\varphi, y)\\
+&\fol(\Wnext \varphi, x) = x= \last \lOR \exists y.\suc(x,y) \lAND \fol(\varphi, y)\\
+&\fol(\varphi_1 \lUntil \varphi_2, x) = \exists y. x \le y \le \last \lAND \fol(\varphi_2, y) \lAND \forall z.x \le z < y \Rightarrow \fol(\varphi_1,z)\\
+&\fol(\varphi_1 \Release \varphi_2, x) = \exists y. x \le y \le \last \lAND \fol(\varphi_1, y) \lAND \forall z.x \le z < y \Rightarrow \fol(\varphi_2,z)  \lOR\\
+& \forall z.x \le z < \last \Rightarrow \fol(\varphi_2,z)
+\end{align*}
+\end{definition}
+The following Theorem ensures that a finite trace $\rho$ satisfies an \LTLf formula $\varphi$ iff the corresponding finite linear ordered \FOL interpretation $\I$ of $\rho$ models $\fol(\varphi, 0)$.
+\begin{theorem}\citep{de2013linear}\label{th:ltl-to-fol}
+Given an \LT-interpretation $\trace$ and a corresponding finite linear ordered \FOL interpretation $\I$, we have
+\begin{align*}
+\trace,i \models \varphi \tiff I,[x/i] models \fol(\varphi, x)
+\end{align*}
+where $[x/i]$ stands for a variable assignments that assigns the value $i$ to the free variable $x$ of $\fol(\varphi, x)$.
+\end{theorem}
+In general, recalling the Definition \ref{ltlf-sat-val-ent}, a formula $\varphi$ is $\true$ in a trace $\trace$ ($\trace \models \varphi$) if $\trace, 0 \models \varphi$. Hence, we should evaluate our translation function $\fol(\varphi, x)$ in $0$ (i.e. computing $\fol(\varphi, 0)$).
+Finally, since also the converse reduction of Theorem \ref{th:ltl-to-fol} holds, we can state the following Theorem:
+\begin{theorem}\citep{gabbay1980temporal}\label{th:ltl-fol-expressive}
+\LTLf has exactly the same expressive power of \FOL.
+\end{theorem}
+\subsection{\PLTL-to-\FOL Encoding}\label{subsec:pltl-to-fol}
+As we have previously seen for \LTLf, in the current section we describe the translation function for a \PLTL formula. Here, we also have a first-order language augmented with monadic predicates $\pre$, $<$ and $=$ plus two constants $0$ and $\last$. Then, we have our \emph{finite linear ordered \FOL interpretations} under the form of \folInter, where the domain is $\Delta^{I} = \{0,\dots,n\}$ with $n \in \mathbb{N}$, and the interpretation function $\cdot^{\I}$ interprets the same binary predicates defined as \ref{monadic-predicates} except that here we change $\suc$ with $\pre$ defined as follows:
+\begin{align*}
+\pre^{\I} &= \{ (i,i-1) \mid i \in \{1,\dots,n\}\}\\
+\end{align*}
+We can derive these operators from $<$ as well:
+\begin{align*}
+\pre(x,y) &\doteq y<x \lAND \lnot \exists z. y<z<x\\
+x=y &\doteq \forall z. x<z \equiv y<z\\
+0 &\doteq x \mid \lnot \exists y.\pre(x,y)\\
+\last &\doteq x \mid \lnot \exists y.\pre(y,x)
+\end{align*}
+In the exactly same way done before, we can give the definition of the translation function $\folp(\varphi,x)$:
+\begin{definition}
+Given a \PLTL formula $\varphi$ and a variable $x$, the translation function $\folp(\varphi,x)$, inductively defined on the \PLTL formula's structure, returns the corresponding \FOL formula open in $x$:
+\begin{align*}
+&\folp(a,x) = a(x)\\
+&\folp(\lnot \varphi, x) = \lnot \folp(\varphi, x)\\
+&\folp(\varphi_1 \lAND \varphi_2,x) = \folp(\varphi_1,x) \lAND \folp(\varphi_2,x)\\
+&\folp(\varphi_1 \lOR \varphi_2,x) = \folp(\varphi_1,x) \lOR \folp(\varphi_2,x)\\
+&\folp(\Yesterday \varphi, x) = \exists y.\pre(x,y) \lAND y \ge 0 \lAND \folp(\varphi, y)\\
+&\folp(\varphi_1 \Since \varphi_2, x) = \exists y. 0 \le y \le \last \lAND \folp(\varphi_2, y) \lAND \forall z.y < z \le x \Rightarrow \folp(\varphi_1,z)
+\end{align*}
+\end{definition}
+Consider a finite trace $\rho$, the corresponding \FOL interpretation $\I$ is defined as in Section \ref{subsec:ltlf-to-fol}.
+The following Theorem ensures that a finite trace $\rho$ satisfies an \PLTL formula $\varphi$ iff the corresponding finite linear ordered \FOL interpretation $\I$ of $\rho$ models $\folp(\varphi, \last)$.
+\begin{theorem}\citep{Kamp1968}
+Given a \PLTL formula $\varphi$, a finite trace $\rho$, and the corresponding interpretation $\I$ of $\rho$, we have that
+\begin{align*}
+\rho \models \varphi \tiff I \models \folp(\varphi, \last)
+\end{align*}
+where $\last = length(\rho) -1$.
+\end{theorem}
+\subsection{\MONA and \FOL-to-\MONA Encoding}\label{subsec:fol-to-mona}
+In the following, firstly we introduce the \MONA tool highlighting its main features, how it works and what is its role in this thesis. Secondly, we concentrate on the \MONA syntax and we describe the algorithm to translate a \FOL formula into a \MONA program.
+\subsubsection{\MONA}
+\MONA \citep{mona1998} is a sophisticated tool written in C++ for the construction of symbolic \DFA  from logical specifications. This tool has been implemented starting from 1997 from the BRICS (a research center in computer science located at the Aarhus University) with the aim of efficiently implementing decision procedures for the \emph{Weak Second-order Theory of One or Two successors} (\wsos/\wsts). These two theories are also called monadic (from here the name of the tool) second-order logics and are decidable\footnote{A logic is decidable if there exists an algorithm such that for any given formula it determines its truth value.} since allowed second-order variables are interpreted as a finite set of numbers. Moreover, the \wsos theory is a fragment of arithmetic augmented with second-order quantification over finite sets of natural numbers. Indeed, first-order terms represents just natural numbers. Furthermore, \wsos has not the addition operator because that would make the theory undecidable, however there is the unary predicate $+1$ that stands for the successor function. On the other hand, \wsts is a generalization of \wsos to tree structures.
+Hence, \MONA efficiently translates \wsos and \wsts formulas respectively into minimum \DFAs and \GTAs (Guided Tree Automata \citep{biehl1996algorithms}), representing them by shared, multi-terminal \bdds (Binary Decision Diagrams \citep{henriksen1995mona}). Having considered the polyedric features of \MONA, we will only use the translation to \DFAs.
+
+\MONA has a lot of possible applications that have been published during the years. Additionally, thanks to its APIs, it could be used both as a standalone tool and as an integrated tool for other programs. Some examples of \MONA usage are the following:
+\begin{itemize}
+\item Hardware verification
+\item Controller systems
+\item Program and Protocol verification
+\item Software Engineering
+\end{itemize}
+
+At this point, we can explain how \MONA works, at least for the part related to the \DFA construction from a \FOL formula. However, before doing that, we would like to clarify what the exact role of \MONA is within this thesis. As stated before and as we will see in Chapter \ref{ch:ltlf2dfa}, \MONA has been employed as a tool that translates a monadic \FOL formula on finite linearly ordered domains, encoded as a \mls\footnote{\mls is a slight variation of \wsos where  formulas are interpreted over \emph{finite string} models, rather than \emph{infinite string} models}, into a minimum \DFA.
+
+Now, we can briefly describe how \MONA works.
+
+\subsubsection{\FOL-to-\MONA Encoding}
+The \MONA syntax is quite similar to the \wsos syntax, but it has its own method to define variables and it has been enhanced with some special details, also known as syntactic sugar, making the overall language more readable and allowing to express things more clearly and more concisely.
+
+%\section{\PLTL to \FOL Encoding and \MONA}
+%talk about theory behind translation and intro with mona past
