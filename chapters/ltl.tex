@@ -1,4 +1,4 @@
-\chapter{\PLTL and \LTLf}
+\chapter{\PLTL and \LTLf}\label{ch:theory}
 This chapter will deal with the theoretical framework on which all topics present in the thesis are based. Initially, we will introduce the widely known Linear-Time Temporal Logic (\LTL) and the Past Linear Time Temporal Logic (\PLTL), focusing on their syntax and semantic. Secondly, we will talk about the concept of \textit{Finite Trace} in these formal languages and how it changes them. Specifically, we will describe the Linear Time Temporal Logic over Finite Traces (\LTLf). Then, we will illustrate the theory behind the transformation of an \LTLf or \PLTL formula to a Deterministic Finite State Automaton (\DFA). Finally, we will describe the translation of an \LTLf or \PLTL formula to the classic First-Order Logic formalism (\FOL) and the translation of a \FOL formula into a program that the \MONA, a tool that translates formulas into a \DFA, can manage. Some examples will be provided, but we will suppose the reader to be confident with classical logic and automata theory.
 \section{Linear Temporal Logic (\LTL)}\label{sec:ltl-definition}
 \textit{Temporal Logic} formalisms are a set of formal languages designed for representing temporal information and reasoning about time within a logical framework \citep{sep-logic-temporal}. Indeed, these logics are used when propositions have their truth value dependent on time.
@@ -274,7 +274,7 @@ x=y &\doteq \forall z. x<z \equiv y<z\\
 Although there could be possible differences in notation, the relation between \LT-intepretations and finite linear ordered \FOL interpretations is isomorphic. Indeed, given an \LT-interpretation $\trace$ we can define the corresponding \FOL interpretation \folInter as follows: $\Delta^{I} = \{0,\dots,\last\}$, with $\last = length(\trace)-1$, with the predefined predicates and constants interpretation and, for each $a \in \P$ its interpretation is $a^{\I} = \{i \mid a \in \trace(i)\}$. On the contrary, given a finite linear ordered \FOL interpretation \folInter, with $\Delta^{I} = \{0,\dots,n\}$, we determine the corresponding \LT-interpretation $\trace$ as follows: $length(\trace) = n+1$, for each instant $0 \le i \le last$ (with $last = n$), we obtain $\trace(i)=\{a \mid i \in a^{\I}\}$.
 
 At this moment, we can define the translation function $\fol(\varphi,x)$ in the following way.
-\begin{definition}
+\begin{definition}\label{def:ltlf-to-fol}
 Given an \LTLf formula $\varphi$ and a variable $x$, the translation function $\fol(\varphi,x)$, inductively defined on the \LTLf formula's structure, returns the corresponding \FOL formula open in $x$:
 \begin{align*}
 &\fol(a,x) = a(x)\\
@@ -290,7 +290,7 @@ Given an \LTLf formula $\varphi$ and a variable $x$, the translation function $\
 \end{definition}
 The following Theorem ensures that a finite trace $\rho$ satisfies an \LTLf formula $\varphi$ iff the corresponding finite linear ordered \FOL interpretation $\I$ of $\rho$ models $\fol(\varphi, 0)$.
 \begin{theorem}\citep{de2013linear}\label{th:ltl-to-fol}
-Given an \LT-interpretation $\trace$ and a corresponding finite linear ordered \FOL interpretation $\I$, we have
+Given an \LT-interpretation $\trace$ and a corresponding finite linear ordered \FOL interpretation $\I$, we have:
 \begin{align*}
 \trace,i \models \varphi \tiff I,[x/i] models \fol(\varphi, x)
 \end{align*}
@@ -303,9 +303,10 @@ Finally, since also the converse reduction of Theorem \ref{th:ltl-to-fol} holds,
 \end{theorem}
 \subsection{\PLTL-to-\FOL Encoding}\label{subsec:pltl-to-fol}
 As we have previously seen for \LTLf, in the current section we describe the translation function for a \PLTL formula. Here, we also have a first-order language augmented with monadic predicates $\pre$, $<$ and $=$ plus two constants $0$ and $\last$. Then, we have our \emph{finite linear ordered \FOL interpretations} under the form of \folInter, where the domain is $\Delta^{I} = \{0,\dots,n\}$ with $n \in \mathbb{N}$, and the interpretation function $\cdot^{\I}$ interprets the same binary predicates defined as \ref{monadic-predicates} except that here we change $\suc$ with $\pre$ defined as follows:
-\begin{align*}
-\pre^{\I} &= \{ (i,i-1) \mid i \in \{1,\dots,n\}\}\\
-\end{align*}
+\begin{align}
+\pre^{\I} &= \{ (i,i-1) \mid i \in \{1,\dots,n\}\}
+\label{prev-predicate}
+\end{align}
 We can derive these operators from $<$ as well:
 \begin{align*}
 \pre(x,y) &\doteq y<x \lAND \lnot \exists z. y<z<x\\
@@ -314,7 +315,7 @@ x=y &\doteq \forall z. x<z \equiv y<z\\
 \last &\doteq x \mid \lnot \exists y.\pre(y,x)
 \end{align*}
 In the exactly same way done before, we can give the definition of the translation function $\folp(\varphi,x)$:
-\begin{definition}
+\begin{definition}\label{def:pltl-to-fol}
 Given a \PLTL formula $\varphi$ and a variable $x$, the translation function $\folp(\varphi,x)$, inductively defined on the \PLTL formula's structure, returns the corresponding \FOL formula open in $x$:
 \begin{align*}
 &\folp(a,x) = a(x)\\
@@ -322,7 +323,7 @@ Given a \PLTL formula $\varphi$ and a variable $x$, the translation function $\f
 &\folp(\varphi_1 \lAND \varphi_2,x) = \folp(\varphi_1,x) \lAND \folp(\varphi_2,x)\\
 &\folp(\varphi_1 \lOR \varphi_2,x) = \folp(\varphi_1,x) \lOR \folp(\varphi_2,x)\\
 &\folp(\Yesterday \varphi, x) = \exists y.\pre(x,y) \lAND y \ge 0 \lAND \folp(\varphi, y)\\
-&\folp(\varphi_1 \Since \varphi_2, x) = \exists y. 0 \le y \le \last \lAND \folp(\varphi_2, y) \lAND \forall z.y < z \le x \Rightarrow \folp(\varphi_1,z)
+&\folp(\varphi_1 \Since \varphi_2, x) = \exists y. 0 \le y \le x \lAND \folp(\varphi_2, y) \lAND \forall z.y < z \le x \Rightarrow \folp(\varphi_1,z)
 \end{align*}
 \end{definition}
 Consider a finite trace $\rho$, the corresponding \FOL interpretation $\I$ is defined as in Section \ref{subsec:ltlf-to-fol}.
@@ -337,7 +338,7 @@ where $\last = length(\rho) -1$.
 \subsection{\MONA and \FOL-to-\MONA Encoding}\label{subsec:fol-to-mona}
 In the following, firstly we introduce the \MONA tool highlighting its main features, how it works and what is its role in this thesis. Secondly, we concentrate on the \MONA syntax and we describe the algorithm to translate a \FOL formula into a \MONA program.
 \subsubsection{\MONA}
-\MONA \citep{mona1998} is a sophisticated tool written in C++ for the construction of symbolic \DFA  from logical specifications. This tool has been implemented starting from 1997 from the BRICS (a research center in computer science located at the Aarhus University) with the aim of efficiently implementing decision procedures for the \emph{Weak Second-order Theory of One or Two successors} (\wsos/\wsts). These two theories are also called monadic (from here the name of the tool) second-order logics and are decidable\footnote{A logic is decidable if there exists an algorithm such that for any given formula it determines its truth value.} since allowed second-order variables are interpreted as a finite set of numbers. Moreover, the \wsos theory is a fragment of arithmetic augmented with second-order quantification over finite sets of natural numbers. Indeed, first-order terms represents just natural numbers. Furthermore, \wsos has not the addition operator because that would make the theory undecidable, however there is the unary predicate $+1$ that stands for the successor function. On the other hand, \wsts is a generalization of \wsos to tree structures.
+\MONA \citep{mona1998} is a sophisticated tool written in C/C++ for the construction of symbolic \DFA  from logical specifications. This tool has been implemented starting from 1997 from the BRICS (a research center in computer science located at the Aarhus University) with the aim of efficiently implementing decision procedures for the \emph{Weak Second-order Theory of One or Two successors} (\wsos/\wsts). These two theories are also called monadic (from here the name of the tool) second-order logics and are decidable\footnote{A logic is decidable if there exists an algorithm such that for any given formula it determines its truth value.} since allowed second-order variables are interpreted as a finite set of numbers. Moreover, the \wsos theory is a fragment of arithmetic augmented with second-order quantification over finite sets of natural numbers. Indeed, first-order terms represents just natural numbers. Furthermore, \wsos has not the addition operator because that would make the theory undecidable, however there is the unary predicate $+1$ that stands for the successor function. On the other hand, \wsts is a generalization of \wsos to tree structures.
 Hence, \MONA efficiently translates \wsos and \wsts formulas respectively into minimum \DFAs and \GTAs (Guided Tree Automata \citep{biehl1996algorithms}), representing them by shared, multi-terminal \bdds (Binary Decision Diagrams \citep{henriksen1995mona}). Having considered the polyedric features of \MONA, we will only use the translation to \DFAs.
 
 \MONA has a lot of possible applications that have been published during the years. Additionally, thanks to its APIs, it could be used both as a standalone tool and as an integrated tool for other programs. Some examples of \MONA usage are the following:
@@ -355,5 +356,82 @@ Now, we can briefly describe how \MONA works.
 \subsubsection{\FOL-to-\MONA Encoding}
 The \MONA syntax is quite similar to the \wsos syntax, but it has its own method to define variables and it has been enhanced with some special details, also known as syntactic sugar, making the overall language more readable and allowing to express things more clearly and more concisely.
 
-%\section{\PLTL to \FOL Encoding and \MONA}
-%talk about theory behind translation and intro with mona past
+\MONA is executed on a file, with \textit{.mona} extension, in which we can find some declarations and \wsos/\wsts formulas. We will refer to such file as the \textit{.mona} program, henceforth. After the execution of the tool with a \textit{.mona} program, we get a \DFA. Additionally, \MONA carries out an analysis of the program by recognizing the set of satisfying interpretations for the program. Let us consider the following example \citep{monamanual2001}:
+\begin{example}
+A \texttt{simple.mona} program:\\
+\begin{lstlisting}[style=Mona, escapechar = £]
+var2 P,Q;
+P\Q = {0,4} union {1,2};
+\end{lstlisting}
+\end{example}
+First, we have declared \texttt{P} and \texttt{Q} as second-order variables. After that, we have defined a formula telling that the set difference between \texttt{P} and \texttt{Q} is the union of set \texttt{\{0,4\}} and \texttt{\{1,2\}}. Obviously, this formula is not always true, nonetheless there is an interpretation that satisfies it. For instance, the assignments \texttt{\{0,1,2,4\}} to \texttt{P} and \texttt{\{5\}} to \texttt{Q}. This interpretation can also be represented as a bit string for each variable, where positions in the string correspond to natural numbers, 1 means that the number is in the set (remember that a second-order variable is a set) whereas 0 means that is not. In this case, we would have \texttt{P}$ \rightarrow 111010$ and \texttt{Q}$ \rightarrow 000001$. Thus, it is possible to define a \textit{language} associated to these bit strings and, since it is \textit{regular} it is also possible to build a \DFA. Moreover, \MONA assumes that all defined formulas in the program are in conjunct and each statement should be terminated by a semicolon.
+There are also additional elements consisting the \MONA syntax depicted in Figure \ref{fig:mona-syntax}.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\textwidth]{images/mona-syntax}
+	\caption{The essential \MONA syntax.}
+	\label{fig:mona-syntax}
+\end{figure}
+As we can see from that Figure, there are also quantifiers and all usual logical connectives (i.e. those used in \FOL). In addition, since we would like to write \FOL on \textit{finite linearly ordered domains}, we should enable the \mls mode specifying \texttt{m2l-str;} at the beginning of the \MONA program. Actually, \texttt{m2l-str;} is a shortcut for:
+\begin{lstlisting}[style=Mona, escapechar = £]
+ws1s;£\label{line:ws1s-def}£
+var2 $ where ~ex1 p where true: p notin $ & p+1 in $;£\label{line:restriction}£
+allpos $;£\label{line:allpos-def}£
+defaultwhere1(p) = p in $;£\label{line:defaultwhere1}£
+defaultwhere2(P) = P sub $;£\label{line:defaultwhere2}£
+\end{lstlisting}
+At the first line, it is declared the intent to use exclusively \wsos. Then, at line \ref{line:restriction}, there is the declaration of a second-order variable \texttt{\$} ensuring it to always have the value $\{0,\dots, n-1\}$ for some $n$. Likewise, it is needed the declaration at line \ref{line:allpos-def} to bound the domain of interest. Lastly, at lines \ref{line:defaultwhere1} and \ref{line:defaultwhere2}, the program restrict all first- and second-order variables to \texttt{\$}.
+
+At this point, since we have illustrated all the necessary stuff for the translation, we are able to give the \FOL-to-\MONA encoding with some examples.
+To begin with, all usual logic operators can be encoded following the table in Figure \ref{fig:mona-syntax}. Secondly, to encode the \suc and \pre monadic predicates respectively defined in Equations \ref{monadic-predicates} and \ref{prev-predicate} we use the successor and predecessor built-in operators as follows:
+\begin{align*}
+\suc(x,y) \doteq \texttt{y=x+1}\\
+\pre(x,y) \doteq \texttt{y=x-1}
+\end{align*}
+Additionally, the two constants $0$ and $\last$ already defined in \ref{monadic-predicates} are encoded as \texttt{0} and \texttt{max(\$)}, respectively.
+Thirdly, to express existential and universal quantifiers we use the corresponding syntax as follows:
+\begin{align*}
+\exists p. \doteq \texttt{ex1 p:}\\
+\forall p. \doteq \texttt{all1 p:}
+\end{align*}
+Then, we can express first-order predicates symbols with set containment. For instance, if we have $A(x)$, before we must declare it as \texttt{var2 A;} and, then, encode it as \texttt{x in A}, whereas its negation ($\lnot A(x)$) would be \texttt{x notin A}. Finally, $\true$ and $\false$ remain the same.
+In the following, we give some examples.
+\begin{example}
+\FOL-to-\MONA encoding examples:\\
+\begin{itemize}
+\item Suppose we have the \LTLf formula $\Diamond G$, its translation to \FOL according to Definition \ref{def:ltlf-to-fol} is:
+\begin{equation}\label{eq:fol-eg}
+\exists y. 0 \le y \le \last \lAND G(y)
+\end{equation}
+(we have not included the last part $\forall z. 0 \le z < y \Rightarrow \true$ since it is trivially $\true$).
+The \MONA program corresponding to the formula in \ref{eq:fol-eg} is the following:
+\begin{lstlisting}[style=mona]
+m2l-str;
+var2 G;
+ex1 y: 0<=y & y<=max($) & y in G;
+\end{lstlisting}
+
+\item Suppose we have the \LTLf formula $\Box G$, its translation to \FOL according to Definition \ref{def:ltlf-to-fol} is:
+\begin{equation}\label{eq:fol-gg}
+\lnot (\exists y. 0 \le y \le \last \lAND \lnot G(y))
+\end{equation}
+The \MONA program corresponding to the formula in \ref{eq:fol-gg} is the following:
+\begin{lstlisting}[style=mona]
+m2l-str;
+var2 G;
+~(ex1 y: 0<=y & y<=max($) & y notin G);
+\end{lstlisting}
+
+\item Suppose we have the \PLTL formula $A \Since B)$, its translation to \FOL according to Definition \ref{def:pltl-to-fol} is:
+\begin{equation}\label{eq:fol-asb}
+\exists y. 0 \le y \le \last \lAND B(y) \lAND \forall z. y < z \le \last \Rightarrow A(z)
+\end{equation}
+The \MONA program corresponding to the formula in \ref{eq:fol-asb} is the following:
+\begin{lstlisting}[style=mona]
+m2l-str;
+var2 A,B;
+(ex1 y: 0<=y & y<=max($) & y in B & (all1 z: y<z & z<=max($) => z in A));
+\end{lstlisting}
+\end{itemize}
+\end{example}
+
