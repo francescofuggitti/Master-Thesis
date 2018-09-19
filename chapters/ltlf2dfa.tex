@@ -2,12 +2,12 @@
 In this chapter we will present \href{https://github.com/Francesco17/LTLf2DFA}{\LTLfToDFA}, a software package  written in Python. 
 
 \section{Introduction}\label{sec:intro}
-\LTLfToDFA is a Python tool that processes a given \LTLf formula (with past and future operators) and generates the corresponding minimized \DFA using \MONA\citep{mona1998}. In addition, it offers the possibility to compute the \DFA with or without the \declare assumption \citep{DeGiacomo:2014:RLF:2893873.2894033}.
+\LTLfToDFA is a Python tool that processes a given \LTLf/\PLTL formula and generates the corresponding minimized \DFA using \MONA\citep{mona1998}. In addition, it offers the possibility to compute the \DFA with or without the \declare assumption \citep{DeGiacomo:2014:RLF:2893873.2894033}.
 The main features provided by the library are:
 \begin{itemize}
-\item parsing an \LTLf formula with past or future operators;
-\item translation of an \LTLf formula to \MONA program;
-\item conversion of an \LTLf formula to \DFA automaton.
+\item parsing an \LTLf/\PLTL formula;
+\item translation of an \LTLf/\PLTL formula to \MONA program;
+\item conversion of an \LTLf/\PLTL formula to \DFA automaton.
 \end{itemize}
 \LTLfToDFA can be used with Python>=3.6 and has the following dependencies:
 \begin{itemize}
@@ -200,7 +200,7 @@ For instance, the \LTLf formula $\varphi= G(a \rightarrow X b)$ is represented a
 \end{figure}
 Finally, as in the \texttt{MyLexer} class, we have to handle errors defining a specific method.
 
-\LTLfToDFA can be used just for the parsing phase of an 	\LTLf formula as shown in Listing \ref{code:ltlf2dfa-only-parsing}.
+\LTLfToDFA can be used just for the parsing phase of an 	\LTLf/\PLTL formula as shown in Listing \ref{code:ltlf2dfa-only-parsing}.
 \begin{lstlisting}[language=Python, style=Python, label={code:ltlf2dfa-only-parsing}, caption={How to use only the parsing phase of \LTLfToDFA.}]
 from ltlf2dfa.Parser import MyParser
 
@@ -211,7 +211,7 @@ parsed_formula = parser(formula)
 print(parsed_formula) # syntax tree as tuple of tuples
 \end{lstlisting}
 \subsection{Translator.py}
-The \texttt{Translator.py} module contains the majority of APIs that the \LTLfToDFA package exposes. Indeed, this module consists of a \texttt{Translator} class which concerns the core feature of the package: the translation of an \LTLf  formula into a \DFA. Since the package takes advantage of the \MONA tool for the formula conversion, the \texttt{Translator} class has to translate first the given formula into the syntax recognized by \MONA, then create the input program for \MONA and, finally, invoke \MONA to get back the resulting \DFA in the Graphviz\footnote{Graphviz is open source graph visualization software. For further details see \href{https://www.graphviz.org}{https://www.  .org}} format. 
+The \texttt{Translator.py} module contains the majority of APIs that the \LTLfToDFA package exposes. Indeed, this module consists of a \texttt{Translator} class which concerns the core feature of the package: the translation of an \LTLf/\PLTL  formula into the corresponding minimum \DFA. Since the package takes advantage of the \MONA tool for the formula conversion, the \texttt{Translator} class has to translate first the given formula into the syntax recognized by \MONA, then create the input program for \MONA and, finally, invoke \MONA to get back the resulting \DFA in the Graphviz\footnote{Graphviz is open source graph visualization software. For further details see \href{https://www.graphviz.org}{https://www.  .org}} format. 
 The main methods of the \texttt{Translator} class are:
 \begin{itemize}
 \item \texttt{translate()}, which starting from the formula syntax tree generated (Figure \ref{fig:formula-syntax-tree}) in the parsing phase translates it into a string using the syntax of \MONA;
@@ -220,11 +220,11 @@ The main methods of the \texttt{Translator} class are:
 \end{itemize}
 Now we will go into details of the methods stated above showing their implementation.
 \subsubsection{The \texttt{translate} method}
-The \texttt{translate} method is a crucial step towards reaching a good result and performance. Formally, the translation procedure from an \LTLf formula to the \MONA syntax is done passing through \FOL as shown in \ref{eq:translation-procedure}.
+The \texttt{translate} method is a crucial step towards reaching a good result and performance. Formally, the translation procedure from an \LTLf/\PLTL formula to the \MONA syntax is done passing through \FOL as shown in \ref{eq:translation-procedure}.
 \begin{equation}\label{eq:translation-procedure}
-\textsc{LTL}_f \rightarrow \textsc{FOL} \rightarrow \textsc{MONA}
+\textsc{LTL}_f/\textsc{PLTL} \rightarrow \textsc{FOL} \rightarrow \textsc{MONA}
 \end{equation}
-The former translation from \LTLf to \FOL is done accordingly to \citep{de2013linear}, while the latter follows from \citep{monamanual2001}.
+The former translation from \LTLf/\PLTL to \FOL is done accordingly to \citep{de2013linear}, while the latter follows from \citep{monamanual2001}.
 In Listing \ref{code:ltlf2dfa-translate-method} we can see the translation's implementation. Three dots $\dots$ represent omitted code.
 \begin{lstlisting}[language=Python, style=Python, escapechar = £,  label={code:ltlf2dfa-translate-method}, caption={The \texttt{translate} method.}]
 import ...
@@ -395,7 +395,7 @@ Additionally, since the \MONA syntax requires the declaration of the free variab
 \subsubsection{The \texttt{createMonafile} method}
 The \texttt{createMonafile} method is employed to write the program \textit{.mona} and save it in the main directory. It takes as input a boolean flag that, as stated before, stands for indicating whether one would like to compute and add the \declare assumption or not. In particular, in formal logic, as stated in \citep{DeGiacomo:2014:RLF:2893873.2894033}, the \declare assumption is expressed as in \ref{eq:declare-ass}.
 \begin{equation}\label{eq:declare-ass}
-\Always (\bigvee_{a \in \P} a) \lAND \Always (\bigwedge_{a,b \in \P, a \neq b} a \rightarrow \NOT b) 
+\Always (\bigvee_{a \in \P} a) \lAND \Always (\bigwedge_{a,b \in \P, a \neq b} a \Rightarrow \NOT b) 
 \end{equation}
 It consists essentially in two parts joined by the $\lAND$ operator. The former indicates that it is always true that at each point in time only one symbol is $\true$, while the latter means that always for each couple of different symbols in the formula if one is $\true$ the other must be $\false$.
 The practical part can be seen in Listing \ref{code:ltlf2dfa-createmona-method}.

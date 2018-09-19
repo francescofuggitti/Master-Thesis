@@ -174,7 +174,7 @@ Succinctness of \LTLf with Past:
 Both formulas mean \emph{every grant is preceeded by a request}. The  former (\ref{ltlf-with-past-example}) is in \LTLf with past modalities whereas the latter (\ref{ltlf-without-past-example}) is pure \LTLf. It is pretty evident that the \ref{ltlf-with-past-example} is less intricate than the one in \ref{ltlf-without-past-example}.
 \end{example}
 Finally, this property of \LTLf augmented with past temporal operators is interesting, however it is out of the scope of this thesis.
-\section{\LTLf and \PLTL translation to  automata}
+\section{\LTLf and \PLTL translation to  automata}\label{sec:formula-to-automa}
 Given an \LTLf/\PLTL formula $\varphi$, we can build a deterministic finite state automaton (\DFA) \citep{Rabin:1959:FAD:1661907.1661909} 
 $\automaton_\varphi$ that accepts the same finite traces that makes $\varphi$ true. To achieve this, we proceed in two steps: first, we translate \LTLf and \PLTL formulas into an (\NFA) \citep{DeGiacomo:2015:SLL:2832415.2832466} following a simple direct algorithm; secondly, the obtained \NFA can be converted into a \DFA following the standard \emph{determinization}  procedure.
 
@@ -196,31 +196,31 @@ To denote the set of all traces over $\Sigma$ accepted by $\automaton$ we will u
 
 In the next subsections, we will provide some definitions and we will illustrate the algorithm for the translation also giving an example.
 \subsection{$\DfunSym$ function for \LTLf}\label{ltlf-delta-section}
-In order to build the \NFA, we need to define an auxiliary function $\DfunSym$ as follows:
-\begin{definition}\label{ltlf-delta-def}
-The \emph{delta function $\DfunSym$ for \LTLf formulas} is a function that takes as input an (implicitly quoted) \LTLf formula $\varphi$ (in negation normal form (NNF)\footnote{A formula is in \textit{negation normal form} if negation ($\lnot$) occurs only in front of atoms.}) and a propositional interpretation $\PropInt$ for $\P$ (including $\Last$), and returns a positive boolean formula whose atoms are (implicitly
-quoted) $\varphi$ subformulas. It is defined as follows:
-\input{chapters/misc/ltlf_delta}
-where $\Ended$ is defined as Equation \ref{ltlf-ended}. As a consequence of Definition \ref{ltlf-delta-def} and from Equation \ref{ltlf-eve} and \ref{ltlf-alw}, we can deduce that 
-\begin{align*}
-\Dfun{\Diamond \varphi} 	\ind &= \ind   \Dfun{\varphi} \lOR \Dfun{\Next \Diamond \varphi}\\
-\Dfun{\Box \varphi} 	\ind &= \ind   \Dfun{\varphi} \lAND \Dfun{\Wnext \Box \varphi}
-\end{align*}
-	
-Moreover, we define $\DfunEps{\varphi}$ which is inductively defined as Equation \ref{delta-ltlf}, except for the following cases:
-\begin{align}
-\begin{aligned}
-\DfunEps{A} 			\ind &= \ind \false\\
-\DfunEps{\lnot A} 			\ind &= \ind  \false\\
-\DfunEps{\Next \varphi} 	\ind &= \ind   \false\\
-\DfunEps{\Wnext \varphi} 	\ind &= \ind   \true\\
-\DfunEps{\varphi_1 \lUntil \varphi_2} 	\ind &= \ind   \false\\
-\DfunEps{\varphi_1 \Release \varphi_2} 	\ind &= \ind   \true\\
-\label{delta-ltlf-eps}
-\end{aligned}					
-\end{align}
-\end{definition}
-Note that $\DfunEps{\varphi}$ is always either $\true$ or $\false$. It is worth to observe for future use that from Equation \ref{delta-ltlf-eps} we can say $\DfunEps{\Diamond \varphi} = \false$ and $\DfunEps{\Box \varphi} = \true$.
+%In order to build the \NFA, we need to define an auxiliary function $\DfunSym$ as follows:
+%\begin{definition}\label{ltlf-delta-def}
+%The \emph{delta function $\DfunSym$ for \LTLf formulas} is a function that takes as input an (implicitly quoted) \LTLf formula $\varphi$ (in negation normal form (NNF)\footnote{A formula is in \textit{negation normal form} if negation ($\lnot$) occurs only in front of atoms.}) and a propositional interpretation $\PropInt$ for $\P$ (including $\Last$), and returns a positive boolean formula whose atoms are (implicitly
+%quoted) $\varphi$ subformulas. It is defined as follows:
+%\input{chapters/misc/ltlf_delta}
+%where $\Ended$ is defined as Equation \ref{ltlf-ended}. As a consequence of Definition \ref{ltlf-delta-def} and from Equation \ref{ltlf-eve} and \ref{ltlf-alw}, we can deduce that 
+%\begin{align*}
+%\Dfun{\Diamond \varphi} 	\ind &= \ind   \Dfun{\varphi} \lOR \Dfun{\Next \Diamond \varphi}\\
+%\Dfun{\Box \varphi} 	\ind &= \ind   \Dfun{\varphi} \lAND \Dfun{\Wnext \Box \varphi}
+%\end{align*}
+%	
+%Moreover, we define $\DfunEps{\varphi}$ which is inductively defined as Equation \ref{delta-ltlf}, except for the following cases:
+%\begin{align}
+%\begin{aligned}
+%\DfunEps{A} 			\ind &= \ind \false\\
+%\DfunEps{\lnot A} 			\ind &= \ind  \false\\
+%\DfunEps{\Next \varphi} 	\ind &= \ind   \false\\
+%\DfunEps{\Wnext \varphi} 	\ind &= \ind   \true\\
+%\DfunEps{\varphi_1 \lUntil \varphi_2} 	\ind &= \ind   \false\\
+%\DfunEps{\varphi_1 \Release \varphi_2} 	\ind &= \ind   \true\\
+%\label{delta-ltlf-eps}
+%\end{aligned}					
+%\end{align}
+%\end{definition}
+%Note that $\DfunEps{\varphi}$ is always either $\true$ or $\false$. It is worth to observe for future use that from Equation \ref{delta-ltlf-eps} we can say $\DfunEps{\Diamond \varphi} = \false$ and $\DfunEps{\Box \varphi} = \true$.
 \subsection{$\DfunSym$ function for \PLTL}\label{pltl-delta-section}
 %We give the following definition:
 %\begin{definition}\label{ltlf-delta-def}
