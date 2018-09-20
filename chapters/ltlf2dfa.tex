@@ -548,7 +548,7 @@ class DotHandler:
             %result_path)
 \end{lstlisting}
 The former method at line \ref{line:modifydot} takes advantage of the APIs exposed by \texttt{dotpy}. Especially, it parses the \textit{.dot} file output of \MONA (Figure \ref{fig:mona-output}), deletes the starting node $0$ and the edge from node $0$ to node $1$ and, finally, makes node $1$ initial. Consequently, the latter method at line \ref{line:outputdot} manages the output of the final post-processed \DFA (Figure \ref{fig:automa-post-processed}) and stores it in the main directory.
-For instance, in Figure \ref{fig:pre-post-automaton} we can see graphically what is the outcome of the post-processing of the automaton corresponding to the formula $\varphi = \Always (a \rightarrow \Next b)$.
+For instance, in Figure \ref{fig:pre-post-automaton} we can see graphically what is the outcome of the post-processing of the automaton corresponding to the formula $\varphi = \Always (a \Rightarrow \Next b)$.
 \begin{figure}[h]
 \centering
 \begin{subfigure}{.5\textwidth}
@@ -566,6 +566,39 @@ For instance, in Figure \ref{fig:pre-post-automaton} we can see graphically what
 \caption{Before and after \DFA post-processing}
 \label{fig:pre-post-automaton}
 \end{figure}
+\section{Interpreting \LTLfToDFA output}
+In this section, we explain through examples how to interpret and read the output \DFA resulting from the \LTLfToDFA computation.
+
+To begin with, circle nodes represents automaton states and doubled circle nodes represents those state that are accepting or final for the automaton. Labels on transitions stand for all possible values of formula symbols. A specific formula symbol in a transition must have one of the following values:
+\begin{itemize}
+\item \textbf{1}: means that the formula symbol is $\true$ in that transition;
+\item \textbf{0}: means that the formula symbol is $\false$ in that transition;
+\item \textbf{X}: means \textit{don't care}, i.e. the formula symbol can be both $\true$ or $\false$ in that transition. In other words, it means that the transition can be done no matter is the actual value of the formula symbol.
+\end{itemize}
+
+Finally, when a formula has multiple symbols, the value of each symbol has to be read vertically in order of symbols declaration in the formula. In the following, we will give some examples.
+
+\begin{example}
+Let us consider the formula $\varphi = \Diamond g$ and its corresponding automaton depicted in Figure \ref{fig:automa-example1}.
+\begin{figure}[h]
+\centering
+\includegraphics{images/example1-output.eps}
+\caption{Minimum \DFA for the formula $\varphi = \Diamond g$.} 
+\label{fig:automa-example1}
+\end{figure}
+The first transition without label indicates the initial state. Then, the first loop on state $1$ is done when $g$ is $\false$. Afterwards, the transition from state $1$ to state $2$ can be done only if $g$ is $\true$. Finally, the loop on state $2$ has the label "X" meaning that once the automaton has arrived on state $2$, whatever action it does (also $g$ and $\lnot g$) it remains on state $2$, which is, by the way, final for the automaton.
+\end{example}
+
+\begin{example}
+Let us consider the formula $\varphi = \Box (a \Rightarrow \Diamond b)$ and its corresponding automaton depicted in Figure \ref{fig:automa-example2}.
+\begin{figure}[h]
+\centering
+\includegraphics{images/example2-output.eps}
+\caption{Minimum \DFA for the formula $\varphi = \Diamond g$.} 
+\label{fig:automa-example2}
+\end{figure}
+As usual, state $1$ is the starting state. However, this case is a little bit different from the previous one. Indeed, now the formula has two symbols, namely $a$ and $b$. Since the order of declaration is $a,b$, labels on transition has to be read vertically following this order. For instance, the label on transition from state $1$ to state $2$ reports $0 \atop \text{X}$ meaning that the automaton can walk this transition only if $a$ is $\false$ (in this case, $b$ is \emph{don't care}, i.e. it can assume whatever value). Additionally, another interesting transition to comment is the one that goes from state $3$ to state $4$. Its label reports $0 \atop 0$,$1 \atop 0$ meaning that the automaton will do that transition only if either $a$ and $b$ are $\false$ or $a$ is $\true$ and $b$ is $\false$.
+\end{example} 
 \section{Comparison with \FLLOAT}
 In this section, we will see how \LTLfToDFA performs compared to \href{https://pypi.org/project/flloat/}{\FLLOAT}\footnote{https://github.com/MarcoFavorito/flloat}, which is another Python package having the conversion of an \LTLf formula to a \DFA as one of its features.
 In particular, \FLLOAT handles \LTLf and \LDLf (\textit{Linear Dynamic Logic on Finite Traces}) formulas, but not \PLTL ones, but it provides support for syntax, semantics and parsing of \PL (\textit{Propositional Logic}), \LTLf and \LDLf formal languages.  Additionally, its conversion is based on a different theoretical result with respect to \LTLfToDFA. Nevertheless, we can compare them on the generation of a \DFA from an \LTLf formula.

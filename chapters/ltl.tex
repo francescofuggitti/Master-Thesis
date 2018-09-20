@@ -364,7 +364,7 @@ var2 P,Q;
 P\Q = {0,4} union {1,2};
 \end{lstlisting}
 \end{example}
-First, we have declared \texttt{P} and \texttt{Q} as second-order variables. After that, we have defined a formula telling that the set difference between \texttt{P} and \texttt{Q} is the union of set \texttt{\{0,4\}} and \texttt{\{1,2\}}. Obviously, this formula is not always true, nonetheless there is an interpretation that satisfies it. For instance, the assignments \texttt{\{0,1,2,4\}} to \texttt{P} and \texttt{\{5\}} to \texttt{Q}. This interpretation can also be represented as a bit string for each variable, where positions in the string correspond to natural numbers, 1 means that the number is in the set (remember that a second-order variable is a set) whereas 0 means that is not. In this case, we would have \texttt{P}$ \rightarrow 111010$ and \texttt{Q}$ \rightarrow 000001$. Thus, it is possible to define a \textit{language} associated to these bit strings and, since it is \textit{regular} it is also possible to build a \DFA. Moreover, \MONA assumes that all defined formulas in the program are in conjunct and each statement should be terminated by a semicolon.
+First, we have declared \texttt{P} and \texttt{Q} as second-order variables. After that, we have defined a formula telling that the set difference between \texttt{P} and \texttt{Q} is the union of set \texttt{\{0,4\}} and \texttt{\{1,2\}}. Obviously, this formula is not always true, nonetheless there is an interpretation that satisfies it. For instance, the assignments \texttt{\{0,1,2,4\}} to \texttt{P} and \texttt{\{5\}} to \texttt{Q}. This interpretation can also be represented as a bit string for each variable, where positions in the string correspond to natural numbers, 1 means that the number is in the set (remember that a second-order variable is a set) whereas 0 means that is not. In this case, we would have \texttt{P}$ \rightarrow 111010$ and \texttt{Q}$ \rightarrow 000001$. Thus, it is possible to define a \textit{language} associated to these bit strings and, since it is \textit{regular}, it is also possible to build a \DFA. Moreover, \MONA assumes that all defined formulas in the program are in conjunct and each statement should be terminated by a semicolon.
 There are also additional elements consisting the \MONA syntax depicted in Figure \ref{fig:mona-syntax}.
 \begin{figure}[h]
 	\centering
@@ -383,6 +383,7 @@ defaultwhere2(P) = P sub $;£\label{line:defaultwhere2}£
 At the first line, it is declared the intent to use exclusively \wsos. Then, at line \ref{line:restriction}, there is the declaration of a second-order variable \texttt{\$} ensuring it to always have the value $\{0,\dots, n-1\}$ for some $n$. Likewise, it is needed the declaration at line \ref{line:allpos-def} to bound the domain of interest. Lastly, at lines \ref{line:defaultwhere1} and \ref{line:defaultwhere2}, the program restrict all first- and second-order variables to \texttt{\$}.
 
 At this point, since we have illustrated all the necessary stuff for the translation, we are able to give the \FOL-to-\MONA encoding with some examples.
+
 To begin with, all usual logic operators can be encoded following the table in Figure \ref{fig:mona-syntax}. Secondly, to encode the \suc and \pre monadic predicates respectively defined in Equations \ref{monadic-predicates} and \ref{prev-predicate} we use the successor and predecessor built-in operators as follows:
 \begin{align*}
 \suc(x,y) \doteq \texttt{y=x+1}\\
@@ -434,4 +435,5 @@ var2 A,B;
 \end{lstlisting}
 \end{itemize}
 \end{example}
-
+\section{Summary}
+In this chapter, we have illustrated the theoretical framework, consisted of \LTL, \LTLf and \PLTL formalisms, underlying the thesis. These formal languages have been described focusing the attention on their syntax, semantics and interesting properties. Besides, we have talked about the theory behind the translation procedure of \LTLf and \PLTL formulas to \DFAs. Finally, we have presented the \MONA tool explaining in details the encoding process starting from an \LTLf/\PLTL formula to a \MONA program passing through a \FOL translation.
