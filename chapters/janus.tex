@@ -23,7 +23,7 @@ t_6 &= \tup{b,c,d,e}
 \end{example}
 Furthermore, the event $e_i$ occurring at instant $i$ is denoted by $t(i)$, whereas the segment of $t$ (i.e. the sub-trace) ranging from instant $i$ to instant $j$, where $1 \le i \le j \le n$ is denoted by $t_{[i:j]}$.
 
-Apart from the formal model of event logs, we have real-world event logs that are logs with real data coming from different kind of data sources (e.g. databases, transaction logs, audit log, etc.). All available tools are evaluated against real-world logs. In practice, as we will see in the Section \ref{sec:janus-implementation}, the main way of representing real logs is the XES Standard\footnote{http://www.xes-standard.org}, which is based on the well known XML.
+Apart from the formal model of event logs, we have real-world event logs that are logs with real data coming from different kind of data sources (e.g. databases, transaction logs, audit log, etc.). All available tools are evaluated against real-world logs. In practice, as we will see in the Section \ref{sec:janus-implementation}, the main way of representing real logs is the eXtensible Event Stream (XES) Standard\footnote{http://www.xes-standard.org}, which is based on the well known XML.
 \paragraph{\declare}
 \declare is a language concerning declarative process modeling \citep{pesic2008constraint} and consisting of standard templates based on \citep{dwyer1999patterns} that was introduced to simplify the complexity of constraints semantics. Indeed, \declare constraints are expressed in \LTLf, but we will extend \LTLf with Past temporal operators (\LTLp) for capturing also past modalities. In Figure \ref{fig:declare-constraints}, we can see what are the corresponding \LTLf or \LTLp formulas for the most important \declare constraints. 
 \begin{figure}[h]
@@ -184,9 +184,249 @@ Given an \LTLp formula $\varphi$, its sep.aut.set $\automaton^{\blacktrianglelef
 
 So far, we have described all theoretical results necessary for introducing and understanding how the Janus algorithm works. Now, we talk about automata generation given a pure past, pure present and a pure future formula possible thanks to our developed tool \LTLfToDFA. 
 
-Differently from what has been done in \citep{cecconi2018interestingness} for the automata construction, in this thesis we propose a version of the Janus algorithm that works with \LTLfToDFA. Indeed, as already seen in Chapter \ref{ch:ltlf2dfa}, \LTLfToDFA is able to directly generate the minimum \DFA for a pure past formula (\PLTL) without passing through its pure future (\LTLf) reversed formula.
-\subsection{Algorithm}
+Differently from what has been done in \citep{cecconi2018interestingness} for the automata construction, in this thesis we propose a version of the Janus algorithm that works with \LTLfToDFA. Indeed, as already seen in Chapter \ref{ch:ltlf2dfa}, \LTLfToDFA is able to directly generate the minimum \DFA for a pure past formula (\PLTL) without passing through its pure future (\LTLf) reversed formula. In particular, \LTLfToDFA has been employed in the Janus algorithm for the generation of the automaton corresponding to each formula in the triple $(\varphi^{\blacktriangleleft},\varphi^{\blacktriangledown},\varphi^{\blacktriangleright})$, for every triple $(\varphi^{\blacktriangleleft},\varphi^{\blacktriangledown},\varphi^{\blacktriangleright}) \in \S(\varphi)$. In Example \ref{ex:sep-aut-set}, there are the \DFAs output from \LTLfToDFA.
+
+\begin{example}\label{ex:sep-aut-set}
+Let us consider the \rcon\xspace $\Psi = a \mapsto (\Yesterday b \lOR \Diamond c)$ and its separated formula $\S(\varphi) = \{(\Yesterday b , True, True), (True, True, \Diamond c)\}$. The corresponding sep.aut.set $\automaton^{\blacktriangleleft \blacktriangledown \blacktriangleright}$ for each $(\varphi^{\blacktriangleleft},\varphi^{\blacktriangledown},\varphi^{\blacktriangleright}) \in \S(\varphi)$ is depicted in Table \ref{tab:sep-aut-set}:
+\begin{center}
+\captionof{table}{Representation of the separated automata set for $\Psi = a \mapsto (\Yesterday b \lOR \Diamond c)$}
+\label{tab:sep-aut-set}
+\begin{tabular}{ c  c  c }
+\hline
+$\automaton^{\blacktriangleleft} = \automaton_{\Yesterday b}$ & $\automaton^{\blacktriangledown} = \automaton_{\true}$ & $\automaton^{\blacktriangleright} = \automaton_{\true}$\\
+\hline
+\includegraphics[width=0.3\textwidth]{images/automa3-yesterday.eps}
+&
+\raisebox{.7\height}{\includegraphics[width=0.1\textwidth, height=3.5em]{images/automa4-true.eps}}
+&
+\raisebox{.7\height}{\includegraphics[width=0.1\textwidth, height=3.5em]{images/automa4-true.eps}}\\
+\hline
+$\automaton^{\blacktriangleleft} = \automaton_{\true}$ & $\automaton^{\blacktriangledown} = \automaton_{\true}$ & $\automaton^{\blacktriangleright} = \automaton_{\Diamond c}$\\
+\hline
+\raisebox{.4\height}{\includegraphics[width=0.1\textwidth, height=3.5em]{images/automa4-true.eps}}
+&
+\raisebox{.4\height}{\includegraphics[width=0.1\textwidth, height=3.5em]{images/automa4-true.eps}}
+&
+\raisebox{.07\height}{\includegraphics[width=0.3\textwidth]{images/example1-output.eps}}\\
+\hline
+\end{tabular}
+\end{center}
+\end{example}
+\subsection{Algorithm}\label{sec:janus-alg}
 \section{Implementation}\label{sec:janus-implementation}
+In this section, we fully describe the practical implementation of the Janus algorithm given in Section \ref{sec:janus-alg}. In particular, we give some general information about its features, dependencies and usage. Then, we focus on the package explaining how is structured and commenting highlights on the code. The implementation on this thesis is called \janus, is written in Python and is a porting of the \href{https://github.com/Oneiroe/Janus}{Janus} proof-of-concept software project written in Java.
+
+To begin with, the main goal of \janus, as stated at the beginning, is to compute the \textit{interrestingness degree} of traces on event log. As a consequence, it also provides I/O facilities for three different event log formats, namely simple \textit{.txt} files, \textit{.csv} files and \textit{.xes} files for real-world event logs.
+Moreover, it requires Python>=3.6 and has the following dependencies:
+\begin{itemize}
+\item \LTLfToDFA, presented in Chapter \ref{ch:ltlf2dfa}. As stated before, it has been used for the generation of \DFAs;
+\item \href{https://github.com/opyenxes/OpyenXes}{OpyenXES}, an open-source complete Python library for the XES Standard published in \citep{DBLP:conf/bpm/ValdiviesoLMS18}. It has been used for dealing with XES parsing and management.
+\end{itemize} 
+The \janus software project is open-source and available to download on GitHub\footnote{https://github.com/Francesco17/janus}.
 \subsection{Package Structure}
-\subsection{Classes}
+The structure of the \janus package is relatively simple. It consists of the following:
+\begin{itemize}
+\item \texttt{janus.py}: it is the main module of the package. It contains the actual implementation of the Janus algorithm.
+\item \texttt{janus/}: it is the directory containing all the necessary code to correctly implement the algorithm. It has three subfolders:
+\begin{itemize}
+\item  \texttt{io/}: it contains the \texttt{InputHandler.py} which is in charge of handling the event log given as input.
+\item \texttt{automata/}: it consists of the \texttt{automa.py} file, the \texttt{parserAutoma.py} file and the \texttt{sepautset.py} file. In this folder, we find all the code for dealing with automata.
+\item \texttt{formulas/}: it comprises the \texttt{formula.py} file and the \texttt{separatedFormula.py}. These files defines the logic for \LTLp formulas and \rcon s.
+\end{itemize}
+\item \texttt{files/}: this folder is the place where there are event logs. From this folder, a specific event log is parsed.
+\end{itemize}
+\subsection{I/O}
+The \texttt{InputHandler.py} file, included in the \texttt{io/} folder, has been developed separately from the main module since we wanted to use our algorithm regardless of the input file format. In particular, thanks to the relative \texttt{InputHandler} class (Listing \ref{code:janus-input}), the tool can import a log from a simple text file, from a csv and, finally, from a XES file. Hence, the \janus tool can be used not only with the XES format, but also with other more manageable file formats.
+\begin{lstlisting}[language=Python, style=Python, escapechar = £, label={code:janus-input}, caption={The \texttt{InputHandler.py} module}]
+import csv
+from opyenxes.data_in.XUniversalParser import XUniversalParser
+from opyenxes.classification.XEventAttributeClassifier import \
+XEventAttributeClassifier
+
+class InputHandler:
+
+    def __init__(self, input_path):
+        self.input_path = input_path
+        self._event_log = None
+        self.load()
+
+    @property
+    def event_log(self):
+        return self._event_log
+
+    def load_txt(self):
+        try:
+            with open(self.input_path, 'r') as f:
+                self._event_log = set(tuple(i) for i in \
+                [f.read().splitlines()])
+                f.close()
+        except:
+            raise IOError('[ERROR]: Unable to import text file')
+
+    def load_csv(self):
+        self._event_log = []
+        try:
+            with open(self.input_path, newline='', encoding='utf-8-sig') \
+            as f:
+                reader = csv.reader(f)
+                for row in reader:
+                    self._event_log.append(row[0])
+        except:
+            raise IOError('[ERROR]: Unable to import csv file')
+
+    def load_xes(self):£\label{line:load-xes}£
+        try:
+            with open(self.input_path) as log_file:
+                log = XUniversalParser().parse(log_file)[0]
+
+            # get classifiers
+            classifiers = []
+            for cl in log.get_classifiers():
+                classifiers.append(str(cl))
+
+            classifier = XEventAttributeClassifier("activity", \
+            [classifiers[0]])
+            log_list = list(map(lambda trace: \
+            (map(classifier.get_class_identity, trace)), log))
+
+            self._event_log = set(tuple(trace) for trace in log_list)
+
+        except:
+            raise IOError('[ERROR]: Unable to import xes file')
+
+    def load(self):
+        if self.input_path.endswith('.txt'):
+            self.load_txt()
+        elif self.input_path.endswith('.csv'):
+            self.load_csv()
+        elif self.input_path.endswith('.xes'):
+            self.load_xes()
+        else:
+            raise ValueError('[ERROR]: File extension not recognized')
+\end{lstlisting}
+From Listing \ref{code:janus-input}, we can see that the \texttt{InputHandler} class has a main method called \texttt{load} that depending on the format of the file given as input calls the corresponding method specific for that format. If the format is not among \textit{.txt}, \textit{.csv} and \textit{.xes}, it raises an error.
+Every specific method parses the event log. In particular, at line \ref{line:load-xes}, the \texttt{load\_xes} method takes advantage of the OpyenXES library APIs using its parser and classifier. In Section \ref{sec:janus-main}, we will look at how an \texttt{InputHandler} object can be instantiated.
+\subsection{Automata}
+In the \texttt{automata/} folder there are files devoted to handle and manage automata. Firstly, the \texttt{parserAutoma.py} module is a collection of functions used for parsing the \textit{.dot} file and instantiating the data structure representing the automaton. In Listing \ref{code:janus-parser-automa} is shown that collection of functions.
+\begin{lstlisting}[language=Python, style=Python, escapechar = £, label={code:janus-parser-automa}, caption={The \texttt{parserAutoma.py} module}]
+import pydot
+from janus.automata.automa import Automa
+
+def get_file(path):
+    try:
+        with open(path, 'r') as file:
+            lines = file.readlines()
+            file.close()
+        return lines
+    except IOError:
+        print('[ERROR]: Not able to open the file from {}'.format(path))
+
+def get_graph_from_dot(path):
+    try:
+        dot_graph = pydot.graph_from_dot_file(path)
+        return dot_graph[0]
+    except IOError:
+        print('[ERROR]: Not able to import the dot file')
+
+def get_final_label(label):
+
+    s1 = label.replace(" ", "")
+    s2 = s1.replace('"','')
+
+    if s2 == '':
+        return ['X']
+    elif len(s2) < 2:
+        return [s2]
+    else:
+        s3 = s2.replace(",","")
+        s4 = s3.split('\\n')
+
+        leng_elem = len(s4[0])
+        temp = ''
+        inter_label = []
+        for i in range(leng_elem):
+            for elem in s4:
+                temp += elem[i]
+            inter_label.append(temp)
+            temp = ''
+
+        return inter_label
+
+def parse_dot(path, symbols):£\label{line:parse-dot}£
+
+    graph = get_graph_from_dot(path)
+
+    nodes = []
+    for node in graph.get_nodes():
+        if node.get_name().isdigit():
+            nodes.append(node.get_name())
+        else: continue
+
+    states = set(nodes)
+    initial_state = sorted(nodes, key=int)[0]
+
+    lines = get_file(path)
+    accepting_states = set() # all accepting states of the automaton
+    for line in lines[7:]:
+        if line.strip() != 'node [shape=circle];':
+            temp = line.replace(";\n", "")
+            accepting_states.add(temp.strip())
+        else:
+            break
+
+    sources = []
+    for elem in graph.get_edges():
+        if elem.get_source().isdigit():
+            sources.append(elem.get_source())
+        else: continue
+
+    i = 0
+    transitions = dict()
+    for source in sources:
+        label = graph.get_edges()[i].get_label()
+        final_label = get_final_label(label)
+        destination = graph.get_edges()[i].get_destination()
+        i += 1
+        for lab in final_label:
+            if source in transitions:
+                transitions[source][lab] = destination
+            else:
+                transitions[source] = dict({lab: destination})
+
+    #instantiation of automaton
+    automaton = Automa(
+        symbols=symbols,
+        alphabet={'0', '1', 'X'},
+        states=states,
+        initial_state=initial_state,
+        accepting_states=accepting_states,
+        transitions=transitions
+    )
+    return automaton
+\end{lstlisting}
+The most important function is called \texttt{parse\_dot} (at line \ref{line:parse-dot}). It works as follows: given a \textit{.dot} file path and symbols used in the formula, it returns an instantiation of the \texttt{Automa} class retrieving all information about the \DFA, namely all its states, the initial state, accepting states and, finally, its transitions.
+
+
+\subsection{Formulas}
+\subsection{Main Module}\label{sec:janus-main}
+\subsection{Results}
 \section{Summary}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
