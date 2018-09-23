@@ -174,7 +174,7 @@ Succinctness of \LTLf with Past:
 Both formulas mean \emph{every grant is preceeded by a request}. The  former (\ref{ltlf-with-past-example}) is in \LTLf with past modalities whereas the latter (\ref{ltlf-without-past-example}) is pure \LTLf. It is pretty evident that the \ref{ltlf-with-past-example} is less intricate than the one in \ref{ltlf-without-past-example}.
 \end{example}
 Finally, this property of \LTLf augmented with past temporal operators is interesting, however it is out of the scope of this thesis.
-\section{\LTLf and \PLTL translation to  automata}\label{sec:formula-to-automa}
+\section{\LTLf and \PLTL Translation to  Automata}\label{sec:formula-to-automa}
 Given an \LTLf/\PLTL formula $\varphi$, we can build a deterministic finite state automaton (\DFA) \citep{Rabin:1959:FAD:1661907.1661909} 
 $\automaton_\varphi$ that accepts the same finite traces that makes $\varphi$ true. To achieve this, we proceed in two steps: first, we translate \LTLf and \PLTL formulas into an (\NFA) \citep{DeGiacomo:2015:SLL:2832415.2832466} following a simple direct algorithm; secondly, the obtained \NFA can be converted into a \DFA following the standard \emph{determinization}  procedure.
 

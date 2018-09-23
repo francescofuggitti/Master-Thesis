@@ -1,1 +1,16 @@
-\chapter{Planning}
+\chapter{Planning for Extended Temporal Goals}
+In this chapter, we will define a new approach to the problem of non-deterministic planning for extended temporal goals. In particular, we will give a solution to this problem reducing it to a fully observable non-deterministic (\FOND) problem and taking advantage of our tool \LTLfToDFA, presented in Chapter \ref{ch:ltlf2dfa}. First of all, we will introduce the main idea and motivations supporting our approach. Then, we will give some preliminaries explaining the Planning Domain Definition Language (\PDDL) language and the \FOND planning problem formally. After that, we will illustrate our solution with the encoding of temporal goals into a \PDDL domain and problem. Finally, we will present our practical implementation of the proposed solution.
+\section{Idea and Motivations}
+Planning for temporally extended goals with \textit{deterministic} actions has been well studied during the years starting from \citep{bacchus1998planning} and \citep{doherty2001talplanner}. Two main reasons why temporally extended goals have been considered over the classical goals, viewed as a desirable set of final states to be reached, are because they are not limited in what they can specify and they allows us to restrict the manner used by the plan to reach the goals. Indeed, temporal extended goals are fundamental for the specification of a collection of real-world planning problems. Yet, many of these real-world planning problems have a \textit{non-deterministic} behavior owing to unpredictable environmental conditions. However, planning for temporally extended goals with \textit{non-deterministic} actions is a more challenging problem and has been of increasingly interest only in recent years with \citep{camacho2017non}.
+
+In this scenario, we have devised a solution to this problem that exploits the translation of a temporal formula to a \DFA, using \LTLfToDFA. In particular, our idea is the following: given a non-deterministic planning problem and a temporal formula, we first obtain the corresponding \DFA of the temporal formula through \LTLfToDFA, then, we encode such a \DFA into the non-deterministic planning domain. As a result, we have reduced the original problem to a classic \FOND planning problem. In other words, we compile extended temporal goals together with the original planning domain, specified in (\PDDL), which is suitable for input to standard (\FOND) planners.
+\section{Preliminaries}
+\subsection{\PDDL}
+\subsection{Fully Observable Non Deterministic Planning}
+\section{Encoding of Temporal Goals in \PDDL}
+\section{Implementation}
+\subsection{Package Structure}
+\subsection{\PDDL}
+\subsection{Automa}
+\subsection{Main Module}
+\section{Summary}

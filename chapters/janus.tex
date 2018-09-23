@@ -25,13 +25,37 @@ Furthermore, the event $e_i$ occurring at instant $i$ is denoted by $t(i)$, wher
 
 Apart from the formal model of event logs, we have real-world event logs that are logs with real data coming from different kind of data sources (e.g. databases, transaction logs, audit log, etc.). All available tools are evaluated against real-world logs. In practice, as we will see in the Section \ref{sec:janus-implementation}, the main way of representing real logs is the eXtensible Event Stream (XES) Standard\footnote{http://www.xes-standard.org}, which is based on the well known XML.
 \paragraph{\declare}
-\declare is a language concerning declarative process modeling \citep{pesic2008constraint} and consisting of standard templates based on \citep{dwyer1999patterns} that was introduced to simplify the complexity of constraints semantics. Indeed, \declare constraints are expressed in \LTLf, but we will extend \LTLf with Past temporal operators (\LTLp) for capturing also past modalities. In Figure \ref{fig:declare-constraints}, we can see what are the corresponding \LTLf or \LTLp formulas for the most important \declare constraints. 
-\begin{figure}[h]
+\declare is a language concerning declarative process modeling \citep{pesic2008constraint} and consisting of standard templates based on \citep{dwyer1999patterns} that was introduced to simplify the complexity of constraints semantics. Indeed, \declare constraints are expressed in \LTLf, but we will extend \LTLf with Past temporal operators (\LTLp) for capturing also past modalities. In Table \ref{tab:declare-constraints}, we can see what are the corresponding \LTLf or \LTLp formulas for the most important \declare constraints.
+
+\begin{table}[htbp]
 \centering
-\includegraphics[width=\textwidth]{images/declare-constraints}
-\caption{The most important \declare constraints expressed as \LTLf/\PLTL formulas and \emph{reactive constraints.}}
-\label{fig:declare-constraints}
-\end{figure}
+\captionof{table}{The most important \declare constraints expressed as \LTLp formulas and \emph{reactive constraints}.}
+\label{tab:declare-constraints}
+\begin{tabular}{ l  c  l }
+\hline
+\textbf{\declare constraint} & \textbf{\LTLf expression} & \textbf{\rcon}\\
+\hline
+\textsc{Participation}(a) & $\Diamond a$ & $t_{start} \mapsto \Diamond a$\\
+\textsc{Init}(a) & $a$ & $t_{start} \mapsto a$\\
+\textsc{End}(a) & $\Box \Diamond a$ & $t_{end} \mapsto a$\\
+\hline
+\textsc{RespondedExistence}(a,b) & $\Diamond a \Rightarrow \Diamond b$ & $a \mapsto (\Diamond b \lOR \Once b)$\\
+\textsc{Response}(a,b) & $\Box(a\Rightarrow\Diamond b)$ & $a \mapsto \Diamond b$\\
+\textsc{AlternateResponse}(a,b) & $\Box(a\Rightarrow\Diamond b) \lAND \Box(a\Rightarrow \Next(\lnot a \Wnext b))$ & $a \mapsto \Next( \lnot a \lUntil b)$\\
+\textsc{ChainResponse}(a,b) & $\Box(a\Rightarrow\Diamond b) \lAND \Box(a\Rightarrow \Next b)$ & $a \mapsto \Next b$\\
+\textsc{Precedence}(a,b) & $\lnot b \Wnext a$ & $b \mapsto \Once a$\\
+\textsc{AlternatePrecedence}(a,b) & $(\lnot b \Wnext a) \lAND \Box(a\Rightarrow \Next(\lnot b \Wnext a))$ & $b \mapsto \Yesterday(\lnot b \Since a)$\\
+\textsc{ChainPrecedence}(a,b) & $(\lnot b \Wnext a) \lAND \Box(\Next b\Rightarrow a)$ & $b \mapsto \Yesterday a$\\
+\hline
+\end{tabular}
+\end{table}
+
+%\begin{figure}[h]
+%\centering
+%\includegraphics[width=\textwidth]{images/declare-constraints}
+%\caption{The most important \declare constraints expressed as \LTLf formulas and \emph{reactive constraints}.}
+%\label{fig:declare-constraints}
+%\end{figure}
 Parameters in a template define tasks and they occurs as events in traces. In Example \ref{ex:declare-examples} we provide a glimpse of \declare patterns.
 \begin{example}\label{ex:declare-examples}
 Interesting \declare templates \citep{maggi2013knowledge}
@@ -88,7 +112,7 @@ Declarative process modeling defines a list of \declare constraints to be satisf
 \begin{definition}\citep{cecconi2018interestingness}\label{def:rcon}
 Given an alphabet $\Sigma$, let $\alpha \in \Sigma$ be an \emph{activation} and $\varphi$ be an \LTLp formula over $\Sigma$. A Reactive Constraint (\rcon) $\Psi$ is a pair $(\alpha, \varphi)$, denoted as $\Psi \doteq \alpha  \mapsto \varphi$. We represent all the set of \rcon s over $\Sigma$ as $\mathcal{R}$.
 \end{definition}
-Hereafter, we will assume traces, automata, \LTLp formulas and \rcon s to be defined over the same alphabet $\Sigma$. In addition, in Figure \ref{fig:declare-constraints}, we can see that \declare constraints can be converted in \rcon s. In Definition \ref{def:rcon}, we have seen that $\alpha$ in an \rcon\xspace is called the \emph{activation}. Indeed, it actually \emph{activates} the corresponding constraint. As in \citep{cecconi2018interestingness}, we give the following definitions that are the core concepts upon which the Janus algorithm is built.
+Hereafter, we will assume traces, automata, \LTLp formulas and \rcon s to be defined over the same alphabet $\Sigma$. In addition, in Table \ref{tab:declare-constraints}, we can see that \declare constraints can be converted in \rcon s. In Definition \ref{def:rcon}, we have seen that $\alpha$ in an \rcon\xspace is called the \emph{activation}. Indeed, it actually \emph{activates} the corresponding constraint. As in \citep{cecconi2018interestingness}, we give the following definitions that are the core concepts upon which the Janus algorithm is built.
 \begin{definition}\citep{cecconi2018interestingness}\label{def:activator}
 Given a finite trace $t \in \Sigma$ of length $n$, and an instant $i$, with $1 \le i \le n$, an \rcon\xspace $\Psi \doteq \alpha  \mapsto \varphi$ is activated at $i$ if $t,i \models \alpha$. Thus, the event $t(i)$ is called the \emph{activator} of $\Psi$. A trace in which at least an activator of $\Psi$ exists, is \emph{triggering} for $\Psi$.
 \end{definition}
@@ -216,13 +240,14 @@ $\automaton^{\blacktriangleleft} = \automaton_{\true}$ & $\automaton^{\blacktria
 \section{Implementation}\label{sec:janus-implementation}
 In this section, we fully describe the practical implementation of the Janus algorithm given in Section \ref{sec:janus-alg}. In particular, we give some general information about its features, dependencies and usage. Then, we focus on the package explaining how is structured and commenting highlights on the code. The implementation on this thesis is called \janus, is written in Python and is a porting of the \href{https://github.com/Oneiroe/Janus}{Janus} proof-of-concept software project written in Java.
 
-To begin with, the main goal of \janus, as stated at the beginning, is to compute the \textit{interrestingness degree} of traces on event log. As a consequence, it also provides I/O facilities for three different event log formats, namely simple \textit{.txt} files, \textit{.csv} files and \textit{.xes} files for real-world event logs.
-Moreover, it requires Python>=3.6 and has the following dependencies:
+To begin with, the main goal of \janus, as stated at the beginning, is to compute the \textit{interestingness degree} of traces on event log.  As a consequence, it also provides I/O facilities for three different event log formats, namely simple \textit{.txt} files, \textit{.csv} files and \textit{.xes} files for real-world event logs. Furthermore, the formula $\varphi$ in the \rcon\xspace to be satisfied by traces is manually separated following Definition \ref{def:separated-formula}.
+
+\janus requires Python>=3.6 and has the following dependencies:
 \begin{itemize}
 \item \LTLfToDFA, presented in Chapter \ref{ch:ltlf2dfa}. As stated before, it has been used for the generation of \DFAs;
 \item \href{https://github.com/opyenxes/OpyenXes}{OpyenXES}, an open-source complete Python library for the XES Standard published in \citep{DBLP:conf/bpm/ValdiviesoLMS18}. It has been used for dealing with XES parsing and management.
 \end{itemize} 
-The \janus software project is open-source and available to download on GitHub\footnote{https://github.com/Francesco17/janus}.
+The \janus software is an open-source project and available to download on GitHub\footnote{https://github.com/Francesco17/janus}.
 \subsection{Package Structure}
 The structure of the \janus package is relatively simple. It consists of the following:
 \begin{itemize}
@@ -305,7 +330,7 @@ class InputHandler:
             raise ValueError('[ERROR]: File extension not recognized')
 \end{lstlisting}
 From Listing \ref{code:janus-input}, we can see that the \texttt{InputHandler} class has a main method called \texttt{load} that depending on the format of the file given as input calls the corresponding method specific for that format. If the format is not among \textit{.txt}, \textit{.csv} and \textit{.xes}, it raises an error.
-Every specific method parses the event log. In particular, at line \ref{line:load-xes}, the \texttt{load\_xes} method takes advantage of the OpyenXES library APIs using its parser and classifier. In Section \ref{sec:janus-main}, we will look at how an \texttt{InputHandler} object can be instantiated.
+Consequently, every specific method parses the event log. In particular, at line \ref{line:load-xes}, the \texttt{load\_xes} method takes advantage of the OpyenXES library APIs using its parser and classifier. In Section \ref{sec:janus-main}, we will look at how an \texttt{InputHandler} object can be instantiated.
 \subsection{Automata}
 In the \texttt{automata/} folder there are files devoted to handle and manage automata. Firstly, the \texttt{parserAutoma.py} module is a collection of functions used for parsing the \textit{.dot} file and instantiating the data structure representing the automaton. In Listing \ref{code:janus-parser-automa} is shown that collection of functions.
 \begin{lstlisting}[language=Python, style=Python, escapechar = £, label={code:janus-parser-automa}, caption={The \texttt{parserAutoma.py} module}]
@@ -404,12 +429,224 @@ def parse_dot(path, symbols):£\label{line:parse-dot}£
     )
     return automaton
 \end{lstlisting}
-The most important function is called \texttt{parse\_dot} (at line \ref{line:parse-dot}). It works as follows: given a \textit{.dot} file path and symbols used in the formula, it returns an instantiation of the \texttt{Automa} class retrieving all information about the \DFA, namely all its states, the initial state, accepting states and, finally, its transitions.
+The most important function is called \texttt{parse\_dot} (at line \ref{line:parse-dot}). It works as follows: given the path of a \textit{.dot} file (the output of \LTLfToDFA) and symbols used in the formula, it returns an instantiation of the \texttt{Automa} class retrieving all information about the \DFA, namely all its states, the initial state, accepting states and, finally, its transitions.
 
+Afterwards, there is the \texttt{automa.py} in which the \texttt{Automa} class is implemented. This class is the data structure representing the \DFA that is output from our tool \LTLfToDFA. It follows that in the \texttt{Automa} class there are methods able to perform transitions over the \DFA, to tell whether if the automaton is in an accepting state or not and to tell whether an input symbols can be read by the automaton or not. In addition, when an object is instantiated, it is checked to be a valid \DFA. In Listing \ref{code:janus-automa} the \texttt{Automa} class implementation is shown.
+\begin{lstlisting}[language=Python, style=Python, escapechar = £, label={code:janus-automa}, caption={The \texttt{automa.py} module}]
+import re
 
+class Automa:
+    """
+        DFA Automa:
+        - symbols          => list() ;
+        - alphabet         => set() ;
+        - states           => set() ;
+        - initial_state    => str() ;
+        - accepting_states => set() ;
+        - transitions      => dict(), where
+        **key**: *source* in states
+        **value**: {*action*: *destination*)
+    """
+
+    def __init__(self, symbols, alphabet, states, initial_state, \
+    accepting_states, transitions):
+        self.symbols = symbols
+        self.alphabet = alphabet
+        self.states = states
+        self._initial_state = initial_state
+        self.accepting_states = accepting_states
+        self.transitions = transitions
+        self._current_state = self._initial_state
+        self.validate()
+
+    def valide_transition_start_states(self):
+        for state in self.states:
+            if state not in self.transitions:
+                raise ValueError(
+                    'transition start state {} is missing'.format(
+                        state))
+
+    def validate_initial_state(self):
+        if self._initial_state not in self.states:
+            raise ValueError('initial state is not defined as state')
+
+    def validate_accepting_states(self):
+        if any(not s in self.states for s in self.accepting_states):
+            raise ValueError('accepting states not defined as state')
+
+    def validate_input_symbols(self):
+        alphabet_pattern = self.get_alphabet_pattern()
+        for state in self.states:
+            for action in self.transitions[state]:
+                if not re.match(alphabet_pattern, action):
+                    raise ValueError('invalid transition found')
+
+    def get_alphabet_pattern(self):
+        return re.compile("(^["+''.join(self.alphabet)+"]+$)")
+
+    def validate(self):£\label{line:dfa-validation}£
+        self.validate_initial_state()
+        self.validate_accepting_states()
+        self.valide_transition_start_states()
+        self.validate_input_symbols()
+        return True
+
+    ...
+
+    @property
+    def current_state(self):
+        return self._current_state
+
+    @property
+    def initial_state(self):
+        return self._initial_state
+
+    def make_transition(self, action):£\label{line:make-trans}£
+        if action in self.symbols:
+            for act in self.transitions[self._current_state].keys():
+                temp = dict(zip(self.symbols,[value for value in act]))
+                additional = temp.copy()
+                del additional[action]
+                if (temp[action] == '1' or temp[action] == 'X') and \
+                all(value in {'0', 'X'} for value in additional.values()):
+                    self._current_state = \
+                    self.transitions[self._current_state][act]
+                else:
+                    continue
+        else:
+            number_of_symbols = len(self.symbols)
+            if number_of_symbols == 0: # true when there is True automa
+                self._current_state = \
+                self.transitions[self._current_state]['X']
+            else:
+                if 'X'*number_of_symbols in \
+                self.transitions[self._current_state]:
+                    self._current_state = \
+                    self.transitions[self._current_state]\
+                    ['X'*number_of_symbols]
+                elif '0'*number_of_symbols in \
+                self.transitions[self._current_state]:
+                    self._current_state = \
+                    self.transitions[self._current_state]\
+                    ['0'*number_of_symbols]
+                else:
+                    raise ValueError('[ERROR]: could not make transition')
+
+    def is_accepting(self):£\label{line:is-accepting}£
+        if self._current_state in self.accepting_states:
+            return True
+        else:
+            return False
+
+    def accepts(self, input_symbol):£\label{line:accepts}£
+        _current_state = self._current_state
+        self._current_state = self._initial_state
+        self.make_transition(input_symbol)
+        if self.is_accepting():
+            self._current_state = _current_state
+            return True
+        else:
+            self._current_state = _current_state
+            return False
+\end{lstlisting}
+Once an \texttt{Automa} object is instantiated, the method \texttt{validate} (line \ref{line:dfa-validation}) checks whether the object is a valid \DFA or not. In particular, it checks if the initial state and final states are actually states and it verifies that transitions are not made by invalid symbols.
+Then, the \texttt{make\_transition} method at line \ref{line:make-trans} takes as input an action and make this action on the automaton, therefore modifying its current state. After that, the \texttt{is\_accepting} method (line \ref{line:is-accepting}) simply tells whether the current state is accepting for the automaton itself or not. Finally, there is the \texttt{accepts} method at line \ref{line:accepts}, which given an input symbol returns $\true$ if it is accepted by the \DFA.
+
+As last module about automata, we illustrate the \texttt{sepautset.py}. It is the direct implementation of the \textit{sep.aut.set} defined in \ref{def:automaton-eval}. Indeed, this module contains the definition of the \texttt{SeparatedAutomataSet} class, namely the data structure that allow us to generate the corresponding \textit{sep.aut.set}. Hence, it takes care of generating the set of separated automata starting from a list of separated formulas. We can see its implementation in Listing \ref{code:janus-sepautset}.
+\begin{lstlisting}[language=Python, style=Python, escapechar = £, label={code:janus-sepautset}, caption={The \texttt{sepautset.py} module}]
+from ltlf2dfa.Translator import Translator
+from ltlf2dfa.DotHandler import DotHandler
+from janus.automata.parserAutoma import parse_dot
+import os, re
+
+class SeparatedAutomataSet:
+
+    def __init__(self, separated_formulas_set):
+        self.separated_formulas_set = separated_formulas_set
+        self._automa_set = self.compute_automa()
+
+    @property
+    def automa_set(self):
+        return self._automa_set
+
+    def build_automaton(self, triple):£\label{line:build-dfa}£
+        automata_list = []
+        for formula in triple:
+            symbols = re.findall('[a-z]+', str(formula))
+            trans = Translator(formula)
+            trans.formula_parser()
+            trans.translate()
+            trans.createMonafile(True)  # true for DECLARE assumptions
+            trans.invoke_mona("automa.mona") # returns inter-automa.dot
+            dot = DotHandler("inter-automa.dot")
+            dot.modify_dot()
+            dot.output_dot() # returns automa.dot
+            automata_list.append(parse_dot("automa.dot", symbols))
+            os.remove("automa.mona")
+            os.remove("automa.dot")
+            symbols = []
+        return automata_list
+
+    def compute_automa(self):
+        result = set()
+        for triple in self.separated_formulas_set:£\label{line:automa-set}£
+            past, present, future = self.build_automaton(triple)
+            result.add( (past, present, future) )
+        return result
+\end{lstlisting}
+In this module, it has been employed the \LTLfToDFA tool. In fact, a \texttt{SeparatedAutomataSet} object receives a given set of separated formulas as input and it uses \LTLfToDFA to generate the \DFA corresponding to each formula. Specifically, for each separated formula, i.e. a triple, (line \ref{line:automa-set}) we compute the equivalent \DFA on-line (line \ref{line:build-dfa}). This specific aspect represents a novelty with respect to what has been done in the original Java version of \janus. So, unlike our \janus version, the original one does not compute  \DFAs at execution time, but they are predefined (it only supports the most important \declare constraints) and given before the actual execution. Thus, this is a big step towards a complete generalization of the Janus algorithm implementation.
 \subsection{Formulas}
+Strictly connected to what we have just talked about in the previous section, in the \texttt{formulas/} folder there are modules in which we have defined the logic for managing and representing separated formulas and the formula constraint. In particular, we have the \texttt{separatedFormula.py} which comprises the \texttt{SeparatedFormula} class. Such class has the task of representing each triple resulting from the temporal separation (Definition \ref{def:separated-formula}). We show its implementation in Listing \ref{code:sep-formula}
+\begin{lstlisting}[language=Python, style=Python, escapechar = £, label={code:sep-formula}, caption={The \texttt{separatedFormula.py} module}]
+class SeparatedFormula:
+
+    def __init__(self, triple):
+        self.triple = triple
+        self.validate()
+
+    def validate(self):
+        if len(self.triple) == 3:
+            return True
+        else:
+            raise ValueError('[ERROR]: input is not a triple')
+
+    def __str__(self):
+        return str(self.triple)
+
+    def __iter__(self):
+        for elem in self.triple:
+            yield elem
+\end{lstlisting}
+When instantiating a \texttt{SeparatedFormula} object, this is validated checking whether the given triple is valid.  
+
+After that, the other module contained in the \texttt{formulas/} folder is the \texttt{Formula.py} in which it is defined the \texttt{Formula} class. This class represents the formula of the \rcon\xspace to be satisfied by traces. Actually, since the \janus package works with already separated formulas, the \texttt{Formula} class gets a list of separated formulas, namely a list of triples. The implementation (Listing \ref{code:formula-constraint}) of this class is quite similar to the \texttt{SeparatedFormula} class seen before.
+\begin{lstlisting}[language=Python, style=Python, escapechar = £, label={code:formula-constraint}, caption={The \texttt{Formula.py} module}]
+from janus.formulas.separatedFormula import SeparatedFormula
+
+class Formula:
+
+    def __init__(self, separatedFormulas):
+        self.separatedFormulas = separatedFormulas
+        self.validate()
+
+    def validate(self):
+        if all(isinstance(x, SeparatedFormula) for x in \
+        self.separatedFormulas) and self.separatedFormulas:
+            return True
+        else:
+            raise ValueError('[ERROR]: Different types for conjuncts')
+
+    def __str__(self):
+        return ', '.join(map(str, self.separatedFormulas))
+
+    def __iter__(self):
+        for triple in self.separatedFormulas:
+            yield triple
+\end{lstlisting}
 \subsection{Main Module}\label{sec:janus-main}
+Here we describe the main module of the \janus package. It is called \texttt{janus.py} and it contains the principal logic covering the Janus pseudocode anticipated in Section \ref{sec:janus-alg}. We recall that in this version of \janus we can specify any type of \LTLp formula as long as it is already separated following Definition \ref{def:separated-formula}.
 \subsection{Results}
+After having illustrated the whole implementation of \janus, we are ready to present results of its execution where we have evaluated our tool against a real-world event log. Hence, we have analyzed the real-world event log called \textit{Sepsis}\footnote{https://doi.org/10.4121/uuid:915d2bfb- 7e84- 49ad- a286- dc35f063a460}, which reports the trajectories of patients showing symptoms of sepsis in a Dutch hospital.
 \section{Summary}
 
 
