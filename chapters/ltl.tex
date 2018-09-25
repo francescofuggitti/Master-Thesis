@@ -47,7 +47,7 @@ Validity and logical implication as satisfiability
 \item $\varphi_1 \models \varphi_2 \tiff \varphi_1 \lAND \lnot \varphi_2$ is unsatisfiable.
 \end{itemize}
 \end{example}
-\subsection{Complexity}
+\subsection{Results}
 About \LTL complexity, we can state the following fundamental theorem:
 \begin{theorem}\citep{Sistla:1985:CPL:3828.3837}
 Satisfiability, validity, and logical implication for \LTL formulas are \PSPACE-complete.
@@ -98,7 +98,7 @@ The Definition \ref{ltlf-semantics} is exactly the same Definiton \ref{ltl-seman
 \begin{definition}\label{ltlf-sat-val-ent}
 An \LTLf formula is \emph{true} in $\trace$, in notation $\trace \models \varphi$, if $\trace, 0 \models \varphi$. A formula $\varphi$ is \emph{satisfiable} if it is true in some \LT-interpretation, and is \emph{valid} if it is true in every \LT-interpretation. A formula $\varphi_1$ \emph{logically implies} another formula $\varphi_2$, in symbols $\varphi_1 \models \varphi_2$ iff for every \LT-interpretation $\trace$ we have that $\trace \models \varphi_1$ implies $ \trace \models \varphi_2$.
 \end{definition}
-\subsection{Complexity}
+\subsection{Results}
 About \LTLf complexity, we can state the following theorem:
 \begin{theorem}\citep{de2013linear}
 Satisfiability, validity and logical implication for \LTLf formulas are \PSPACE-complete.
@@ -152,18 +152,19 @@ Given a trace $\trace$, we inductively define when a \PLTL formula $\varphi$ is 
 \end{align*}
 \end{definition}
 The Definition \ref{pltl-semantics} is quite similar to Definitions \ref{ltl-semantics} and \ref{ltlf-semantics}. The only difference lies on the position in time of instances, indeed, in this case, we go backward.
-\subsection{Complexity and Expressiveness}
+\subsection{Results}
 About \PLTL complexity, we can state the following theorem:
 \begin{theorem}
 Satisfiability, validity and logical implication for \PLTL formulas are \PSPACE-complete.
 \end{theorem}
 
-\noindent About expressiveness of \PLTL, we can state the following theorem:
-\begin{theorem}
+\subsection{Expressiveness}
+About expressiveness of \PLTL, we can state the following theorem:
+\begin{theorem}\label{th:expr-ltl-pltl}
 \PLTL has exactly the same expressive power of \LTLf.
 \end{theorem}
 
-\noindent However, it is worth to say that the \LTLf formalism augmented with past temporal operators present in \PLTL can be exponentially more succinct that \LTLf (with only future operators) \citep{markey2003temporal}.
+\noindent Although from Theorem \ref{th:expr-ltl-pltl} \PLTL and \LTL have the same expressive power, it is worth to say that the \LTLf formalism augmented with past temporal operators present in \PLTL can be exponentially more succinct that \LTLf (with only future operators) \citep{markey2003temporal}.
 Indeed, having at the same time past and future temporal operators is really useful because, in general, expressions given in natural language use references to events occurred in the past. We give an example in the following.
 \begin{example}\label{succinctness-example}
 Succinctness of \LTLf with Past:
@@ -195,7 +196,7 @@ A \DFA is a \NFA where $\delta$ is a function $\delta: Q \times \Sigma \to Q$
 To denote the set of all traces over $\Sigma$ accepted by $\automaton$ we will use $\L(A)$ henceforth.
 
 In the next subsections, we will provide some definitions and we will illustrate the algorithm for the translation also giving an example.
-\subsection{$\DfunSym$ function for \LTLf}\label{ltlf-delta-section}
+\subsection{$\DfunSym$ function for \LTLf}\label{sec:ltlf-delta}
 %In order to build the \NFA, we need to define an auxiliary function $\DfunSym$ as follows:
 %\begin{definition}\label{ltlf-delta-def}
 %The \emph{delta function $\DfunSym$ for \LTLf formulas} is a function that takes as input an (implicitly quoted) \LTLf formula $\varphi$ (in negation normal form (NNF)\footnote{A formula is in \textit{negation normal form} if negation ($\lnot$) occurs only in front of atoms.}) and a propositional interpretation $\PropInt$ for $\P$ (including $\Last$), and returns a positive boolean formula whose atoms are (implicitly
@@ -221,7 +222,7 @@ In the next subsections, we will provide some definitions and we will illustrate
 %\end{align}
 %\end{definition}
 %Note that $\DfunEps{\varphi}$ is always either $\true$ or $\false$. It is worth to observe for future use that from Equation \ref{delta-ltlf-eps} we can say $\DfunEps{\Diamond \varphi} = \false$ and $\DfunEps{\Box \varphi} = \true$.
-\subsection{$\DfunSym$ function for \PLTL}\label{pltl-delta-section}
+\subsection{$\DfunSym$ function for \PLTL}\label{sec:pltl-delta}
 %We give the following definition:
 %\begin{definition}\label{ltlf-delta-def}
 %The \emph{delta function $\DfunSym$ for \LTLf formulas} is a function that takes as input an (implicitly quoted) \LTLf
@@ -250,7 +251,7 @@ In the next subsections, we will provide some definitions and we will illustrate
 %Note that $\DfunEps{\varphi}$ is always either $\true$ or $\false$. It is worth to observe for future use that from Equation \ref{delta-ltlf-eps} we can say $\DfunEps{\Diamond \varphi} = \false$ and $\DfunEps{\Box \varphi} = \true$.
 %\section{\PLTLToDFA}
 %talk about theory behind conversion to automata in past
-\section{\LTLf/\PLTL to \FOL Encoding and \MONA}
+\section{\LTLf/\PLTL to \FOL Encoding and \MONA}\label{sec:mona-encoding}
 In this section, we will illustrate how to translate an \LTLf and a \PLTL formula into \emph{first-order logic} (\FOL) over finite linear ordered sequences\footnote{More precisely \textit{monadic first-order logic on finite linearly ordered domains}, sometimes denoted as \sc fo[<].} \citep{de2013linear,zpv2018}. Then, we will present the \MONA tool with its syntax and we will explain the translation procedure from a \FOL encoding to the \MONA enconding.
 \subsection{\LTLf-to-\FOL Encoding}\label{subsec:ltlf-to-fol}
 In the following we deal with a first-order language augmented with monadic predicates $\suc$, $<$ and $=$ plus two constants $0$ and $\last$. Afterwards, we focus our attention to \emph{finite linear ordered \FOL interpretations} under the form of \folInter, where the domain is $\Delta^{I} = \{0,\dots,n\}$ with $n \in \mathbb{N}$, and the interpretation function $\cdot^{\I}$ interprets binary predicates and constants as follows:

@@ -1,5 +1,5 @@
 \chapter{Janus}
-In this chapter, we will illustrate how our tool \LTLfToDFA presented in Chapter \ref{ch:ltlf2dfa} can be efficiently employed in the field of Business Process Management, with particular attention to Process Mining. First of all, we will formally describe the theoretical framework of declarative process mining, introducing a new theorem that generalizes the concept of separated formulas only for \declare constraints. Then, in this context, we will thoroughly describe the implementation of the Janus algorithm \citep{cecconi2018interestingness}, employing our tool \LTLfToDFA, for computing the interestingness degree of traces in real event logs. Finally, we will provide such a computation for a real log as an example. 
+In this chapter, we will illustrate how our tool \LTLfToDFA presented in Chapter \ref{ch:ltlf2dfa} can be efficiently employed in the field of Business Process Management, with particular attention to Process Mining. First of all, we will formally describe the theoretical framework of declarative process mining. We will introduce a new theorem that generalizes concepts of reactive constraints and separated formulas present in \citep{cecconi2018interestingness} and we will illustrate the Janus algorithm in \citep{cecconi2018interestingness} modified accordingly with the new proposed theorem. Then, in this context, we will thoroughly describe the implementation of this new version of the Janus algorithm, employing our tool \LTLfToDFA, for computing the interestingness degree of traces in real event logs. Finally, we will provide such a computation for a real log as an example. 
 \section{Declarative Process Mining}
 In this section, we will present the theoretical framework of Business Process Management focusing our attention to declarative process mining. We will extend what described in Chapter \ref{ch:theory} providing all additional concepts, definitions and theorems necessary to clearly understand the context.
 
@@ -23,7 +23,7 @@ t_6 &= \tup{b,c,d,e}
 \end{example}
 Furthermore, the event $e_i$ occurring at instant $i$ is denoted by $t(i)$, whereas the segment of $t$ (i.e. the sub-trace) ranging from instant $i$ to instant $j$, where $1 \le i \le j \le n$ is denoted by $t_{[i:j]}$.
 
-Apart from the formal model of event logs, we have real-world event logs that are logs with real data coming from different kind of data sources (e.g. databases, transaction logs, audit log, etc.). All available tools are evaluated against real-world logs. In practice, as we will see in the Section \ref{sec:janus-implementation}, the main way of representing real logs is the eXtensible Event Stream (XES) Standard\footnote{http://www.xes-standard.org}, which is based on the well known XML.
+Apart from the formal model of event logs, we have real-world event logs that are logs with real data coming from different kind of data sources (e.g. databases, transaction logs, audit log, etc.). All available tools are evaluated against real-world logs or synthetic logs, i.e. automatically generated logs that mimic real logs in shape and content. In practice, as we will see in the Section \ref{sec:janus-implementation}, the main way of representing real logs is the eXtensible Event Stream (XES) Standard\footnote{http://www.xes-standard.org}, which is based on the well known XML.
 \paragraph{\declare}
 \declare is a language concerning declarative process modeling \citep{pesic2008constraint} and consisting of standard templates based on \citep{dwyer1999patterns} that was introduced to simplify the complexity of constraints semantics. Indeed, \declare constraints are expressed in \LTLf, but we will extend \LTLf with Past temporal operators (\LTLp) for capturing also past modalities. In Table \ref{tab:declare-constraints}, we can see what are the corresponding \LTLf or \LTLp formulas for the most important \declare constraints.
 
@@ -102,13 +102,12 @@ The separated formulas for $(\Yesterday a \lOR \Diamond b$):
 (\Yesterday a \lAND True \lAND True)\bigvee(True \lAND True \lAND \Diamond b)
 \end{align*}
 \end{example}
-PUT HERE THE NEW GENERALIZATION OF THE THEOREM
 
 Since the Janus algorithm relies on the construction of the automata for separated \LTLp formulas, we will refer to notions explained previously in Section \ref{sec:formula-to-automa}. The crucial point is that given a separated \LTLp formula $\varphi$ we can build a minimum \DFA that \emph{accepts} all and only the traces satisfying formula $\varphi$.
 
-In the following sections, we will describe in details the Janus approach giving fundamentals definitions and theorems. Then, we will illustrate the algorithm and its practical implementation.
-\section{Janus}\label{sec:janus}
-Declarative process modeling defines a list of \declare constraints to be satisfied during the execution of the process model. These constraints are of a reactive nature in the sense that the occurrence of some task bounds the occurrence of other activities. As anticipated in the previous Section, this kind of behavior might lead to the principle of \textit{ex falso quod libet}, namely a constraint can be satisfied even though it is never activated. Here, the Janus approach \citep{cecconi2018interestingness} solves this problem allowing the user to indicate the activation condition for the constraint directly in the constraint formula. In this way, constraints are activated only if the activation condition holds. Therefore, we can refer to these constraints as \textit{reactive constraints} (\rcon).
+In the following sections, we will describe in details our modified version of the Janus approach giving fundamentals definitions and theorems and highlighting major differences with respect to the original one in  \citep{cecconi2018interestingness}. Then, we will illustrate the modified algorithm and its practical implementation.
+\section{The Janus Approach}\label{sec:janus}
+Declarative process modeling defines a list of \declare constraints to be satisfied during the execution of the process model. These constraints are of a reactive nature in the sense that the occurrence of some task bounds the occurrence of other activities. As anticipated in the previous Section, this kind of behavior might lead to the principle of \textit{ex falso quod libet}, namely a constraint can be satisfied even though it is never activated. The Janus approach \citep{cecconi2018interestingness} solves this problem allowing the user to indicate the activation condition for the constraint directly in the constraint. In this way, constraints are activated only if the activation condition holds. Therefore, we can refer to these constraints as \textit{reactive constraints} (\rcon).
 \begin{definition}\citep{cecconi2018interestingness}\label{def:rcon}
 Given an alphabet $\Sigma$, let $\alpha \in \Sigma$ be an \emph{activation} and $\varphi$ be an \LTLp formula over $\Sigma$. A Reactive Constraint (\rcon) $\Psi$ is a pair $(\alpha, \varphi)$, denoted as $\Psi \doteq \alpha  \mapsto \varphi$. We represent all the set of \rcon s over $\Sigma$ as $\mathcal{R}$.
 \end{definition}
@@ -134,8 +133,7 @@ Given a finite trace $t \in \Sigma$ of length $n$ and an \rcon\xspace $\Psi \dot
      \end{cases}
 \]
 \end{definition}
-Intuitively, the $\zeta(\Psi, t)$ function measures how many times the \rcon\xspace $\Psi$ is interesting fulfilled with respect to the total number of activations within the trace $t$. In Section \ref{sec:janus-implementation}, we will see the implementation of the Janus algorithm for computing the \emph{interestingness degree} of traces in real-world event logs.
-Now, we give an example to better capture the concepts just defined.
+Intuitively, the $\zeta(\Psi, t)$ function measures how many times the \rcon\xspace $\Psi$ is interesting fulfilled with respect to the total number of activations within the trace $t$. Now, we give an example to better capture the concepts just defined.
 
 \begin{example}\label{ex:janus-interest}
 Let us consider the \rcon\xspace $\Psi = b \mapsto \Once a$ and traces in the Example \ref{ex:traces}, we have the following:
@@ -145,6 +143,35 @@ Let us consider the \rcon\xspace $\Psi = b \mapsto \Once a$ and traces in the Ex
 \item The \textit{interestingness degree} of $\Psi$ in $t_1$ is $\zeta(\Psi, t_1) = 1$, since it is activated and fulfilled only once. Then, the \textit{interestingness degree} of $\Psi$ in $t_4$ is $\zeta(\Psi, t_4) = 0.5$ because it is activated twice, but fulfilled only once. Finally, in all the other traces $t_2$, $t_3$, $t_5$ and $t_6$ is $\zeta(\Psi, t) = 0$.
 \end{itemize}
 \end{example}
+
+However, the representation of an \rcon\xspace, as in Definition \ref{def:rcon}, has two main drawbacks:
+\begin{itemize}
+\item  the activation condition $\alpha$ could be only a single task;
+\item $\alpha$ is not incorporated in the formula $\varphi$.
+\end{itemize}
+These two disadvantages limits the Janus approach to what it can mine. In order to overcome this limitation, we have devised a generalization of the \rcon\xspace constraint definition. We can state the following Theorem:
+\begin{theorem}\label{th:gener-theo}
+Given an \rcon\xspace $\Psi \doteq \alpha  \mapsto \varphi$, expanded by Definition \ref{def:separated-formula} as $\alpha  \mapsto \bigvee^{m}_{j=1} (\varphi^{\blacktriangleleft} \lAND \varphi^{\blacktriangledown} \lAND \varphi^{\blacktriangleright})_j$, it is equivalent to:
+\begin{equation}\label{eq:new-constraint}
+\Psi \equiv (False \lAND \alpha \lAND False) \lOR \S'(\varphi)
+\end{equation}
+where $\alpha$ is a propositional formula and $\S'(\varphi) \doteq \bigvee^{m}_{j=1} [\varphi^{\blacktriangleleft} \lAND (\varphi^{\blacktriangledown} \lAND \alpha) \lAND \varphi^{\blacktriangleright}]_j$.
+\end{theorem}
+In other words, Theorem \ref{th:gener-theo} says that a certain activation condition (expressed as a separated formula) of \rcon\xspace can be directly embedded on the constraint formula itself. This generalized representation solves disadvantages of simple \rcon s\xspace described above. Indeed, the first triple $(False \lAND \alpha \lAND False)$ is only needed to count all occurrences of activations whereas the constraint is fulfilled if for at least a separated formula is verified over the trace. Notice that when we check for constraint fulfillment, the triple $(False \lAND \alpha \lAND False)$ evaluates always to $\false$.
+%To this extent, we can rewrite the Definition \ref{def:interestingness-degree} as follows:
+%\begin{definition}\label{def:interestingness-degree2}
+%Given a finite trace $t \in \Sigma$ of length $n$ and an \rcon\xspace $\Psi$, expressed as in \ref{eq:new-constraint}, we define the \emph{interestingness degree} function $\zeta: \mathcal{R} \times \Sigma^* \rightarrow [0,1] \subseteq \mathbb{R}$ as follows:
+%\[   
+%\zeta(\Psi,t) = 
+%     \begin{cases}
+%       \dfrac{\lvert \{ i: t,i \models \alpha \text{ and } t,i \models \varphi\} \rvert}{\lvert \{ i: t,i \models \alpha\} \rvert}, &\quad\text{if } \lvert \{ i: t,i \models \alpha\} \rvert \neq 0 ;\\
+%       0, &\quad\text{otherwise} \\
+%     \end{cases}
+%\]
+%\end{definition}
+
+ In Section \ref{sec:janus-implementation}, we will see the implementation of the Janus algorithm for computing the \emph{interestingness degree} of traces in real-world event logs, using \rcon s declared as in \ref{eq:new-constraint}.
+
 As we have just seen, the fulfilment of an \rcon\xspace, in a trace, relies on the verification of the corresponding \LTLp formula over such a trace at the instant of activation. This process of verification of a formula $\varphi$ on a trace can be achieved by constructing the related \DFA $\automaton_{\varphi}$ and checking whether such trace is accepted by $\automaton_{\varphi}$ or not. To this extent, in the following, we have to give some other definitions and theorems.
 
 First of all, since an \LTLp formula could have both past and future temporal operators, in order to build its corresponding \DFA we exploit the Theorem \ref{th:separation-theorem} by first splitting the \LTLp formula into its separated formulas and, then, constructing the corresponding \DFAs of that separated formulas. However, we need to know how to evaluate the separated formulas over a trace. We can now give the following Lemma and Theorem:
@@ -188,55 +215,92 @@ since both are not satisfied, we can conclude that $\varphi$ is not satisfied by
 since the former holds $\true$, $\varphi$ is satisfied by $t_1(9)$.
 \end{itemize}
 \end{example}
-At this point, we can start talking about separated formulas verification on a trace using their corresponding \DFAs. 
+At this point, we can start talking about separated formulas verification on a trace using their corresponding \DFAs.
 
-\begin{definition}\citep{cecconi2018interestingness}\label{def:automaton-eval}
-Given a \LTLp formula $\varphi$, we define as \emph{separated automata set} (sep.aut.set) $\automaton^{\blacktriangleleft \blacktriangledown \blacktriangleright} \in 2^{\automaton \x \automaton \x \automaton}$ the set of triples $\automaton^{\blacktriangleleft \blacktriangledown \blacktriangleright} = (\automaton^{\blacktriangleleft}, \automaton^{\blacktriangledown}, \automaton^{\blacktriangleright}) \in \automaton \x \automaton \x \automaton$ such that $\automaton^{\blacktriangleleft} \doteq \automaton_{\varphi^\blacktriangleleft}$, $\automaton^{\blacktriangledown} \doteq \automaton_{\varphi^\blacktriangledown}$ and $\automaton^{\blacktriangleright} \doteq \automaton_{\varphi^\blacktriangleright}$ for every $(\varphi^{\blacktriangleleft},\varphi^{\blacktriangledown},\varphi^{\blacktriangleright}) \in \S(\varphi)$.
+\begin{definition}\label{def:automaton-eval}
+Given a \LTLp formula $\varphi$, we define as \emph{separated automata set} (sep.aut.set) $\automaton^{\blacktriangleleft \blacktriangledown \blacktriangleright} \in 2^{\automaton \x \automaton \x \automaton}$ the set of triples $\automaton^{\blacktriangleleft \blacktriangledown \blacktriangleright} = (\automaton^{\blacktriangleleft}, \automaton^{\blacktriangledown}, \automaton^{\blacktriangleright}) \in \automaton \x \automaton \x \automaton$ such that $\automaton^{\blacktriangleleft} \doteq \automaton_{\varphi^\blacktriangleleft}$, $\automaton^{\blacktriangledown} \doteq \automaton_{(\varphi^\blacktriangledown \lAND \alpha)}$ and $\automaton^{\blacktriangleright} \doteq \automaton_{\varphi^\blacktriangleright}$ for every $(\varphi^{\blacktriangleleft},\varphi^{\blacktriangledown},\varphi^{\blacktriangleright}) \in \Psi$.
 \end{definition}
-As in Example \ref{ex:separated-formulas}, here we give its automata version.
+The \textit{sep.aut.set} just defined is a modified version of the one in \citep{cecconi2018interestingness}. As in Example \ref{ex:separated-formulas}, here we give its automata version.
 \begin{example}\label{ex:automata-sep-formulas}
-The sep.aut.set for $(\Yesterday a \lOR \Diamond b$) is:
+Given the \rcon\xspace $\Psi = (False \lAND a \lAND False) \lOR (\Yesterday b \lAND (True \lAND a) \lAND True) \lOR (True \lAND (True \lAND a) \lAND \Diamond c)$, its sep.aut.set is:
 \begin{align*}
-\automaton^{\blacktriangleleft \blacktriangledown \blacktriangleright} = \{(\automaton_{\Yesterday a}, \automaton_{True}, \automaton_{True}), (\automaton_{True}, \automaton_{True}, \automaton_{\Diamond b})\}
+\automaton^{\blacktriangleleft \blacktriangledown \blacktriangleright} = \{(\automaton_{False}, \automaton_{a}, \automaton_{False}), (\automaton_{\Yesterday b}, \automaton_{(True \lAND a)}, \automaton_{True}), (\automaton_{True}, \automaton_{(True \lAND a)}, \automaton_{\Diamond c})\}
 \end{align*}
 \end{example}
 Similarly to what we have seen before with Theorem \ref{th:sepformulas-eval}, we can state the following:
 
-\begin{theorem}\citep{cecconi2018interestingness}\label{th:sepformulas-eval}
+\begin{theorem}\citep{cecconi2018interestingness}\label{th:sepautset-eval}
 Given an \LTLp formula $\varphi$, its sep.aut.set $\automaton^{\blacktriangleleft \blacktriangledown \blacktriangleright}$, a finite trace $t \in \Sigma^*$ of length $n$ and an instant $i$, with $1 \le i \le n$, we have that $t,i \models \varphi \tiff t_{[1,i]}, i \in \L(\automaton^\blacktriangleleft), t_{[i,i]}, i \in \L(\automaton^\blacktriangledown)$ and $t_{[i,n]}, i \in \L(\automaton^\blacktriangleright)$ for \emph{at least} a $(\automaton^{\blacktriangleleft}, \automaton^{\blacktriangledown}, \automaton^{\blacktriangleright}) \in \automaton^{\blacktriangleleft \blacktriangledown \blacktriangleright}$.
 \end{theorem}
 
 So far, we have described all theoretical results necessary for introducing and understanding how the Janus algorithm works. Now, we talk about automata generation given a pure past, pure present and a pure future formula possible thanks to our developed tool \LTLfToDFA. 
 
-Differently from what has been done in \citep{cecconi2018interestingness} for the automata construction, in this thesis we propose a version of the Janus algorithm that works with \LTLfToDFA. Indeed, as already seen in Chapter \ref{ch:ltlf2dfa}, \LTLfToDFA is able to directly generate the minimum \DFA for a pure past formula (\PLTL) without passing through its pure future (\LTLf) reversed formula. In particular, \LTLfToDFA has been employed in the Janus algorithm for the generation of the automaton corresponding to each formula in the triple $(\varphi^{\blacktriangleleft},\varphi^{\blacktriangledown},\varphi^{\blacktriangleright})$, for every triple $(\varphi^{\blacktriangleleft},\varphi^{\blacktriangledown},\varphi^{\blacktriangleright}) \in \S(\varphi)$. In Example \ref{ex:sep-aut-set}, there are the \DFAs output from \LTLfToDFA.
+Differently from what has been done in \citep{cecconi2018interestingness} for the automata construction, in this thesis we propose a version of the Janus algorithm that works with \LTLfToDFA. Indeed, as already seen in Chapter \ref{ch:ltlf2dfa}, \LTLfToDFA is able to directly generate the minimum \DFA for a pure past formula (\PLTL) without passing through its pure future (\LTLf) reversed formula. In particular, \LTLfToDFA has been employed in the Janus algorithm for the generation of the automaton corresponding to each formula in the triple $(\varphi^{\blacktriangleleft},(\varphi^{\blacktriangledown} \lAND \alpha),\varphi^{\blacktriangleright})$, for every triple belonging to $\S'(\varphi)$. In Example \ref{ex:sep-aut-set}, there are \DFAs output from \LTLfToDFA.
 
 \begin{example}\label{ex:sep-aut-set}
-Let us consider the \rcon\xspace $\Psi = a \mapsto (\Yesterday b \lOR \Diamond c)$ and its separated formula $\S(\varphi) = \{(\Yesterday b , True, True), (True, True, \Diamond c)\}$. The corresponding sep.aut.set $\automaton^{\blacktriangleleft \blacktriangledown \blacktriangleright}$ for each $(\varphi^{\blacktriangleleft},\varphi^{\blacktriangledown},\varphi^{\blacktriangleright}) \in \S(\varphi)$ is depicted in Table \ref{tab:sep-aut-set}:
-\begin{center}
+Let us consider the \rcon\xspace $\Psi = (False \lAND a \lAND False) \lOR (\Yesterday b \lAND (True \lAND a) \lAND True) \lOR (True \lAND (True \lAND a) \lAND \Diamond c)$. The corresponding sep.aut.set $\automaton^{\blacktriangleleft \blacktriangledown \blacktriangleright}$ for each triple in $\Psi$ is depicted in Table \ref{tab:sep-aut-set}.
+\begin{table}
+\centering
 \captionof{table}{Representation of the separated automata set for $\Psi = a \mapsto (\Yesterday b \lOR \Diamond c)$}
 \label{tab:sep-aut-set}
 \begin{tabular}{ c  c  c }
 \hline
-$\automaton^{\blacktriangleleft} = \automaton_{\Yesterday b}$ & $\automaton^{\blacktriangledown} = \automaton_{\true}$ & $\automaton^{\blacktriangleright} = \automaton_{\true}$\\
+$\automaton^{\blacktriangleleft} = \automaton_{\Yesterday b}$ & $\automaton^{\blacktriangledown} = \automaton_{(\true \lAND a)}$ & $\automaton^{\blacktriangleright} = \automaton_{\true}$\\
 \hline
 \includegraphics[width=0.3\textwidth]{images/automa3-yesterday.eps}
 &
-\raisebox{.7\height}{\includegraphics[width=0.1\textwidth, height=3.5em]{images/automa4-true.eps}}
+\includegraphics[width=0.2\textwidth]{images/automa-symbol.eps}
 &
 \raisebox{.7\height}{\includegraphics[width=0.1\textwidth, height=3.5em]{images/automa4-true.eps}}\\
 \hline
-$\automaton^{\blacktriangleleft} = \automaton_{\true}$ & $\automaton^{\blacktriangledown} = \automaton_{\true}$ & $\automaton^{\blacktriangleright} = \automaton_{\Diamond c}$\\
+$\automaton^{\blacktriangleleft} = \automaton_{\true}$ & $\automaton^{\blacktriangledown} = \automaton_{(\true \lAND a)}$ & $\automaton^{\blacktriangleright} = \automaton_{\Diamond c}$\\
 \hline
-\raisebox{.4\height}{\includegraphics[width=0.1\textwidth, height=3.5em]{images/automa4-true.eps}}
+\raisebox{-.3\height}{\includegraphics[width=0.1\textwidth, height=3.5em]{images/automa4-true.eps}}
 &
-\raisebox{.4\height}{\includegraphics[width=0.1\textwidth, height=3.5em]{images/automa4-true.eps}}
+\raisebox{-.5\height}{\includegraphics[width=0.2\textwidth]{images/automa-symbol.eps}}
 &
-\raisebox{.07\height}{\includegraphics[width=0.3\textwidth]{images/example1-output.eps}}\\
+\raisebox{.1\height}{\includegraphics[width=8em]{images/example1-output.eps}}\\
 \hline
 \end{tabular}
-\end{center}
+\end{table}
 \end{example}
 \subsection{Algorithm}\label{sec:janus-alg}
+Here, we illustrate a modified version of the Janus algorithm present in \citep{cecconi2018interestingness}, which is able to deal with our new generalization of \rcon s introduced previously with Theorem \ref{th:gener-theo}.
+
+\begin{algorithm}
+	\caption{\janus algorithm: given a a trace $t$, an \rcon\xspace and its sep.aut.set $\automaton^{\blacktriangleleft \blacktriangledown \blacktriangleright}$, it returns the \textit{interestingness degree}}
+	\label{alg:janus}
+	\begin{algorithmic}[1]
+		\State $\O \gets$ empty bag;
+		\ForEach{event $t(i) \in t$}
+		\ForEach{$\automaton^\blacktriangleleft \in \automaton^{\blacktriangleleft \blacktriangledown \blacktriangleright}$} make transition $t(i)$ on $\automaton^\blacktriangleleft$;
+		\EndFor
+		\If{$(\automaton_{\alpha}$ \textit{accepts} $t(i))$} \label{alg:activation}\Comment{Activation}
+			\State $\J \gets$ empty set of pairs;
+				\ForEach{$(\automaton^{\blacktriangleleft}, \automaton^{\blacktriangledown}, \automaton^{\blacktriangleright}) \in \automaton^{\blacktriangleleft \blacktriangledown \blacktriangleright}$}
+					\If{$(\automaton^\blacktriangleleft$ \textit{is in an accepting state and} $\automaton^\blacktriangledown$ \textit{accepts} $t(i))$}
+						\State Add $(s_{0}^{\blacktriangleright}, \automaton^\blacktriangleright)$ to $\J$;
+					\EndIf	
+				\EndFor
+				\State Add $\J$ to $\O$;
+		\EndIf 		
+		\ForEach{$\J \in \O$}
+			\ForEach{$(s^{\blacktriangleright}, \automaton^\blacktriangleright) \in \J$} $s^{\blacktriangleright} \gets \delta^{\blacktriangleright}(s^{\blacktriangleright}, t(i)) $\Comment{Make transition $t(i)$ on $\automaton^{\blacktriangleright}$}	
+			\EndFor
+		\EndFor
+		\EndFor		
+
+		\If{$\mid \O \mid > 0$} 
+		\State \Return $\dfrac{\mid \{\J \in \O: \text{at least a } (s^{\blacktriangleright}, \automaton^\blacktriangleright) \in \J \} \text{ is such that } s^{\blacktriangleright} \in \F^{\blacktriangleright} \mid}{\mid \O \mid}$
+		\Else
+		\State \Return $0$
+		\EndIf
+		
+	
+	\end{algorithmic}
+	
+\end{algorithm}
+
 \section{Implementation}\label{sec:janus-implementation}
 In this section, we fully describe the practical implementation of the Janus algorithm given in Section \ref{sec:janus-alg}. In particular, we give some general information about its features, dependencies and usage. Then, we focus on the package explaining how is structured and commenting highlights on the code. The implementation on this thesis is called \janus, is written in Python and is a porting of the \href{https://github.com/Oneiroe/Janus}{Janus} proof-of-concept software project written in Java.
 
