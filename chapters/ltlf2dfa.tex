@@ -667,7 +667,7 @@ In the histogram, \FLLOAT results are coloured in red, while \LTLfToDFA ones are
  As we can see from the bar chart, in \FLLOAT the time needed to convert the formula increases as the length of the formula grows, whereas in \LTLfToDFA it is almost steady. Furthermore, it is notable that \LTLfToDFA is overall more than twice as fast as \FLLOAT.
 This behaviour is due to the fact that these two packages operates in a different way. Indeed, while \FLLOAT is a pure Python package, \LTLfToDFA uses, for the heavy task of the generation of the automaton, \MONA that is written in C/C++. Hence, the real difference relies on the performance differences between C/C++ and Python programs.
 As a final remark, although \LTLfToDFA is much faster than \FLLOAT, its time execution depends on the I/O system performance which can drastically reduce it. Thus, \LTLfToDFA results may arise depending on various factors such as disk speed, caching and filesystem.
-\section{Discussion}
+\section{Summary}
 In this chapter, we have presented the \LTLfToDFA Python package. We have also described the structure of the package, discussed in detail its implementation highlighting all the main features and, finally, seen how it performs in time relatively to the \FLLOAT Python package.
 
 

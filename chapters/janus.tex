@@ -1,10 +1,10 @@
 \chapter{Janus}
-In this chapter, we will illustrate how our tool \LTLfToDFA presented in Chapter \ref{ch:ltlf2dfa} can be efficiently employed in the field of Business Process Management, with particular attention to Process Mining. First of all, we will formally describe the theoretical framework of declarative process mining. We will introduce a new theorem that generalizes concepts of reactive constraints and separated formulas present in \citep{cecconi2018interestingness} and we will illustrate the Janus algorithm in \citep{cecconi2018interestingness} modified accordingly with the new proposed theorem. Then, in this context, we will thoroughly describe the implementation of this new version of the Janus algorithm, employing our tool \LTLfToDFA, for computing the interestingness degree of traces in real event logs. Finally, we will provide such a computation for a real log as an example. 
+In this chapter, we will illustrate how our tool \LTLfToDFA presented in Chapter \ref{ch:ltlf2dfa} can be efficiently employed in the field of Business Process Management, with particular attention to Process Mining. First of all, we will formally describe the theoretical framework of declarative process mining. We will give a generalization of the Janus algorithm in \citep{cecconi2018interestingness}, introducing a new theorem that enlarges concepts of reactive constraints and separated formulas and we will illustrate the Janus algorithm in \citep{cecconi2018interestingness} modified accordingly with the new proposed theory. Then, in this context, we will thoroughly describe the implementation of this new version of the Janus algorithm, employing our tool \LTLfToDFA, for computing the interestingness degree of traces in real event logs. Finally, we will provide such a computation for a real log as an example. 
 \section{Declarative Process Mining}
 In this section, we will present the theoretical framework of Business Process Management focusing our attention to declarative process mining. We will extend what described in Chapter \ref{ch:theory} providing all additional concepts, definitions and theorems necessary to clearly understand the context.
 
 Business Process Management (BPM) deals with discovering, modeling, analyzing and managing business processes in order to measure their productivity and to improve their performance. These tasks are carried out thanks to logging facilities that, nowadays, all BPM systems have. The extraction and the validation of temporal constraints from event logs (i.e. multi-sets of finite traces) are techniques consisting declarative process mining \citep{montali2010declarative}. Temporal constraints are expressed using \LTLf and/or \PLTL and refers to activities present in traces. In the following, we will formally introduce what event logs and \declare \citep{pesic2008constraint} are. Another important aspect to notice is that these constraints are meant to be checked upon the activation satisfying specific conditions. For these reasons, they are referred as \emph{reactive constraints}.
-\paragraph{Event Logs}
+\subsection{Event Logs}
 The event log is a collection of meaningful data that is the entry point for the consequent process mining. Formally, we consider this meaningful data expressed as a multiple traces containing a sequence of events belonging to the alphabet of symbols $\Sigma$. A single trace can be represented as $t = \tup{e_1,e_2,\dots,e_n}$ where $e_i$ is the event occurring at instant $i$ and $n \in \mathbb{N}$ is the length of the trace $t$.  Now, we can give the following definition:
 \begin{definition}
 An event log $\L$ is defined as $\L = \{t_1,\dots,t_m\} \in \mathbb{M} (\Sigma^*)$ is a multi-set of traces $t_j$ with $1 \le j \le m$, where $m \in \mathbb{N}$.
@@ -24,7 +24,7 @@ t_6 &= \tup{b,c,d,e}
 Furthermore, the event $e_i$ occurring at instant $i$ is denoted by $t(i)$, whereas the segment of $t$ (i.e. the sub-trace) ranging from instant $i$ to instant $j$, where $1 \le i \le j \le n$ is denoted by $t_{[i:j]}$.
 
 Apart from the formal model of event logs, we have real-world event logs that are logs with real data coming from different kind of data sources (e.g. databases, transaction logs, audit log, etc.). All available tools are evaluated against real-world logs or synthetic logs, i.e. automatically generated logs that mimic real logs in shape and content. In practice, as we will see in the Section \ref{sec:janus-implementation}, the main way of representing real logs is the eXtensible Event Stream (XES) Standard\footnote{http://www.xes-standard.org}, which is based on the well known XML.
-\paragraph{\declare}
+\subsection{\declare}
 \declare is a language concerning declarative process modeling \citep{pesic2008constraint} and consisting of standard templates based on \citep{dwyer1999patterns} that was introduced to simplify the complexity of constraints semantics. Indeed, \declare constraints are expressed in \LTLf, but we will extend \LTLf with Past temporal operators (\LTLp) for capturing also past modalities. In Table \ref{tab:declare-constraints}, we can see what are the corresponding \LTLf or \LTLp formulas for the most important \declare constraints.
 
 \begin{table}[htbp]
@@ -50,12 +50,6 @@ Apart from the formal model of event logs, we have real-world event logs that ar
 \end{tabular}
 \end{table}
 
-%\begin{figure}[h]
-%\centering
-%\includegraphics[width=\textwidth]{images/declare-constraints}
-%\caption{The most important \declare constraints expressed as \LTLf formulas and \emph{reactive constraints}.}
-%\label{fig:declare-constraints}
-%\end{figure}
 Parameters in a template define tasks and they occurs as events in traces. In Example \ref{ex:declare-examples} we provide a glimpse of \declare patterns.
 \begin{example}\label{ex:declare-examples}
 Interesting \declare templates \citep{maggi2013knowledge}
@@ -265,7 +259,7 @@ $\automaton^{\blacktriangleleft} = \automaton_{\true}$ & $\automaton^{\blacktria
 \end{table}
 \end{example}
 \subsection{Algorithm}\label{sec:janus-alg}
-Here, we illustrate a modified version of the Janus algorithm present in \citep{cecconi2018interestingness}, which is able to deal with our new generalization of \rcon s introduced previously with Theorem \ref{th:gener-theo}.
+Here, we illustrate the modified version of the Janus algorithm present in \citep{cecconi2018interestingness}. In particular, this version of the algorithm is able to deal with our new generalization of \rcon s introduced previously with Theorem \ref{th:gener-theo} (Algorithm \ref{alg:janus}). The algorithm takes as input a trace and the sep.aut.set corresponding to an \rcon\xspace expressed as \ref{th:gener-theo}.
 
 \begin{algorithm}
 	\caption{\janus algorithm: given a a trace $t$, an \rcon\xspace and its sep.aut.set $\automaton^{\blacktriangleleft \blacktriangledown \blacktriangleright}$, it returns the \textit{interestingness degree}}
@@ -275,7 +269,7 @@ Here, we illustrate a modified version of the Janus algorithm present in \citep{
 		\ForEach{event $t(i) \in t$}
 		\ForEach{$\automaton^\blacktriangleleft \in \automaton^{\blacktriangleleft \blacktriangledown \blacktriangleright}$} make transition $t(i)$ on $\automaton^\blacktriangleleft$;
 		\EndFor
-		\If{$(\automaton_{\alpha}$ \textit{accepts} $t(i))$} \label{alg:activation}\Comment{Activation}
+		\If{$(\automaton_{\alpha}$ \textit{accepts} $t(i))$} \label{alg:activation}\Comment{Activation condition}
 			\State $\J \gets$ empty set of pairs;
 				\ForEach{$(\automaton^{\blacktriangleleft}, \automaton^{\blacktriangledown}, \automaton^{\blacktriangleright}) \in \automaton^{\blacktriangleleft \blacktriangledown \blacktriangleright}$}
 					\If{$(\automaton^\blacktriangleleft$ \textit{is in an accepting state and} $\automaton^\blacktriangledown$ \textit{accepts} $t(i))$}
@@ -298,13 +292,21 @@ Here, we illustrate a modified version of the Janus algorithm present in \citep{
 		
 	
 	\end{algorithmic}
-	
 \end{algorithm}
+
+\subsubsection*{How the algorithm works}
+As stated before, the goal of the algorithm is to compute the \textit{interestingness degree} of an \rcon\xspace with respect to a trace. The fundamental data structure is the \textit{Janus state} ($\J$), a set of pairs consisting of a future automaton with its current state. 
+
+The na\"ive approach would count, whenever the activation condition holds, how many times there is  \textit{at least} a triple $(\automaton^{\blacktriangleleft}, \automaton^{\blacktriangledown}, \automaton^{\blacktriangleright}) \in \automaton^{\blacktriangleleft \blacktriangledown \blacktriangleright}$ that satisfies the \rcon\xspace; then, it would compute the ratio between this calculation with the overall activations. However, this would lead to an over and repeated computation. On the contrary, the Janus algorithm exploits the automata's property of remembering the past. In particular, for each event of the trace, the algorithm keeps updated the state of past automata and, when, at instant $i$, the activation condition holds, it relies on the fact that the past automata have already evaluated the trace until that instant (i.e. the sub-trace $t_{[1,i]}$). Then, for each triple in the sep.aut.set, only if the past automaton is in an accepting state and the present automaton accepts the current event $t(i)$, the algorithm initializes a \textit{Janus state} with the future automaton with its current state. Each $\J$ is kept in memory by adding it to the bag $\O$. Subsequently, the algorithm updates only future automaton with their current state that appear in $\O$, namely, only relevant future automata are considered. As a result, an event in a trace interestingly fulfills an \rcon\xspace if, on activation, \textit{at least} a triple $(\automaton^{\blacktriangleleft}, \automaton^{\blacktriangledown}, \automaton^{\blacktriangleright}) \in \automaton^{\blacktriangleleft \blacktriangledown \blacktriangleright}$ is verified over the entire trace. By construction, this holds true if \textit{at least} an automaton in $\J$ is, at the end, in a final state. Therefore, the \textit{interestingness degree} is given by the ratio between such \textit{Janus states} and the cardinality of $\O$.
+
+Finally, unlike the Janus original version, our version has a different way of activation verification (line \ref{alg:activation}). While in the former version there is only a check of the form \texttt{event = activator}, in our version, since for Theorem \ref{th:gener-theo} $\alpha$ is a propositional formula, we have to check if the automaton corresponding to $\alpha$ ($\automaton_{\alpha}$) accepts the event.
 
 \section{Implementation}\label{sec:janus-implementation}
 In this section, we fully describe the practical implementation of the Janus algorithm given in Section \ref{sec:janus-alg}. In particular, we give some general information about its features, dependencies and usage. Then, we focus on the package explaining how is structured and commenting highlights on the code. The implementation on this thesis is called \janus, is written in Python and is a porting of the \href{https://github.com/Oneiroe/Janus}{Janus} proof-of-concept software project written in Java.
 
-To begin with, the main goal of \janus, as stated at the beginning, is to compute the \textit{interestingness degree} of traces on event log.  As a consequence, it also provides I/O facilities for three different event log formats, namely simple \textit{.txt} files, \textit{.csv} files and \textit{.xes} files for real-world event logs. Furthermore, the formula $\varphi$ in the \rcon\xspace to be satisfied by traces is manually separated following Definition \ref{def:separated-formula}.
+To begin with, our implementation of the modified algorithm, presented in Section \ref{sec:janus-alg}, together with the integration of the \LTLfToDFA tool, considerably differs from the original implementation. In particular, our \janus can handle any type of constraint (not only \declare ones) and the user can specify the activation condition as a propositional formula instead of just one task. Nevertheless, the main goal of \janus remains the same: compute the \textit{interestingness degree} of traces on event log.  
+
+Secondly, \janus provides I/O facilities for three different event log formats, namely simple \textit{.txt} files, \textit{.csv} files and \textit{.xes} files for real-world event logs. Furthermore, the constraint formula is manually separated following Definition \ref{def:separated-formula} and it is augmented with the activation condition as per Theorem \ref{th:gener-theo}.
 
 \janus requires Python>=3.6 and has the following dependencies:
 \begin{itemize}
@@ -457,7 +459,7 @@ def parse_dot(path, symbols):£\label{line:parse-dot}£
     lines = get_file(path)
     accepting_states = set() # all accepting states of the automaton
     for line in lines[7:]:
-        if line.strip() != 'node [shape=circle];':
+        if line.strip() != 'node [shape = circle];':
             temp = line.replace(";\n", "")
             accepting_states.add(temp.strip())
         else:
@@ -509,7 +511,7 @@ class Automa:
         - accepting_states => set() ;
         - transitions      => dict(), where
         **key**: *source* in states
-        **value**: {*action*: *destination*)
+        **value**: {*action*: *destination*}
     """
 
     def __init__(self, symbols, alphabet, states, initial_state, \
@@ -564,37 +566,76 @@ class Automa:
     @property
     def initial_state(self):
         return self._initial_state
+        
+    def check_others(self, action, map_symb_act, singleton):
+        if singleton:
+            del map_symb_act[action]
+        else:
+            for elem in action:
+                del map_symb_act[elem]
+        if all(value in {'0', 'X'} for value in map_symb_act.values()):
+            return True
+        else:
+            return False
+
+    def check_mixed_symbols(self, action):
+        if len(action) == 1:
+            return False
+        else:
+            for item in action:
+                if item in self.symbols:
+                    return True
+                else: continue
+            return False
 
     def make_transition(self, action):£\label{line:make-trans}£
-        if action in self.symbols:
-            for act in self.transitions[self._current_state].keys():
-                temp = dict(zip(self.symbols,[value for value in act]))
-                additional = temp.copy()
-                del additional[action]
-                if (temp[action] == '1' or temp[action] == 'X') and \
-                all(value in {'0', 'X'} for value in additional.values()):
-                    self._current_state = \
-                    self.transitions[self._current_state][act]
-                else:
-                    continue
-        else:
-            number_of_symbols = len(self.symbols)
-            if number_of_symbols == 0: # true when there is True automa
-                self._current_state = \
-                self.transitions[self._current_state]['X']
+        _action = None
+        if len(action) == 1:
+            _action = action[0]
+        if len(self.symbols) == 0:
+            self._current_state = \
+            self.transitions[self._current_state]['X']
+
+        for act in self.transitions[self.current_state].keys():
+            temp = dict(zip(self.symbols, [value for value in act]))
+            if set(action).issubset(set(self.symbols)):
+                if len(self.symbols) == 1:
+                    if temp[_action] in {'1','X'}:
+                        self._current_state = \
+                        self.transitions[self._current_state][act]
+                    else: continue
+                else: 
+                    if type(_action) == str:
+                        if temp[_action] in {'1', 'X'} and \
+                        self.check_others(_action, temp, True):
+                            self._current_state = \
+                            self.transitions[self._current_state][act]
+                        else:
+                            continue
+                    else:
+                        vals = [temp[_] for _ in action]
+                        if set(vals).issubset({'1','X'}) and \
+                        self.check_others(action, temp, False):
+                            self._current_state = \
+                            self.transitions[self._current_state][act]
+                        else:
+                            continue
             else:
-                if 'X'*number_of_symbols in \
-                self.transitions[self._current_state]:
-                    self._current_state = \
-                    self.transitions[self._current_state]\
-                    ['X'*number_of_symbols]
-                elif '0'*number_of_symbols in \
-                self.transitions[self._current_state]:
-                    self._current_state = \
-                    self.transitions[self._current_state]\
-                    ['0'*number_of_symbols]
+                if self.check_mixed_symbols(action):
+                    common = [val for val in action if val in self.symbols]
+                    vals = [temp[_] for _ in common] 
+                    if set(vals).issubset({'1', 'X'}) and \
+                    self.check_others(common, temp, False):
+                        self._current_state = \
+                        self.transitions[self._current_state][act]
+                    else:
+                        continue
                 else:
-                    raise ValueError('[ERROR]: could not make transition')
+                    if all(value in {'0', 'X'} for value in temp.values()):
+                        self._current_state = \
+                        self.transitions[self._current_state][act]
+                    else:
+                        continue
 
     def is_accepting(self):£\label{line:is-accepting}£
         if self._current_state in self.accepting_states:
@@ -636,13 +677,14 @@ class SeparatedAutomataSet:
     def build_automaton(self, triple):£\label{line:build-dfa}£
         automata_list = []
         for formula in triple:
-            symbols = re.findall('[a-z]+', str(formula))
+            symbols = re.findall('(?<![a-z])(?!true|false)[_a-z0-9]+', \
+            str(formula))
             trans = Translator(formula)
             trans.formula_parser()
             trans.translate()
-            trans.createMonafile(True)  # true for DECLARE assumptions
-            trans.invoke_mona("automa.mona") # returns inter-automa.dot
-            dot = DotHandler("inter-automa.dot")
+            trans.createMonafile(False)  # true for DECLARE assumptions
+            trans.invoke_mona() # returns inter-automa.dot
+            dot = DotHandler()
             dot.modify_dot()
             dot.output_dot() # returns automa.dot
             automata_list.append(parse_dot("automa.dot", symbols))
@@ -650,12 +692,12 @@ class SeparatedAutomataSet:
             os.remove("automa.dot")
             symbols = []
         return automata_list
-
-    def compute_automa(self):
-        result = set()
-        for triple in self.separated_formulas_set:£\label{line:automa-set}£
+        
+    def compute_automa(self):£\label{line:automa-set}£
+        result = []
+        for triple in self.separated_formulas_set:
             past, present, future = self.build_automaton(triple)
-            result.add( (past, present, future) )
+            result.append( (past, present, future) )
         return result
 \end{lstlisting}
 In this module, it has been employed the \LTLfToDFA tool. In fact, a \texttt{SeparatedAutomataSet} object receives a given set of separated formulas as input and it uses \LTLfToDFA to generate the \DFA corresponding to each formula. Specifically, for each separated formula, i.e. a triple, (line \ref{line:automa-set}) we compute the equivalent \DFA on-line (line \ref{line:build-dfa}). This specific aspect represents a novelty with respect to what has been done in the original Java version of \janus. So, unlike our \janus version, the original one does not compute  \DFAs at execution time, but they are predefined (it only supports the most important \declare constraints) and given before the actual execution. Thus, this is a big step towards a complete generalization of the Janus algorithm implementation.
@@ -708,14 +750,130 @@ class Formula:
             yield triple
 \end{lstlisting}
 \subsection{Main Module}\label{sec:janus-main}
-Here we describe the main module of the \janus package. It is called \texttt{janus.py} and it contains the principal logic covering the Janus pseudocode anticipated in Section \ref{sec:janus-alg}. We recall that in this version of \janus we can specify any type of \LTLp formula as long as it is already separated following Definition \ref{def:separated-formula}.
+Here, we describe the main module of the \janus package. It is called \texttt{janus.py} and it contains the principal logic covering the Janus pseudocode anticipated in Section \ref{sec:janus-alg}. We recall that in this version of \janus we can specify any type of \LTLp formula as long as it is already separated following Definition \ref{def:separated-formula}. Moreover, our \janus works with propositional formula as activation condition defined within the constraint formula. In Listing \ref{code:janus-main} is shown the code of the \texttt{janus.py} module.
+\begin{lstlisting}[language=Python, style=Python, escapechar = £, label={code:janus-main}, caption={The \texttt{janus.py} module}]
+from janus.io.InputHandler import InputHandler
+from janus.formulas.separatedFormula import SeparatedFormula
+from janus.formulas.formula import Formula
+from janus.automata.sepautset import SeparatedAutomataSet
+import argparse, copy
+
+args_parser = argparse.ArgumentParser(description='Janus algorithm')
+args_parser.add_argument('<event-log>', help='Path to the event log')
+
+params = vars(args_parser.parse_args())
+
+input_log = InputHandler(params['<event-log>'])£\label{line:input-log}£
+log_set = input_log.event_log
+
+# separated formulas
+sepFormula0 = SeparatedFormula(('false', 'leucocytes', 'false'))£\label{line:sep-formulas}£
+sepFormula1 = SeparatedFormula(('Yerregistration', 'true & leucocytes', \
+'true'))
+sepFormula2 = SeparatedFormula(('true', 'true & leucocytes', 'Fcrp'))
+
+ # set manually the constraint
+constraint = Formula([sepFormula0, sepFormula1, sepFormula2])£\label{line:constraint}£
+
+sepautset = SeparatedAutomataSet(constraint).automa_set£\label{line:sep-aut-set}£
+
+for trace in log_set:
+    print('[TRACE]: ' + str(trace))
+    O = []£\label{line:janus-alg}£
+    for event in trace:
+        for pastAut in sepautset:
+            pastAut[0].make_transition([event.replace(' ','').lower()])
+
+        if sepautset[0][1].accepts([event.replace(' ','').lower()]):
+            J = {}
+            for past, now, future in sepautset:
+                if past.is_accepting() and \
+                now.accepts([event.replace(' ','').lower()]):
+                    temp = copy.deepcopy(future)
+                    J[temp] = future.initial_state
+            O.append(J)
+        for j in O:
+            for aut, st in j.items():
+                aut.make_transition([event.replace(' ','').lower()])
+                j[aut] = aut.current_state
+
+    if O:
+        count = 0
+        for janus in O:
+            for automa, state in janus.items():
+                if state in automa.accepting_states:
+                    count += 1
+                    break
+                else:
+                    continue
+        print('[ACTIVATED]: ' + str(len(O)))
+        print('[FULFILLED]: ' + str(count))
+        print('[INTERESTINGNESS DEGREE]: ' + str(count/len(O)))
+    else:
+        print('[ACTIVATED]: 0')
+        print('[FULFILLED]: 0')
+        print('[INTERESTINGNESS DEGREE]: 0')
+\end{lstlisting}
+As we can see, the practical implementation of the Janus algorithm directly reflects the pseudocode illustrated in \ref{alg:janus}. 
+
+Firstly, at line \ref{line:input-log} we use the \texttt{InputHandler} class to parse and get the event log. Then, starting from line \ref{line:sep-formulas} we manually define our separated formulas. As a consequence, at lines \ref{line:constraint} and \ref{line:sep-aut-set}, we define the constraint formula and the separated automata set, respectively. In particular, by defining the separated automata set we use our tool \LTLfToDFA for the automatic generation of automata. Finally, at this point (line \ref{line:janus-alg}), the computation of the \textit{interestingness degree} can start.
 \subsection{Results}
-After having illustrated the whole implementation of \janus, we are ready to present results of its execution where we have evaluated our tool against a real-world event log. Hence, we have analyzed the real-world event log called \textit{Sepsis}\footnote{https://doi.org/10.4121/uuid:915d2bfb- 7e84- 49ad- a286- dc35f063a460}, which reports the trajectories of patients showing symptoms of sepsis in a Dutch hospital.
+After having illustrated the whole implementation of \janus, we are ready to present results of its execution where we have evaluated our tool against a real-world event log. Hence, we have analyzed the real-world event log called \textit{Sepsis}\footnote{https://doi.org/10.4121/uuid:915d2bfb- 7e84- 49ad- a286- dc35f063a460}, which reports trajectories of patients showing symptoms of sepsis in a Dutch hospital.
+
+Since the \textit{Sepsis} event log contains a lot of trajectories, we discuss, in the following example, the execution of \janus only on a few of them.
+\begin{example}\label{ex:sepsis-result}
+In this example, we show how \janus computes the \textit{interestingness degree} over different traces under the \declare assumption, namely when, at each instant, one and only one task is executed.
+
+The constraint is expressed as in \ref{eq:new-constraint} and, for this example, is as follows:
+\begin{align*}
+\Psi = \;& (False \lAND Leucocytes \lAND False) \lOR\\
+& (\Yesterday ER Registration \lAND (True \lAND Leucocytes) \lAND True) \lOR\\
+& (True \lAND (True \lAND Leucocytes) \lAND \Diamond CRP)
+\end{align*}
+In this example, we have selected the following three different traces:
+\begin{enumerate}
+\item \label{list:trace-1} \{'ER Registration', 'IV Liquid', 'ER Triage', 'ER Sepsis Triage', 'LacticAcid', 'Leucocytes', 'CRP', 'IV Antibiotics', 'Admission NC', 'CRP', 'Leucocytes', 'Release A'\};
+\item \label{list:trace-2} \{'ER Registration', 'ER Triage', 'ER Sepsis Triage', 'Admission NC', 'Release A'\};
+\item \label{list:trace-3} \{'ER Registration', 'ER Triage', 'ER Sepsis Triage', 'Leucocytes', 'LacticAcid', 'CRP', 'IV Antibiotics', 'Admission NC', 'Leucocytes', 'CRP', 'CRP', 'Leucocytes', 'Release A'\}.
+\end{enumerate}
+To begin with, in trace \ref{list:trace-1} the constraint is activated twice at instants $t_1(6)$ and $t_1(11)$, respectively. However, the constraint is satisfied only by the former activation because the triple $(True \lAND (True \lAND Leucocytes) \lAND \Diamond CRP)$ is satisfied within the trace. Indeed, the second activation, at instant $t_1(11)$, does not fulfill the constraint since there is no triple of $\Psi$ which holds true. So, the \textit{interestingness degree} of this trace is $\dfrac{1}{2} = 0.5$.
+
+Secondly, in trace \ref{list:trace-2}, the constraint is never activated because the task "Leucocytes" never occurs, so no triple of $\Psi$ can hold true. In this case, the \textit{interestingness degree} is simply $0$.
+
+Lastly, in trace \ref{list:trace-3}, the constraint is activated three times, respectively at instants $t_3(4)$,  $t_3(9)$ and $t_3(12)$. Similarly to what happens in trace \ref{list:trace-1}, here only the first two activations fulfill the constraint formula. In particular, also in this case, the triple of $\Psi$ that is satisfied is $(True \lAND (True \lAND Leucocytes) \lAND \Diamond CRP)$. As a result, the \textit{interestingness degree} of this trace is $\dfrac{2}{3} = 0.667$.
+\end{example}
+
+Although the example \ref{ex:traces} is a proof-of-concept of the theory given in previous sections, it does not show clearly the actual potential of the \janus implementation given by the generalization theorem \ref{th:gener-theo} and the integration of our \LTLfToDFA, both introduced in this thesis. To this extent, we describe an \textit{ad-hoc} example in which all contributions given in this thesis appear.
+
+\begin{example}\label{ex:adhoc-result}
+In this example, we show how \janus computes the \textit{interestingness degree} over \textit{ad-hoc} traces without having restrictions, namely:
+
+\begin{itemize}
+\item the constraint could be any kind of formula;
+\item we could have multiple symbols at each instant in the trace;
+\item the activation condition could be a propositional formula.
+\end{itemize}
+
+\noindent Therefore, the constraint is expressed as in \ref{eq:new-constraint} and, also for this example we borrow symbols from \textit{Sepsis} as follows:
+\begin{align*}
+\Psi = \;& (False \lAND (Leucocytes \lAND LacticAcid) \lAND False) \lOR \\
+& (\Yesterday ER Registration \lAND (True \lAND (Leucocytes \lAND LacticAcid)) \lAND True) \lOR\\
+& (True \lAND (True \lAND (Leucocytes \lAND LacticAcid)) \lAND \Diamond CRP)
+\end{align*}
+As we can see, now we have chosen the activation condition as a propositional formula $(Leucocytes \lAND LacticAcid)$ meaning that the constraint will be activated only if, at a given instant of the trace, $(Leucocytes \lAND LacticAcid)$ holds true.
+Additionally, we have selected the following traces for the example:
+\begin{enumerate}
+\item \label{list:adhoc-trace1} \{'ER Registration', ('ER Triage','ER Sepsis Triage), ('LacticAcid', 'IV Liquid'),  ('Leucocytes', 'LacticAcid'), 'CRP', 'LacticAcid', ('Leucocytes', 'LacticAcid'), ('Leucocytes', 'IV Antibiotics'),'IV Liquid', 'Release A'\}
+\item \label{list:adhoc-trace2} \{'ER Registration', ('ER Triage','ER Sepsis Triage), ('CRP', 'LacticAcid'),  ('Leucocytes', 'LacticAcid'), 'Admission NC', 'CRP', 'LacticAcid', ('Leucocytes', 'IV Liquid'), ('Leucocytes', 'IV Antibiotics'), 'IV Liquid', 'Release A'\}
+\end{enumerate}
+
+Initially, in trace \ref{list:adhoc-trace1}, the constraint is activated twice at instants $t_1(4)$ and $t_1(7)$, respectively. Yet, the constraint is satisfied only by the $t_1(4)$ where only the triple $(True \lAND (True \lAND (Leucocytes \lAND LacticAcid)) \lAND \Diamond CRP)$ is satisfied within the trace. Notice that the constraint is activated only when in the trace there are at the same time $Leucocytes$ and $LacticAcid$. Consequently, the \textit{interestingness degree} of this trace is $\dfrac{1}{2} = 0.5$.
+
+On the other hand, in trace \ref{list:trace-2}, the constraint is activated and fulfilled once. Hence, in this case, the \textit{interestingness degree} is simply $1$.
+\end{example}
+
 \section{Summary}
-
-
-
-
+In this chapter, we have presented how the \LTLfToDFA Python package has been well employed in the field of Business Process Management. In particular, we have explored the Janus approach to declarative process mining enhancing its peculiarities and, at the same time, giving our substantial contributions in generalizing the approach itself. After that, we have described the implementation of the janus algorithm, modified accordingly to our modifications, highlighting all its main features. Finally, we have seen examples of execution results.
 
 
 

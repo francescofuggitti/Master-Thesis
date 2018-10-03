@@ -164,7 +164,7 @@ About expressiveness of \PLTL, we can state the following theorem:
 \PLTL has exactly the same expressive power of \LTLf.
 \end{theorem}
 
-\noindent Although from Theorem \ref{th:expr-ltl-pltl} \PLTL and \LTL have the same expressive power, it is worth to say that the \LTLf formalism augmented with past temporal operators present in \PLTL can be exponentially more succinct that \LTLf (with only future operators) \citep{markey2003temporal}.
+\noindent Although from Theorem \ref{th:expr-ltl-pltl} \PLTL and \LTL have the same expressive power, it is worth to say that the \LTLf formalism augmented with past temporal operators present in \PLTL can be exponentially more succinct than \LTLf (with only future operators) \citep{markey2003temporal}.
 Indeed, having at the same time past and future temporal operators is really useful because, in general, expressions given in natural language use references to events occurred in the past. We give an example in the following.
 \begin{example}\label{succinctness-example}
 Succinctness of \LTLf with Past:
@@ -177,7 +177,7 @@ Both formulas mean \emph{every grant is preceeded by a request}. The  former (\r
 Finally, this property of \LTLf augmented with past temporal operators is interesting, however it is out of the scope of this thesis.
 \section{\LTLf and \PLTL Translation to  Automata}\label{sec:formula-to-automa}
 Given an \LTLf/\PLTL formula $\varphi$, we can build a deterministic finite state automaton (\DFA) \citep{Rabin:1959:FAD:1661907.1661909} 
-$\automaton_\varphi$ that accepts the same finite traces that makes $\varphi$ true. To achieve this, we proceed in two steps: first, we translate \LTLf and \PLTL formulas into an (\NFA) \citep{DeGiacomo:2015:SLL:2832415.2832466} following a simple direct algorithm; secondly, the obtained \NFA can be converted into a \DFA following the standard \emph{determinization}  procedure.
+$\automaton_\varphi$ that accepts the same finite traces that makes $\varphi$ true. To accomplish this, we proceed in two steps: first, we translate \LTLf and \PLTL formulas into an (\NFA) \citep{DeGiacomo:2015:SLL:2832415.2832466} following a simple direct algorithm; secondly, the obtained \NFA can be converted into a \DFA following the standard \emph{determinization}  procedure.
 
 Now, we recall definitions of \NFA and \DFA:
 \begin{definition}\label{nfa}
@@ -195,62 +195,94 @@ A \DFA is a \NFA where $\delta$ is a function $\delta: Q \times \Sigma \to Q$
 \end{definition}
 To denote the set of all traces over $\Sigma$ accepted by $\automaton$ we will use $\L(A)$ henceforth.
 
-In the next subsections, we will provide some definitions and we will illustrate the algorithm for the translation also giving an example.
+In the next subsections, we will provide some definitions and we will illustrate the algorithm for the translation.
 \subsection{$\DfunSym$ function for \LTLf}\label{sec:ltlf-delta}
-%In order to build the \NFA, we need to define an auxiliary function $\DfunSym$ as follows:
-%\begin{definition}\label{ltlf-delta-def}
-%The \emph{delta function $\DfunSym$ for \LTLf formulas} is a function that takes as input an (implicitly quoted) \LTLf formula $\varphi$ (in negation normal form (NNF)\footnote{A formula is in \textit{negation normal form} if negation ($\lnot$) occurs only in front of atoms.}) and a propositional interpretation $\PropInt$ for $\P$ (including $\Last$), and returns a positive boolean formula whose atoms are (implicitly
-%quoted) $\varphi$ subformulas. It is defined as follows:
-%\input{chapters/misc/ltlf_delta}
-%where $\Ended$ is defined as Equation \ref{ltlf-ended}. As a consequence of Definition \ref{ltlf-delta-def} and from Equation \ref{ltlf-eve} and \ref{ltlf-alw}, we can deduce that 
-%\begin{align*}
-%\Dfun{\Diamond \varphi} 	\ind &= \ind   \Dfun{\varphi} \lOR \Dfun{\Next \Diamond \varphi}\\
-%\Dfun{\Box \varphi} 	\ind &= \ind   \Dfun{\varphi} \lAND \Dfun{\Wnext \Box \varphi}
-%\end{align*}
-%	
-%Moreover, we define $\DfunEps{\varphi}$ which is inductively defined as Equation \ref{delta-ltlf}, except for the following cases:
-%\begin{align}
-%\begin{aligned}
-%\DfunEps{A} 			\ind &= \ind \false\\
-%\DfunEps{\lnot A} 			\ind &= \ind  \false\\
-%\DfunEps{\Next \varphi} 	\ind &= \ind   \false\\
-%\DfunEps{\Wnext \varphi} 	\ind &= \ind   \true\\
-%\DfunEps{\varphi_1 \lUntil \varphi_2} 	\ind &= \ind   \false\\
-%\DfunEps{\varphi_1 \Release \varphi_2} 	\ind &= \ind   \true\\
-%\label{delta-ltlf-eps}
-%\end{aligned}					
-%\end{align}
-%\end{definition}
-%Note that $\DfunEps{\varphi}$ is always either $\true$ or $\false$. It is worth to observe for future use that from Equation \ref{delta-ltlf-eps} we can say $\DfunEps{\Diamond \varphi} = \false$ and $\DfunEps{\Box \varphi} = \true$.
+To build the \NFA, we need to define an auxiliary function $\DfunSym$.
+\begin{definition}\label{ltlf-delta-def}
+The \emph{delta function $\DfunSym$ for \LTLf formulas} is a function that takes as input an (implicitly quoted) \LTLf formula $\varphi$ (in negation normal form (NNF)\footnote{A formula is in \textit{negation normal form} if negation ($\lnot$) occurs only in front of atoms.}) and a propositional interpretation $\PropInt$ for $\P$ (including $\Last$), and returns a positive boolean formula whose atoms are (implicitly
+quoted) $\varphi$ subformulas. It is defined as follows:
+\input{chapters/misc/ltlf_delta}
+where $\Ended$ is defined as Equation \ref{ltlf-ended}. As a consequence of Definition \ref{ltlf-delta-def} and from Equation \ref{ltlf-eve} and \ref{ltlf-alw}, we can deduce that 
+\begin{align*}
+\Dfun{\Diamond \varphi} 	\ind &= \ind   \Dfun{\varphi} \lOR \Dfun{\Next \Diamond \varphi}\\
+\Dfun{\Box \varphi} 	\ind &= \ind   \Dfun{\varphi} \lAND \Dfun{\Wnext \Box \varphi}
+\end{align*}
+	
+Moreover, we define $\DfunEps{\varphi}$ which is inductively defined as Equation \ref{delta-ltlf}, except for the following cases:
+\begin{align}
+\begin{aligned}
+\DfunEps{A} 			\ind &= \ind \false\\
+\DfunEps{\lnot A} 			\ind &= \ind  \false\\
+\DfunEps{\Next \varphi} 	\ind &= \ind   \false\\
+\DfunEps{\Wnext \varphi} 	\ind &= \ind   \true\\
+\DfunEps{\varphi_1 \lUntil \varphi_2} 	\ind &= \ind   \false\\
+\DfunEps{\varphi_1 \Release \varphi_2} 	\ind &= \ind   \true\\
+\label{delta-ltlf-eps}
+\end{aligned}					
+\end{align}
+\end{definition}
+Notice that $\DfunEps{\varphi}$ is always either $\true$ or $\false$. Here, it is worth to observe that from Equation \ref{delta-ltlf-eps} we can say $\DfunEps{\Diamond \varphi} = \false$ and $\DfunEps{\Box \varphi} = \true$.
 \subsection{$\DfunSym$ function for \PLTL}\label{sec:pltl-delta}
-%We give the following definition:
-%\begin{definition}\label{ltlf-delta-def}
-%The \emph{delta function $\DfunSym$ for \LTLf formulas} is a function that takes as input an (implicitly quoted) \LTLf
-%formula $\varphi$ in NNF and a propositional interpretation $\PropInt$ for $\Prop$, and returns a positive boolean formula whose atoms are (implicitly
-%quoted) $\varphi$ subformulas. It is defined as follows:
-%\input{chapters/misc/ltlf_delta}
-%where $\Ended$ is defined as Equation \ref{ltlf-ended}. As a consequence of Definition \ref{ltlf-delta-def} and from Equation \ref{ltlf-eve} and \ref{ltlf-alw}, we can deduce that 
-%\begin{align*}
-%\Dfun{\Diamond \varphi} 	\ind &= \ind   \Dfun{\varphi} \lOR \Dfun{\Next \Diamond \varphi}\\
-%\Dfun{\Box \varphi} 	\ind &= \ind   \Dfun{\varphi} \lAND \Dfun{\Wnext \Box \varphi}
-%\end{align*}
-%	
-%Moreover, we define $\DfunEps{\varphi}$ which is inductively defined as Equation \ref{delta-ltlf}, except for the following cases:
-%\begin{align}
-%\begin{aligned}
-%\DfunEps{A} 			\ind &= \ind \false\\
-%\DfunEps{\lnot A} 			\ind &= \ind  \false\\
-%\DfunEps{\Next \varphi} 	\ind &= \ind   \false\\
-%\DfunEps{\Wnext \varphi} 	\ind &= \ind   \true\\
-%\DfunEps{\varphi_1 \lUntil \varphi_2} 	\ind &= \ind   \false\\
-%\DfunEps{\varphi_1 \Release \varphi_2} 	\ind &= \ind   \true\\
-%\label{delta-ltlf-eps}
-%\end{aligned}					
-%\end{align}
-%\end{definition}
-%Note that $\DfunEps{\varphi}$ is always either $\true$ or $\false$. It is worth to observe for future use that from Equation \ref{delta-ltlf-eps} we can say $\DfunEps{\Diamond \varphi} = \false$ and $\DfunEps{\Box \varphi} = \true$.
-%\section{\PLTLToDFA}
-%talk about theory behind conversion to automata in past
+Since, from Theorem \ref{th:expr-ltl-pltl}, \PLTL has exactly the same expressive power of \LTLf, the corresponding $\DfunSym$ function for \PLTL is equivalent to the one seen in Section \ref{sec:ltlf-delta}, but using past temporal operators. At this point, we should formally define how to get the \LTLf formula corresponding to a \PLTL formula. We give the following definition and theorem.
+
+\begin{definition}\label{def:inverse-formula}
+Given a \PLTL formula $\varphi$, the inverted \LTLf formula $\varphi^R$ of $\varphi$ is obtained by replacing all temporal operators in $\varphi$ with the corresponding future operators.
+\end{definition}
+
+\begin{theorem}\label{th:pltl-to-ltl}
+Let $\L(\varphi)$ be the language of a \PLTL formula $\varphi$ and $\L^R(\varphi)$ be its reversed language, then $\L(\varphi) = \L^R(\varphi^R)$
+\end{theorem}
+
+The Theorem \ref{th:pltl-to-ltl} shows that the reversed \LTLf formula $\varphi^R$ accepts exactly the reversed language satisfying the \PLTL formula $\varphi$. 
+
+\begin{example}
+Given a \PLTL formula $\varphi = \boxminus(a \Rightarrow \Yesterday b)$, its reversed formula $\varphi^R$ is obtained by replacing all past temporal operators $\boxminus$ and $\Yesterday$ with their dual in the future, respectively $\Box$ and $\Next$. So, we have $\varphi^R = \Box(a \Rightarrow \Next b)$.
+\end{example}
+
+\subsection{The \LTLfToNFA algorithm}
+The \LTLfToNFA algorithm takes as input an \LTLf/\PLTL formula $\varphi$ and outputs an \NFA $\automaton_\varphi = \tup{2^\Prop, Q, q_0, \delta, F}$ that accepts exactly the traces satisfying $\varphi$. The algorithm, presented in the following, is a variant of the algorithm in \citep{DeGiacomo:2015:SLL:2832415.2832466}. Moreover, its correctness relies on the fact that every \LTLf/\PLTL formula $\varphi$ can be associated to a polynomial \emph{alternating automaton on words} (\AFW) accepting exactly the traces that make $\varphi$ true and that every \AFW can be transformed into an \NFA \citep{de2013linear}.
+Furthermore, the algorithm requires that $\varphi$ is in \emph{negation normal form} (NNF), which can be done in linear time.
+
+The function $\DfunSym$ used in lines \ref{ldlf2nfa:delta-eps-init}, \ref{ldlf2nfa:delta-for-loop} and \ref{ldlf2nfa:delta-eps-end} is the one defined in Section \ref{sec:ltlf-delta}.
+\begin{algorithm}
+	\caption{\LTLfToNFA: from \LTLf/\PLTL formula $\varphi$ to \NFA $\automaton_\varphi$}
+	\label{alg:ltl2nfa}
+	\begin{algorithmic}[1]
+		\State \algInput\ \LTLf/\PLTL formula $\varphi$
+		\State \algOutput\ \NFA $\automaton_\varphi = \tup{2^\Prop, Q, q_0, \delta, F}$
+		\State $q_0 \gets \set{\varphi}$
+		\State $F \gets \set{\emptyset}$
+		\If{$(\DfunEps{\varphi} = \true)$} \label{ldlf2nfa:delta-eps-init}
+			\State $F \gets F \cup \set{q_0}$
+		\EndIf
+		\State $Q \gets \set{q_0, \emptyset}$
+		\State $\delta \gets \emptyset$
+		\While{$(Q \tm{or} \delta\ \text{change})$}
+			\For{$(q\in Q)$} \label{ldlf2nfa:main-for-loop}
+				\If{$(q'\models \bigwedge_{(\psi\in q)} \Dfun{\psi})$} \label{ldlf2nfa:delta-for-loop}
+					\State $Q \gets Q \cup \set{q'}$
+					\State $\delta \gets \delta \cup \set{(q, \PropInt, q')}$
+					\If{$(\bigwedge_{(\psi\in q')} \DfunEps{\psi} = true)$} \label{ldlf2nfa:delta-eps-end}
+						\State $F \gets F \cup \set{q'}$
+					\EndIf
+				\EndIf		
+			\EndFor
+		\EndWhile
+	\end{algorithmic}
+\end{algorithm}
+
+\subsubsection*{How \LTLfToNFA works}
+The \LTLfToNFA algorithm proceeds in a forward fashion. Indeed, the algorithm visits every state already seen $q$, checks all the possible transitions from that state and collects the results until states and transitions do not change. Consequently, it computes the next state $q'$, the new transition $(q, \PropInt, q')$ and whether $q'$ is a final state or not. Intuitively, the delta function $\DfunSym$ emulates the semantic behaviour of every \LTLf/\PLTL subformula after seeing $\PropInt$.
+
+States of $\automaton_\varphi$ are sets of atoms (each atom is a quoted $\varphi$ subformula) to be interpreted as conjunctions. The empty conjunction $\emptyset$ stands for $\true$. Moreover, $q'$ is a set of quoted subformulas of $\varphi$ denoting a minimal interpretation such that $q' \models \bigwedge_{(\psi\in q)} \Dfun{\psi}$ (notice that we have also $(\emptyset, p,\emptyset) \in \delta$ for every $p \in 2^\Prop$).
+
+The following result holds:
+\begin{theorem}[\cite{DeGiacomo:2015:SLL:2832415.2832466}]\label{ldlf2nfa-correctness}
+Algorithm \LTLfToNFA is correct, i.e., for every finite trace $\trace: \trace \models \varphi \tm{iff} \trace \in \L(\automaton_\varphi)$. Moreover, it terminates in at most an exponential number of steps, and generates a set of states $\States$ whose size is at most exponential in the size of the formula $\varphi$.
+\end{theorem}
+
+In order to obtain a \DFA, the \NFA $\automaton_\varphi$ can be determinized in exponential time \citep{Rabin:1959:FAD:1661907.1661909}. Hence, an \LTLf/\PLTL formula can be transformed into the corresponding \DFA in 2\EXPTIME.
+
 \section{\LTLf/\PLTL to \FOL Encoding and \MONA}\label{sec:mona-encoding}
 In this section, we will illustrate how to translate an \LTLf and a \PLTL formula into \emph{first-order logic} (\FOL) over finite linear ordered sequences\footnote{More precisely \textit{monadic first-order logic on finite linearly ordered domains}, sometimes denoted as \sc fo[<].} \citep{de2013linear,zpv2018}. Then, we will present the \MONA tool with its syntax and we will explain the translation procedure from a \FOL encoding to the \MONA enconding.
 \subsection{\LTLf-to-\FOL Encoding}\label{subsec:ltlf-to-fol}
@@ -368,10 +400,10 @@ P\Q = {0,4} union {1,2};
 First, we have declared \texttt{P} and \texttt{Q} as second-order variables. After that, we have defined a formula telling that the set difference between \texttt{P} and \texttt{Q} is the union of set \texttt{\{0,4\}} and \texttt{\{1,2\}}. Obviously, this formula is not always true, nonetheless there is an interpretation that satisfies it. For instance, the assignments \texttt{\{0,1,2,4\}} to \texttt{P} and \texttt{\{5\}} to \texttt{Q}. This interpretation can also be represented as a bit string for each variable, where positions in the string correspond to natural numbers, 1 means that the number is in the set (remember that a second-order variable is a set) whereas 0 means that is not. In this case, we would have \texttt{P}$ \rightarrow 111010$ and \texttt{Q}$ \rightarrow 000001$. Thus, it is possible to define a \textit{language} associated to these bit strings and, since it is \textit{regular}, it is also possible to build a \DFA. Moreover, \MONA assumes that all defined formulas in the program are in conjunct and each statement should be terminated by a semicolon.
 There are also additional elements consisting the \MONA syntax depicted in Figure \ref{fig:mona-syntax}.
 \begin{figure}[h]
-	\centering
-	\includegraphics[width=\textwidth]{images/mona-syntax}
-	\caption{The essential \MONA syntax.}
-	\label{fig:mona-syntax}
+\centering
+\includegraphics[width=\textwidth]{images/mona-syntax}
+\caption{The essential \MONA syntax.}
+\label{fig:mona-syntax}
 \end{figure}
 As we can see from that Figure, there are also quantifiers and all usual logical connectives (i.e. those used in \FOL). In addition, since we would like to write \FOL on \textit{finite linearly ordered domains}, we should enable the \mls mode specifying \texttt{m2l-str;} at the beginning of the \MONA program. Actually, \texttt{m2l-str;} is a shortcut for:
 \begin{lstlisting}[style=Mona, escapechar = £]

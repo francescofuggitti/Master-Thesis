@@ -93,6 +93,29 @@
 	stepnumber=1	
 }
 
+\lstdefinelanguage{PDDL}{
+  basicstyle      = \ttfamily,
+  sensitive=false,    % not case-sensitive
+  morecomment=[l]{;}, % line comment
+  alsoletter={:,-},   % consider extra characters
+  numberstyle=\tiny\color{codegray}\noncopynumber,	
+  numbers=left,
+  stepnumber=1,
+  morekeywords={
+    define,domain,problem,not,and,or,when,forall,exists,either,
+    :domain,:requirements,:types,:objects,:constants,
+    :predicates,:action,:parameters,:precondition,:effect,
+    :fluents,:primary-effect,:side-effect,:init,:goal,
+    :strips,:adl,:equality,:typing,:conditional-effects,
+    :negative-preconditions,:disjunctive-preconditions,
+    :existential-preconditions,:universal-preconditions,:quantified-preconditions,
+    :functions,assign,increase,decrease,scale-up,scale-down,
+    :metric,minimize,maximize,
+    :durative-actions,:duration-inequalities,:continuous-effects,
+    :durative-action,:duration,:condition
+  }
+}
+
 \hypersetup{
 	hyperfootnotes=true,            
 	bookmarks=true,         
@@ -103,7 +126,7 @@
 	citecolor=red,
 	urlcolor=blue,
 	pdftitle={\thesistitle},
-	pdfsubject = {Master Thesis, University of Rome "La Sapienza"},
+	pdfsubject = {Master Thesis, University of Rome "Sapienza"},
 	pdfauthor={Francesco Fuggitti},
 	pdfkeywords={master thesis, sapienza, roma, university, francesco fuggitti}
 	pdfauthor = {\textcopyright\ \today\ Francesco Fuggitti},
@@ -128,7 +151,7 @@
 \copyyear{2018}
 \advisor{Prof. Giuseppe De Giacomo}
 \authoremail{fuggitti.1735212@studenti.uniroma1.it}
-%\examdate{$22^{\text{th}}$ October 2018}
+%\examdate{$25^{\text{th}}$ October 2018}
 %\examiner{Prof. }
 %\examiner{Prof. }
 %\examiner{Prof. }
