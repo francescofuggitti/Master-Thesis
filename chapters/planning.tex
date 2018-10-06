@@ -1,6 +1,6 @@
-\chapter{Planning for Extended Temporal Goals}
+\chapter{Planning for Extended Temporal Goals}\label{ch:planning}
 In this chapter, we will define a new approach to the problem of non-deterministic planning for extended temporal goals. In particular, we will give a solution to this problem reducing it to a fully observable non-deterministic (\FOND) problem and taking advantage of our tool \LTLfToDFA, presented in Chapter \ref{ch:ltlf2dfa}. First of all, we will introduce the main idea and motivations supporting our approach. Then, we will give some preliminaries explaining the Planning Domain Definition Language (\PDDL) language and the \FOND planning problem formally. After that, we will illustrate our solution with the encoding of temporal goals into a \PDDL domain and problem. Finally, we will present our practical implementation of the proposed solution.
-\section{Idea and Motivations}
+\section{Idea and Motivations}\label{sec:plan-idea-motiv}
 Planning for temporally extended goals with \textit{deterministic} actions has been well studied during the years starting from \citep{bacchus1998planning} and \citep{doherty2001talplanner}. Two main reasons why temporally extended goals have been considered over the classical goals, viewed as a desirable set of final states to be reached, are because they are not limited in what they can specify and they allows us to restrict the manner used by the plan to reach the goals. Indeed, temporal extended goals are fundamental for the specification of a collection of real-world planning problems. Yet, many of these real-world planning problems have a \textit{non-deterministic} behavior owing to unpredictable environmental conditions. However, planning for temporally extended goals with \textit{non-deterministic} actions is a more challenging problem and has been of increasingly interest only in recent years with \citep{camacho2017non}.
 
 In this scenario, we have devised a solution to this problem that exploits the translation of a temporal formula to a \DFA, using \LTLfToDFA. In particular, our idea is the following: given a non-deterministic planning problem and a temporal formula, we first obtain the corresponding \DFA of the temporal formula through \LTLfToDFA, then, we encode such a \DFA into the non-deterministic planning domain. As a result, we have reduced the original problem to a classic \FOND planning problem. In other words, we compile extended temporal goals together with the original planning domain, specified in \PDDL, which is suitable for input to standard (\FOND) planners.
@@ -35,7 +35,7 @@ The \textit{domain} definition gives each domain a name and specifies predicates
     ...)
   ...)  
 \end{lstlisting}
-where \texttt{[]} indicates optional elements. To begin with, any \PDDL \textit{domain} definition must declare its expressivity requirements given after the \texttt{:requirements} key. The basic \PDDL expressivity is called \textsc{strips}\footnote{\textsc{strips} stands for STanford Research Institute Problem Solver, which is a formal language of inputs to the homonym automated planner developed in 1971.}, whereas a more complex one is the Action Description Language (\textsc{adl}), that extends \textsc{strips} in several ways, such as providing support for negative preconditions, disjunctive preconditions, quantifiers, conditional effects etc.. Nevertheless, many planners do not support full \textsc{adl} because creating plans efficiently is not trivial. Although the presence of this limitation, the \PDDL language allows us to use only some of the \textsc{adl} features. Furthermore, there are also other requirements often used that can be specified as \texttt{equality}, allowing the usage of the predicate \texttt{=} interpreted as equality, and \texttt{typing} allowing the typing of objects. 
+where \texttt{[]} indicates optional elements. To begin with, any \PDDL \textit{domain} definition must declare its expressivity requirements given after the \texttt{:requirements} key. The basic \PDDL expressivity is called \textsc{strips}\footnote{\textsc{strips} stands for STanford Research Institute Problem Solver, which is a formal language of inputs to the homonym automated planner developed in 1971.}, whereas a more complex one is the Action Description Language (\textsc{adl}), that extends \textsc{strips} in several ways, such as providing support for negative preconditions, disjunctive preconditions, quantifiers, conditional effects etc.. Nevertheless, many planners do not support full \textsc{adl} because creating plans efficiently is not trivial. Although the presence of this limitation, the \PDDL language allows us to use only some of the \textsc{adl} features. Furthermore, there are also other requirements often used that can be specified as \texttt{equality}, allowing the usage of the predicate \texttt{=} interpreted as equality, and \texttt{typing} allowing the typing of objects. As we will explain later in Section \ref{sec:planning-implementation}, our practical implementation supports, for now, only simple \textsc{adl}, namely conditional effects in domain's operators which do not have any nested subformula.
 
 Secondly, there is the predicates definition after the \texttt{:predicates} key. Predicates may have zero or more parameters variables and they specify only the number of arguments that a predicate should have. Moreover, a predicate may also have typed parameters written as \texttt{?X -- TYPE\_OF\_X}.
 
@@ -191,6 +191,8 @@ Here, we show as example the \texttt{put-on-block} operator of the \FOND version
 The effect of the \texttt{put-on-block} is non deterministic. Specifically, the action is executed every time the agent is holding a block and another block is clear on the top. The effect can be either that the block is put on top of the other block or that the block is put on table. This has to be intended as an aleatory event. Indeed, the agent does not control the operator execution result.
 \end{example}
 
+Additionally, a \textit{non-deterministic} action $a$ with effect $oneof(E_1,\dots,E_n)$ can be intended as a set of \textit{deterministic} actions $b_1,\dots,b_n$, sharing the same precondition of $a$, but with effects $E_1,\dots,E_n$, respectively. Hence, the application of action $a$ turns out in the application of one of the actions $b_i$, chosen non-deterministically.
+
 At this point, we can formally define the \FOND planning. Following \citep{ghallab2004automated} and \citep{geffner2013concise}, we give the following definition:
 \begin{definition}
 A \textit{non-deterministic domain} is a tuple $\D = \tup{2^\F, \mathcal{A}, s_0, \delta, \alpha}$ where:
@@ -204,33 +206,90 @@ A \textit{non-deterministic domain} is a tuple $\D = \tup{2^\F, \mathcal{A}, s_0
 \end{itemize}
 \end{definition}
 \noindent Such domain $\D$ is assumed to be represented compactly (e.g. in \PDDL), therefore, considering the \textit{size} of the domain as the cardinality of $\F$. Intuitively, the evolution of a non-deterministic domain is as follows: from a given state $s$, the agent chooses what action $a \in \alpha(s)$ to execute, then, the environment chooses a \textit{successor state} $s'$ with $(s,a,s') \in \delta$.
-  
+Moreover, the agent can execute an action having the knowledge of all history of states so far.
 
+Now, we can define the meaning of solving a \FOND planning problem on $\D$. A \textit{trace} of $\D$ is a finite or infinite sequence $s_0,a_0,s_1,a_1, \dots$ where $s_0$ is the initial state, $a_i \in \alpha(s_i)$ and $s_{i+1} \in \delta(s_i,a_i)$ for each $s_i,a_i$ in the trace.
 
+Solutions to a \FOND problem $\P$ are called \textit{strategies} (or \textit{policies}). A \textit{strategy} $\trace$ is defined as follows:
+\begin{definition}\label{def:policy}
+Given a \FOND problem $\P$, a \textit{strategy} $\trace$ for $\P$ is a partial function defined as:
+\begin{equation}
+\trace: (2^\F)^+ \rightarrow \mathcal{A}
+\end{equation}
+such that for every $u \in (2^\F)^+$, if $\trace(u)$ is defined, then $\trace(u) \in \alpha(last(u))$, namely it selects applicable actions, whereas, if $\trace(u)$ is undefined, then $\trace(u) = \bot$.
+\end{definition}
+\noindent A trace $\tau$ is \textit{generated} by $\trace$ (often called $\trace$-trace) if the following holds:
+\begin{itemize}
+\item if $s_0,a_0,\dots,s_i,a_i$ is a prefix of $\tau$, then $\trace(s_0,s_1,\dots,s_i) = a_i$;
+\item if $\tau$ is finite, i.e. $\tau = s_0,a_0,\dots,a_{n-1},s_n$, then $\trace(s_0,s_1,\dots,s_i) = \bot$.
+\end{itemize}
 
+For \FOND planning problems, in \citep{cimatti2003weak}, are defined different classes of solutions. Here we examine only two of them, namely \textit{strong solution} and \textit{strong cyclic solutions}. In the following, we give their formal definitions.
 
+\begin{definition}\label{def:strong-sol}
+A \textit{strong solution} is a strategy that is guaranteed to achieve the goal regardless of non-determinism.
+\end{definition}
 
+\begin{definition}\label{def:strong-cyc-sol}
+\textit{Strong cyclic solutions} guarantee goal reachability only under the assumption of \textit{fairness}. In the presence of \textit{fairness} it is supposed that all action outcomes, in a given state, would occur infinitely often. 
+\end{definition}
+Obviously, \textit{strong cyclic solutions} are less restrictive than a \textit{strong solution}.
+Indeed, as the name suggests, a strong cyclic solution may revisit states. However, in this thesis we will focus only on searching \textit{strong solutions}. As final remark, when searching for a strong solution to a \FOND problem we refer to \FONDS.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+In the next Section, we will generalize the concept of solving \FOND planning problems with extended temporal goals, describing the step by step encoding process of those temporal goals in the \FOND domain, written in \PDDL.
 \section{Encoding of Temporal Goals in \PDDL}
-\section{Implementation}
+As written in Section \ref{sec:plan-idea-motiv}, planning with extended temporal goals has been considered over the representation of goals in classical planning to capture a richer class of plans where restrictions on the whole sequence of states must be satisfied as well. In particular, differently from classical planning, where the goal description can only be expressed as a propositional formula, in planning for extended temporal goals the goal description may have the same expressive power of the temporal logic in which the goal is specified. This enlarges the general view about planning. In other words, extended temporal goals specify desirable sequences of states and a plan exists if its execution yields one of these desirable of sequences \citep{bacchus1998planning}.
+
+In this thesis, we use \LTLf and \PLTL formalisms as temporal logics for expressing extended goals.
+To better understand the powerful of planning with extended temporal goals we give the following example.
+
+\begin{example}\label{ex:pla-temp-simple}
+Considering the well known \texttt{tireworld} \FOND planning task, one of the possible classical goal can be
+*** PUT THE EXAMPLE HERE ***
+\end{example}
+
+Planning for \LTLf and \PLTL goals slightly changes the definitions given in Section \ref{sec:fond}. In the following, we give the modified definitions of the concepts seen before.
+
+\begin{definition}\label{def:strong-sol-extend}
+Given a domain $\D$ and an \LTLf/\PLTL formula $\varphi$ over atoms $\F \cup \mathcal{A}$, a strategy $\trace$ is a \textit{strong solution} to $\D$ for goal $\varphi$, if every $\trace$-trace is finite and satisfies $\varphi$.
+\end{definition}
+
+About complexity of \FONDS we have the following Theorem.
+
+\begin{theorem}\citep{rintanen2004complexity}
+\label{th:fond-complex}
+Solving \FONDS problems for \LTLf/\PLTL goals of the form $\Diamond G$ is \EXPTIME-complete in the size of the domain.
+\end{theorem}
+
+At this point, we can start talking about the encoding process of \LTLf/\PLTL goals carried out in this thesis.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Implementation}\label{sec:planning-implementation}
 \subsection{Package Structure}
 \subsection{\PDDL}
 \subsection{Automa}
 \subsection{Main Module}
+\section{Results}
 \section{Summary}

@@ -1,12 +1,56 @@
 \chapter{Introduction}
-Here the intro of the intro
 \section{Context}
-here the context of the thesis
-\section{Problem}
-what is the problem solved
+The literature on Artificial Intelligence (AI) and Computer Science (CS) has directed attention to Linear Temporal Logic (\LTL) as the formal language for temporal specification of the sequence of actions of an agent or a system of agents \citep{fagin2004reasoning}. Initially, \LTL on infinite traces was formulated in Computer Science as a specification language for concurrent programs \citep{Pnueli:1977:TLP:1382431.1382534}.
+
+More specifically, the variant of \LTL evaluated on finite traces (\LTLf) and its past counterpart \PLTL, treated in this thesis, have been thoroughly investigated in \cite{de2013linear,lichtenstein1985glory}. Concerning \LTLf, \cite{de2013linear} conceptualise the encoding of \LTLf to First-Order Logic (\FOL) by defining the translation function $fol(\varphi, x)$. \cite{zpv2018} adopts this function, but modifying it with the appropriate built-in operators of \MONA. \MONA was formerly applied in \cite{zhu2017symbolic} because of its performativity. Regarding \PLTL temporal specification, formerly studied in ``The Glory of the Past'' \citep{lichtenstein1985glory}, \cite{zpv2018} formulates the translation function $fol_p(\varphi, x)$ allowing the encoding of \PLTL to \FOL through the application of \MONA operators. Nevertheless, afore-mentioned researches have not yet implemented such a translation function with the \MONA tool starting directly from a \PLTL formula. 
+%tool capable of generating Deterministic Finite-state Automata (\DFA) taking advantage of the \MONA tool.
+
+The above-mentioned formal languages, \LTLf and \PLTL, are mechanism for specifying temporally extended goals in Planning and formula constraints in Business Process Modeling (BPM). While \cite{camacho2017non} analyse non-deterministic planning for \LTL on finite and infinite traces goals, academics have not investigated planning for \PLTL goals. Regarding BPM, \cite{cecconi2018interestingness}, by employing the augmentation of \LTLf with past modalities, introduce a new approach to compute the ratio between the number of times a constraint formula is satisfied by a trace and the number of times the former is activated by the latter. However, such an approach conceptualises the activation condition of the constraint as a single task and it can only handle \declare constraints, under a practical perspective.
+
+In the next Section, we are going to formulate the objective of the thesis by explaining issues pertaining to the applications of \LTLf and \PLTL, particularly, in Planning and BPM.
 \section{Objectives}
-what are the objective of the thesis
+This thesis sets specific objectives about the definition and application of \LTLf and \PLTL formalisms by referring to problems on cited research works.
+
+Firstly, even though \cite{de2013linear} formalized the theory behind the translation from an \LTLf formula to \FOL and \cite{zpv2018} retrieved this approach customizing it for \MONA, they have not yet implemented the translation functions both for \LTLf and \PLTL employing the \MONA tool for the generation of the symbolic Deterministic Finite-state Automaton (\DFA). Such an implementation is critical for the optimization of the conversion processes of \LTLf and \PLTL formulas to \DFA as shown in \cite{zhu2017symbolic}. Therefore, the thesis will build a tool, named \LTLfToDFA, which will use \MONA to convert both \LTLf and \PLTL formulas to their corresponding \DFA.
+
+Secondly, the literature on AI has not investigated planning for \PLTL goals. The investigation on planning for \PLTL goals is of paramount importance in one respect. It generalizes the restriction of modes used by the plan to reach the goal. While previous works considered future goal specifications (i.e. using \LTLf goals), the objective of this thesis is not only to allow past goal specifications (i.e. using \PLTL goals), but also to provide a new formalization of those temporally extended goals in the Planning Domain Definition Language (\PDDL). Such an objective will be attained through the result given by the \LTLfToDFA tool.
+
+Finally, the thesis will propose a generalization of the Janus approach firstly introduced in \cite{cecconi2018interestingness}, under a theoretical and practical perspective. The Janus approach has two main drawbacks. To begin with, the activation condition of a constraint formula could only be specified as a single task. As a result, the constraint can be activated if at a certain instant of the trace there is only a single task. Secondly, the original Janus algorithm implementation does not include a tool to directly convert any \LTLf and \PLTL formulas into their related \DFA. The thesis will address such limitations by devising a generalization of the Janus approach and then employing the \LTLfToDFA tool to directly generate \DFA of any \LTLf and \PLTL formulas.
 \section{Results}
 what are the results achieved
-\section{Structure}
-what is the structure of the thesis
+\section{Structure of the Thesis}
+The thesis is structured as follows:
+\begin{itemize}
+\item In Chapter \ref{ch:theory}, we will illustrate the theoretical framework, consisting of \LTL, \LTLf and \PLTL formalisms, underlying the thesis. These formal languages will be described focusing the attention on their syntax, semantics and interesting properties. Besides, we will be talking about the theory behind the translation procedure of \LTLf and \PLTL formulas to \DFAs. Finally, we will present the \MONA tool explaining in details the encoding process starting from an \LTLf/\PLTL formula to a \MONA program passing through a \FOL translation.
+
+\item In Chapter \ref{ch:ltlf2dfa}, we will present the \LTLfToDFA Python package. We will also describe the structure of the package, discussing in detail its implementation highlighting all the main features and, finally, seeing how it performs in time relatively to the \FLLOAT Python package.
+
+\item In Chapter \ref{ch:planning}, 
+
+\item In Chapter \ref{ch:janus}, we will present how the \LTLfToDFA Python package has been well employed in the field of Business Process Management. In particular, we will explore the Janus approach to declarative process mining enhancing its peculiarities and, at the same time, giving our substantial contributions in generalizing the approach itself. After that, we will describe the implementation of the \janus algorithm, modified accordingly, highlighting all its main features. Finally, we will see examples of execution results.
+
+\item In Chapter \ref{ch:conclusion}, the thesis will conclude summarizing its main achievements and discussing possible future works.
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
