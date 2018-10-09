@@ -1,7 +1,7 @@
-\chapter{Planning for Extended Temporal Goals}\label{ch:planning}
-In this chapter, we will define a new approach to the problem of non-deterministic planning for extended temporal goals. In particular, we will give a solution to this problem reducing it to a fully observable non-deterministic (\FOND) problem and taking advantage of our tool \LTLfToDFA, presented in Chapter \ref{ch:ltlf2dfa}. First of all, we will introduce the main idea and motivations supporting our approach. Then, we will give some preliminaries explaining the Planning Domain Definition Language (\PDDL) language and the \FOND planning problem formally. After that, we will illustrate our solution with the encoding of temporal goals into a \PDDL domain and problem. Finally, we will present our practical implementation of the proposed solution.
+\chapter{Planning for \LTLf/\PLTL Goals}\label{ch:planning}
+In this chapter, we will define a new approach to the problem of non-deterministic planning for extended temporal goals. In particular, we will give a solution to this problem reducing it to a fully observable non-deterministic (\FOND) problem and taking advantage of our tool \LTLfToDFA, presented in Chapter \ref{ch:ltlf2dfa}. First of all, we will introduce the main idea and motivations supporting our approach. Then, we will give some preliminaries explaining the Planning Domain Definition Language (\PDDL) language and the \FOND planning problem formally. After that, we will illustrate our \FONDFOR approach with the encoding of temporal goals into a \PDDL domain and problem. Finally, we will present our practical implementation of the proposed solution.
 \section{Idea and Motivations}\label{sec:plan-idea-motiv}
-Planning for temporally extended goals with \textit{deterministic} actions has been well studied during the years starting from \citep{bacchus1998planning} and \citep{doherty2001talplanner}. Two main reasons why temporally extended goals have been considered over the classical goals, viewed as a desirable set of final states to be reached, are because they are not limited in what they can specify and they allows us to restrict the manner used by the plan to reach the goals. Indeed, temporal extended goals are fundamental for the specification of a collection of real-world planning problems. Yet, many of these real-world planning problems have a \textit{non-deterministic} behavior owing to unpredictable environmental conditions. However, planning for temporally extended goals with \textit{non-deterministic} actions is a more challenging problem and has been of increasingly interest only in recent years with \citep{camacho2017non}.
+Planning for temporally extended goals with \textit{deterministic} actions has been well studied during the years starting from \citep{bacchus1998planning} and \citep{doherty2001talplanner}. Two main reasons why temporally extended goals have been considered over the classical goals, viewed as a desirable set of final states to be reached, are because they are not limited in what they can specify and they allows us to restrict the manner used by the plan to reach the goals. Indeed, temporal extended goals are fundamental for the specification of a collection of real-world planning problems. Yet, many of these real-world planning problems have a \textit{non-deterministic} behavior owing to unpredictable environmental conditions. However, planning for temporally extended goals with \textit{non-deterministic} actions is a more challenging problem and has been of increasingly interest only in recent years with \citep{camacho2017non, de2018automata}.
 
 In this scenario, we have devised a solution to this problem that exploits the translation of a temporal formula to a \DFA, using \LTLfToDFA. In particular, our idea is the following: given a non-deterministic planning problem and a temporal formula, we first obtain the corresponding \DFA of the temporal formula through \LTLfToDFA, then, we encode such a \DFA into the non-deterministic planning domain. As a result, we have reduced the original problem to a classic \FOND planning problem. In other words, we compile extended temporal goals together with the original planning domain, specified in \PDDL, which is suitable for input to standard (\FOND) planners.
 \section{Preliminaries}
@@ -205,7 +205,7 @@ A \textit{non-deterministic domain} is a tuple $\D = \tup{2^\F, \mathcal{A}, s_0
 \item $(s, a, s') \in \delta$ with $a \in \alpha(s)$ represents \textit{action effects} (including frame assumptions).
 \end{itemize}
 \end{definition}
-\noindent Such domain $\D$ is assumed to be represented compactly (e.g. in \PDDL), therefore, considering the \textit{size} of the domain as the cardinality of $\F$. Intuitively, the evolution of a non-deterministic domain is as follows: from a given state $s$, the agent chooses what action $a \in \alpha(s)$ to execute, then, the environment chooses a \textit{successor state} $s'$ with $(s,a,s') \in \delta$.
+\noindent Such domain $\D$ is assumed to be represented compactly (e.g. in \PDDL), therefore, considering the \textit{size} of the domain as the cardinality of $\F$. Intuitively, the evolution of a non-deterministic domain is as follows: from a given state $s$, the agent chooses what action $a \in \alpha(s)$ to execute, then, the environment chooses a \textit{successor state} $s'$ with $(s,a,s') \in \delta$. To this extent, planning can also be seen as a \textit{game} between two players: the agent tries to force eventually reaching the goal no matter how the environment behaves.
 Moreover, the agent can execute an action having the knowledge of all history of states so far.
 
 Now, we can define the meaning of solving a \FOND planning problem on $\D$. A \textit{trace} of $\D$ is a finite or infinite sequence $s_0,a_0,s_1,a_1, \dots$ where $s_0$ is the initial state, $a_i \in \alpha(s_i)$ and $s_{i+1} \in \delta(s_i,a_i)$ for each $s_i,a_i$ in the trace.
@@ -237,10 +237,10 @@ Obviously, \textit{strong cyclic solutions} are less restrictive than a \textit{
 Indeed, as the name suggests, a strong cyclic solution may revisit states. However, in this thesis we will focus only on searching \textit{strong solutions}. As final remark, when searching for a strong solution to a \FOND problem we refer to \FONDS.
 
 In the next Section, we will generalize the concept of solving \FOND planning problems with extended temporal goals, describing the step by step encoding process of those temporal goals in the \FOND domain, written in \PDDL.
-\section{Encoding of Temporal Goals in \PDDL}
-As written in Section \ref{sec:plan-idea-motiv}, planning with extended temporal goals has been considered over the representation of goals in classical planning to capture a richer class of plans where restrictions on the whole sequence of states must be satisfied as well. In particular, differently from classical planning, where the goal description can only be expressed as a propositional formula, in planning for extended temporal goals the goal description may have the same expressive power of the temporal logic in which the goal is specified. This enlarges the general view about planning. In other words, extended temporal goals specify desirable sequences of states and a plan exists if its execution yields one of these desirable of sequences \citep{bacchus1998planning}.
+\section{The \FONDFOR approach}
+As written in Section \ref{sec:plan-idea-motiv}, planning with extended temporal goals has been considered over the representation of goals in classical planning to capture a richer class of plans where restrictions on the whole sequence of states must be satisfied as well. In particular, differently from classical planning, where the goal description can only be expressed as a propositional formula, in planning for extended temporal goals the goal description may have the same expressive power of the temporal logic in which the goal is specified. This enlarges the general view about planning. In other words, extended temporal goals specify desirable sequences of states and a plan exists if its execution yields one of these desirable sequences \citep{bacchus1998planning}.
 
-In this thesis, we use \LTLf and \PLTL formalisms as temporal logics for expressing extended goals.
+In this thesis, we propose a new approach, called \FONDFOR, that uses \LTLf and \PLTL formalisms as temporal logics for expressing extended goals.
 To better understand the powerful of planning with extended temporal goals we give the following example.
 
 \begin{example}\label{ex:pla-temp-simple}
@@ -254,14 +254,51 @@ Planning for \LTLf and \PLTL goals slightly changes the definitions given in Sec
 Given a domain $\D$ and an \LTLf/\PLTL formula $\varphi$ over atoms $\F \cup \mathcal{A}$, a strategy $\trace$ is a \textit{strong solution} to $\D$ for goal $\varphi$, if every $\trace$-trace is finite and satisfies $\varphi$.
 \end{definition}
 
-About complexity of \FONDS we have the following Theorem.
+About complexity of \FONDS, we have the following Theorem.
 
 \begin{theorem}\citep{rintanen2004complexity}
 \label{th:fond-complex}
-Solving \FONDS problems for \LTLf/\PLTL goals of the form $\Diamond G$ is \EXPTIME-complete in the size of the domain.
+Solving \FONDS problems for \LTLf/\PLTL goals of the form $\Diamond G$ is \EXPTIME-complete in the size of the domain and \TWOEXPTIME-complete in the size of the goal.
 \end{theorem}
 
-At this point, we can start talking about the encoding process of \LTLf/\PLTL goals carried out in this thesis.
+\subsection{Idea}
+Our \FONDFOR approach works as follows: given a non-deterministic planning domain $\D$, an initial state $s_0$ and an \LTLf or \PLTL goal formula $\varphi$ (whose symbols are ground predicates), we first obtain the corresponding \DFA of the temporal formula through \LTLfToDFA, then, we encode such a \DFA into the non-deterministic planning domain $\D$. As a result, we will have a new domain $\D'$ and a new problem $P'$ that can be considered and solved as a classical \FOND planning problem. 
+
+The new approach, carried out in this thesis, stems from the research in \cite{de2018automata}, that, basically, proposes automata-theoretic foundations of \FOND planning for \LTLf goals. In particular, they compute the cartesian product between the \DFA corresponding to the domain $\D$ ($\automaton_\D$) and the \DFA corresponding to $\varphi$ ($\automaton_\varphi$), thus, solving a \DFA game on $\automaton_\D \times \automaton_\varphi$, i.e. find, if exists, a trace accepted by $\automaton_\D \times \automaton_\varphi$. Moreover, an important consideration is that the resulting automaton $\automaton_\D \times \automaton_\varphi$ will read both the action and its effect, as shown, for instance, in Figure \ref{fig:dfa-game}.
+
+However, unlike what has been done in \cite{de2018automata}, we split transitions containing the action and its effect in order to have them separately. The reason for this separation is that having both the action and its effect on the same transition is not suitable on a practical perspective. Hence, we have devised a solution in which we run $\automaton_\D$ and $\automaton_\varphi$ separately, but combining them into a single unique transition system. To achieve this, we move $\automaton_\D$ and $\automaton_\varphi$ alternatively by introducing an additional predicate, which we will call \texttt{turnDomain}, that is true when we should move $\automaton_\D$ and is false when we should move $\automaton_\varphi$. In the following, we give an example to better understand the solution put in place in this thesis.
+
+\begin{example}
+Let us consider the simplified version of the classical Yale shooting domain \citep{hanks1986default} as in \cite{de2018automata}, where we have that the turkey is either alive or not and the actions are shoot and wait with the obvious effects, but with a gun that can be faulty. Specifically, shooting with a (supposedly) working gun can either end in killing the turkey or in the turkey staying alive and the discovery that the gun is not working properly. On the other hand, shooting (with care) with a gun that does not work properly makes it work and kills the turkey. The cartesian product $\automaton_\D \times \automaton_\varphi$ with $\varphi = \Diamond\lnot a$ is as follows:
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.7\textwidth]{images/cartesian-prod}
+\caption{The \DFA automaton corresponding to $\automaton_\D \times \automaton_\varphi$} 
+\label{fig:dfa-game}
+\end{figure}
+
+\noindent As we can see in Figure \ref{fig:dfa-game}, each transition reads both the action and its effect. This is not suitable for a practical implementation. Thus, we do not perform the cartesian product between the two automaton. On the contrast, we build a transition system as follows:
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{images/yale-our-sol}
+\caption{The \DFA automaton corresponding to $\automaton_\D \times \automaton_\varphi$} 
+\label{fig:yale-our-sol}
+\end{figure}
+
+\end{example}
+
+The transition system, shown in Figure \ref{fig:yale-our-sol}, expresses the new domain $\D'$ that has a perfect alternation of transitions. In particular, actions of the initial domain $\D$ alternates with a special action, that we called \texttt{trans}, representing the movement done by $\automaton_\varphi$. 
+
+In the next Section, we will explain how the new domain $\D'$ and the new problem $\P'$ can be written in \PDDL by showing the encoding of \LTLf/\PLTL goals in \PDDL.
+
+\subsection{Encoding of \LTLf/\PLTL goals in \PDDL}
+In this Section, we describe the process of obtaining the new domain $\D'$ and the new problem $\P'$, both specified in \PDDL. Both the original \PDDL domain $\D$ and problem $\P$ change when introducing \LTLf/\PLTL goals. Regarding the original domain $\D$, we have the following:
+\begin{itemize}
+\item 
+\end{itemize}
+
 
 
 
