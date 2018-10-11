@@ -268,65 +268,404 @@ The new approach, carried out in this thesis, stems from the research in \cite{d
 
 However, unlike what has been done in \cite{de2018automata}, we split transitions containing the action and its effect in order to have them separately. The reason for this separation is that having both the action and its effect on the same transition is not suitable on a practical perspective. Hence, we have devised a solution in which we run $\automaton_\D$ and $\automaton_\varphi$ separately, but combining them into a single unique transition system. To achieve this, we move $\automaton_\D$ and $\automaton_\varphi$ alternatively by introducing an additional predicate, which we will call \texttt{turnDomain}, that is true when we should move $\automaton_\D$ and is false when we should move $\automaton_\varphi$. In the following, we give an example to better understand the solution put in place in this thesis.
 
-\begin{example}
+\begin{example}\label{ex:yale-scenario}
 Let us consider the simplified version of the classical Yale shooting domain \citep{hanks1986default} as in \cite{de2018automata}, where we have that the turkey is either alive or not and the actions are shoot and wait with the obvious effects, but with a gun that can be faulty. Specifically, shooting with a (supposedly) working gun can either end in killing the turkey or in the turkey staying alive and the discovery that the gun is not working properly. On the other hand, shooting (with care) with a gun that does not work properly makes it work and kills the turkey. The cartesian product $\automaton_\D \times \automaton_\varphi$ with $\varphi = \Diamond\lnot a$ is as follows:
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.7\textwidth]{images/cartesian-prod}
-\caption{The \DFA automaton corresponding to $\automaton_\D \times \automaton_\varphi$} 
+\caption{The \DFA corresponding to $\automaton_\D \times \automaton_\varphi$. Symbol \texttt{a} stands for \textit{alive} and \texttt{w} for \textit{working}} 
 \label{fig:dfa-game}
 \end{figure}
 
-\noindent As we can see in Figure \ref{fig:dfa-game}, each transition reads both the action and its effect. This is not suitable for a practical implementation. Thus, we do not perform the cartesian product between the two automaton. On the contrast, we build a transition system as follows:
+\noindent As we can see in Figure \ref{fig:dfa-game}, each transition reads both the action and its effect. This is not suitable for a practical implementation. Thus, we do not perform the cartesian product between the two automata. On the contrast, we build a transition system as follows:
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.8\textwidth]{images/yale-our-sol}
-\caption{The \DFA automaton corresponding to $\automaton_\D \times \automaton_\varphi$} 
+\caption{The new transition system corresponding to the Yale shooting domain. Symbol \texttt{a} stands for \textit{alive}, \texttt{w} for \textit{working} and \texttt{t} for \textit{turnDomain}} 
 \label{fig:yale-our-sol}
 \end{figure}
-
 \end{example}
 
-The transition system, shown in Figure \ref{fig:yale-our-sol}, expresses the new domain $\D'$ that has a perfect alternation of transitions. In particular, actions of the initial domain $\D$ alternates with a special action, that we called \texttt{trans}, representing the movement done by $\automaton_\varphi$. 
+The transition system, shown in Figure \ref{fig:yale-our-sol}, expresses the new domain $\D'$ that has a perfect alternation of transitions. In particular, actions of the initial domain $\D$ alternates with a special action, that we called \texttt{trans}, representing the movement done by $\automaton_\varphi$. Moreover, it is important to notice the usage of the added predicate \texttt{turnDomain} allowing us to alternate between general actions and the new action \texttt{trans}.
 
 In the next Section, we will explain how the new domain $\D'$ and the new problem $\P'$ can be written in \PDDL by showing the encoding of \LTLf/\PLTL goals in \PDDL.
 
 \subsection{Encoding of \LTLf/\PLTL goals in \PDDL}
-In this Section, we describe the process of obtaining the new domain $\D'$ and the new problem $\P'$, both specified in \PDDL. Both the original \PDDL domain $\D$ and problem $\P$ change when introducing \LTLf/\PLTL goals. Regarding the original domain $\D$, we have the following:
+In this Section, we describe the process of obtaining the new domain $\D'$ and the new problem $\P'$, both specified in \PDDL. The original \PDDL domain $\D$ and the associated original problem $\P$ change when introducing \LTLf/\PLTL goals. In particular, what changes is the way we encode our \LTLf/\PLTL formula in \PDDL. Firstly, we employ our \LTLfToDFA tool to convert the given goal formula $\varphi$ into the corresponding \DFA. Then, we encode, in a specific way, the resulting \DFA automaton in \PDDL modifying the original domain $\D$ and problem $\P$.
+
+\subsubsection*{Modification of Domain $\D$}
+Regarding $\D$, we add the \texttt{trans} operator and some predicates depending on the resulting \DFA. Specifically, since the goal formula $\varphi$ has instantiated predicates as symbols, to capture the general representation of $\varphi$ we should consider them as variables. Hence, the formula $\varphi$ becomes $\varphi(x_1,x_2,\dots,x_n)$, where $n$ is the number of variables. As a result, the representation of the \DFA, associated to $\varphi(x_1,x_2,\dots,x_n)$, is parametric, namely both states and actions depend on variables as for the automaton in Figure \ref{fig:dfa-parametric}.
+
+\begin{example}\label{ex:param-formula}
+Let us consider the goal formula $\varphi = \Diamond(on(d3,rod3))$ for the Tower of Hanoi planning problem. The predicate \texttt{on} is instantiated on objects \texttt{d3} and \texttt{rod3}. By considering them as variables, $\varphi$ becomes $\varphi(x_1,x_2) = \Diamond(on(x_1,x_2))$, where we know that $x_1$ will correspond to $d3$ and $x_2$ to $rod3$. 
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.7\textwidth]{images/automa-param}
+\caption{The parametric \DFA corresponding to $\varphi(x_1,x_2) = \Diamond(on(x_1,x_2))$} 
+\label{fig:dfa-parametric}
+\end{figure}
+\end{example}
+
+At this point, we can explain how we build the new operator \texttt{trans}. Since this operator has been introduced to simulate moves of the automaton related to the goal formula, the operator will have:
 \begin{itemize}
-\item 
+\item variables as parameters;
+\item the negation of the \texttt{turnDomain} predicate as precondition;
+\item transitions encoded as conditional effects as effect.
 \end{itemize}
+We give the following example:
 
+\begin{example}\label{ex:trans-op-adl}
+Consider the \DFA in Figure \ref{fig:dfa-parametric}, the \texttt{trans} operator built from that automaton is the following:
+\begin{lstlisting}[language=PDDL, escapechar=£]
+(:action trans
+  :parameters (?x1 ?x2)
+  :precondition (not (turnDomain))
+  :effect (and (when (and (q1 ?x1 ?x2) (not (on ?x1 ?x2)))
+              (and (q1 ?x1 ?x2) (not (q2 ?x1 ?x2)) (turnDomain))
+          (when (or (and (q1 ?x1 ?x2) (on ?x1 ?x2)) (q2 ?x1 ?x2))£\label{line:cond-eff-ex}£
+              (and (q2 ?x1 ?x2) (not (q1 ?x1 ?x2)) (turnDomain))
+  )
+)
+\end{lstlisting}
+\end{example}
 
+As shown in Example \ref{ex:trans-op-adl}, transitions, with source state and destination state, are encoded as conditional effects, where the condition formula includes source state and formula symbols whereas the effect formula includes the destination state, the negation of all other states and \texttt{turnDomain}. Moreover, in order to get a compact encoding of \texttt{trans} effects, conditional effects are brought together by destination state as happens, for instance, at line \ref{line:cond-eff-ex}.
 
+After the \texttt{trans} operator has been built, we change $\D$ as follows:
+\begin{enumerate}
+\item add \texttt{turnDomain} to all actions precondition and negated \texttt{turnDomain} to all actions effects;
+\item add \texttt{trans} operator;
+\item add all automaton state predicates to the domain predicates definition.
+\end{enumerate}
 
+\noindent We have thus obtained the new domain $\D'$. In the following, we show an example.
 
+\begin{example}\label{ex:new-dom}
+Let consider the Triangle Tireworld scenario. The objective is to drive from one location to another, however while driving a tire may be going flat. If there is a spare tire in the location of the car, then the car can use it to fix the flat tire. The original \PDDL domain is:
+\begin{lstlisting}[language=PDDL, escapechar=£]
+(define (domain triangle-tire)
+  (:requirements :typing :strips :non-deterministic)
+  (:types location)
+  (:predicates (vehicle-at ?loc - location)
+	       (spare-in ?loc - location)
+	       (road ?from - location ?to - location)
+	       (not-flattire))
+  (:action move-car
+    :parameters (?from - location ?to - location)
+    :precondition (and (vehicle-at ?from) (road ?from ?to) 
+      (not-flattire))
+    :effect (oneof (and (vehicle-at ?to) (not (vehicle-at ?from)))
+	  (and (vehicle-at ?to) (not (vehicle-at ?from)) 
+	  (not (not-flattire))))
+   )
+  (:action changetire
+    :parameters (?loc - location)
+    :precondition (and (spare-in ?loc) (vehicle-at ?loc))
+    :effect (and (not (spare-in ?loc)) (not-flattire))
+   )
+)
+\end{lstlisting}
+Now, consider a simple \LTLf formula $\varphi = \Diamond vehicleAt(l13)$. It requires that eventually the vehicle will be in location $l13$. The parametric \DFA associated to $\varphi(x)$ is depicted in Figure \ref{fig:dfa-parametric2}.
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.7\textwidth]{images/automa-param2}
+\caption{The parametric \DFA corresponding to $\varphi(x) = \Diamond(vehicleAt(x))$} 
+\label{fig:dfa-parametric2}
+\end{figure}
 
+Considering the \DFA in Figure \ref{fig:dfa-parametric2}, the \texttt{trans} operator built from that automaton is the following:
+\begin{lstlisting}[language=PDDL, escapechar=£]
+(:action trans
+  :parameters (?x - location)
+  :precondition (not (turnDomain))
+  :effect (and (when (and (q1 ?x) (not (vehicle-at ?x)))
+              (and (q1 ?x) (not (q2 ?x)) (turnDomain))
+          (when (or (and (q1 ?x) (vehicle-at ?x)) (q2 ?x))
+              (and (q2 ?x) (not (q1 ?x)) (turnDomain))
+  )
+)
+\end{lstlisting}
 
+Finally, putting together all pieces and carrying out changes described above, we obtain the new domain $\D'$ as follows:
 
+\begin{lstlisting}[language=PDDL, escapechar=£]
+(define (domain triangle-tire)
+  (:requirements :typing :strips :non-deterministic)
+  (:types location)
+  (:predicates (vehicle-at ?loc - location)
+	       (spare-in ?loc - location)
+	       (road ?from - location ?to - location)
+	       (not-flattire)
+	       (q1 ?x - location)
+	       (q2 ?x - location)
+	       (turnDomain))
+  (:action move-car
+    :parameters (?from - location ?to - location)
+    :precondition (and (vehicle-at ?from) (road ?from ?to) 
+      (not-flattire) (turnDomain))
+    :effect (oneof (and (vehicle-at ?to) (not (vehicle-at ?from))
+      (not (turnDomain)))
+	  (and (vehicle-at ?to) (not (vehicle-at ?from)) 
+	  (not (not-flattire)) (not (turnDomain))))
+   )
+  (:action changetire
+    :parameters (?loc - location)
+    :precondition (and (spare-in ?loc) (vehicle-at ?loc) 
+      (turnDomain))
+    :effect (and (not (spare-in ?loc)) (not-flattire)
+      (not (turnDomain)))
+   )
+  (:action trans
+    :parameters (?x - location)
+    :precondition (not (turnDomain))
+    :effect (and (when (and (q1 ?x) (not (vehicle-at ?x)))
+              (and (q1 ?x) (not (q2 ?x)) (turnDomain))
+          (when (or (and (q1 ?x) (vehicle-at ?x)) (q2 ?x))
+              (and (q2 ?x) (not (q1 ?x)) (turnDomain)))
+  )   
+)
+\end{lstlisting}
+\end{example}
 
+\subsubsection*{Modification of Problem $\P$}
+Concerning the planning problem $\P$, we completely discard the goal specification, whereas the initial state description is slightly modified. Moreover, the problem name, the associated domain name and all defined objects remain unchanged. We have to modify both the initial state and the goal state specifications to make them compliant with $\D'$, containing all changes introduced in the planning domain $\D$. To this extent, in the initial state description, we should add to the original specification the new predicate \texttt{turnDomain}, meaning that it is $true$ at the beginning, and the initial state of the automaton instantiated on the objects of interest, i.e. those specified in the \LTLf/\PLTL formula $\varphi$. 
 
+On the other hand, the goal description is built from scratch by putting together the \texttt{turnDomain} predicate, meaning that it must be $true$ at the end of the execution, and the final state(s) of the automaton always instantiated on the objects of interest. Here, it is important to notice that if the automaton has two or more final states, they should be put in disjunction.
 
+We can give the following example.
 
+\begin{example}\label{ex:new-prob}
+Let consider again the Triangle Tireworld scenario, shown in the Example \ref{ex:new-dom}. The original \PDDL domain is:
+\begin{lstlisting}[language=PDDL, escapechar=£]
+(define (problem triangle-tire-1)
+  (:domain triangle-tire)
+  (:objects l11 l12 l13 l21 l22 l23 l31 l32 l33 - location)
+  (:init (vehicle-at l11)
+    (road l11 l12) (road l12 l13) (road l11 l21) (road l12 l22)
+    (road l21 l12) (road l22 l13) (road l21 l31) (road l31 l22)
+    (spare-in l21) (spare-in l22) (spare-in l31)
+    (not-flattire))
+  (:goal (vehicle-at l13))
+)
+\end{lstlisting}
+Now, considering the same \LTLf formula $\varphi = \Diamond vehicleAt(l13)$, the object of interest is $l13$. Hence, we should evaluate our automaton states as $q_1(l13)$ and $q_2(l13)$.
 
+Finally, putting together all pieces and carrying out changes described above, we obtain the new problem $\P'$ as follows:
 
+\begin{lstlisting}[language=PDDL, escapechar=£]
+(define (problem triangle-tire-1)
+  (:domain triangle-tire)
+  (:objects l11 l12 l13 l21 l22 l23 l31 l32 l33 - location)
+  (:init (vehicle-at l11)
+    (road l11 l12) (road l12 l13) (road l11 l21) (road l12 l22)
+    (road l21 l12) (road l22 l13) (road l21 l31) (road l31 l22)
+    (spare-in l21) (spare-in l22) (spare-in l31)
+    (not-flattire) (turnDomain) (q1 l13))
+  (:goal (and (turnDomain) (q2 l13)))
+)
+\end{lstlisting}
+As a remark, we will refer to the new goal specification as $\G'$.
+\end{example}
 
+Having examined the encoding of \LTLf/\PLTL goal formulas in \PDDL, the resulting planning domain $\D'$ and problem $\P'$ represent a ``classical'' planning specification. In the next Section, we will see how we obtain a strong policy giving $\D'$ and $\P'$.
 
+\subsection{\FOND Planners}
+In this Section, we talk about the state-of-art \FOND planners and how they are employed within this thesis.
 
+To begin with, thanks to our encoding process, we have reduced the problem of \FOND planning for \LTLf/\PLTL goals to a ``classical'' \FOND planning, which is essentially a \textit{reachability} problem. We can state the following Theorem.
 
+\begin{theorem}
+A strong policy $\trace$ is a valid policy for $\D', \G'$ if and only if $\trace$ is a valid policy for $\D,\varphi$.
+\end{theorem}
 
+Given this Theorem, we can solve our original problem giving $\D'$ and $\P'$ as input to standard \FOND planners. The main state-of-art \FOND planners are:
+\begin{itemize}
+\item MBP and Gamer, which are OBDD\footnote{OBDD stands for \textit{Ordered Binary Decision Diagram}}-based planners \citep{cimatti2003weak, kissmann2009solving}
+\item MyND and Grendel, which rely on explicit AND/OR graph search \citep{bercher2010pattern, ramirez2014directed}
+\item PRP, NDP and FIP, which rely on classical algorithms \citep{kuter2008using, fu2011simple, muise2012improved}
+\item FOND-SAT, which provides a SAT approach to \FOND planning \citep{geffner2018compact}
+\end{itemize}
+Although \FOND planning is receiving an increasingly interest, the research on computational approaches has been recently reduced. Nevertheless, some planners performs well on different contexts of use. In our thesis, we are going to employ a customized version of FOND-SAT, the newest planner.
 
+Secondly, although the description of many real-world planning problems involves the use of conditional effects, requiring full support of ADL by planners, those state-of-art planners, cited above, are still not able to fully handle such conditional effects. This represents a big limitation that can be surely deepened as a future work of this thesis. To this extent, we should first compile away conditional effects from the domain and, then, we can give it to a planner. Our proposal implementation, thoroughly described in the Section \ref{sec:planning-implementation}, is able to compile away simple conditional effects, namely those conditional effects that do not have nested formulas. Additionally, we have to  compile away conditional effects of the \texttt{trans} operator upstream even though its  representation with the employment of conditional effects is much more effective and compact. Luckily, this process consists of just splitting the operator in as many operators as the number of conditional effects present in the original action and adding the condition formula in the preconditions for each conditional effect. In the following, we make a clarifying example.
 
+\begin{example}
+The \texttt{trans} operator built in the Example \ref{ex:new-dom} is:
+\begin{lstlisting}[language=PDDL, escapechar=£]
+(:action trans
+  :parameters (?x - location)
+  :precondition (not (turnDomain))
+  :effect (and (when (and (q1 ?x) (not (vehicle-at ?x)))
+              (and (q1 ?x) (not (q2 ?x)) (turnDomain))
+          (when (or (and (q1 ?x) (vehicle-at ?x)) (q2 ?x))
+              (and (q2 ?x) (not (q1 ?x)) (turnDomain))
+  )
+)
+\end{lstlisting}
+As we can see, it contains only two conditional effects. Hence, we split this operator in two operators that we are going to call \texttt{trans-0} and \texttt{trans-1}, respectively. In particular, for each conditional effect the condition formula is added to the precondition and the effect formula is left in the effects. \texttt{trans-0} and \texttt{trans-1} are as follows:
+\begin{lstlisting}[language=PDDL, escapechar=£]
+(:action trans-0
+  :parameters (?x - location)
+  :precondition (and (and (q1 ?x) (not (vehicle-at ?x))) 
+    (not (turnDomain)))
+  :effect (and (q1 ?x) (not (q2 ?x)) (turnDomain))
+  )
+)
+(:action trans-1
+  :parameters (?x - location)
+  :precondition (and (or (and (q1 ?x) (vehicle-at ?x)) (q2 ?x)) 
+    (not (turnDomain)))
+  :effect (and (q2 ?x) (not (q1 ?x)) (turnDomain))
+  )
+)
+\end{lstlisting}
+\end{example}
 
+At this point, having compiled away simple conditional effects from the modified domain $\D'$, we can finally describe how we have employed FOND-SAT in our thesis.
 
+The main reasons why we have chosen FOND-SAT are the following:
+\begin{itemize}
+\item it is written in pure Python, hence we can easily integrate it in our Python implementation as we will see in Section \ref{sec:planning-implementation};
+\item it performs reasonably well;
+\item it outputs all policies building a transition system whose states are called \textit{controller states}.
+\end{itemize}
+FOND-SAT takes also advantage of the parser and translation PDDL-to-SAS+ scripts from  PRP. When FOND-SAT was developed, PRP's translation scripts could not handle disjunctive preconditions that may be present in our \texttt{trans} operators. As a result, we have modified FOND-SAT with the newest version of those scripts directly from PRP.
 
+The usage of FOND-SAT is really simple. From its source folder, it is necessary to run the following command in the terminal:
+\begin{lstlisting}[language=bash]
+python main.py -strong 1 -policy 1 /path-to/domain.pddl 
+/path-to/problem.pddl
+\end{lstlisting}
+The command simply executes the main module of FOND-SAT requiring to find strong policies and to print, if exists, the policy found. We feed FOND-SAT with our new domain $\D'$ and new problem $\P'$.
+
+Once strong plans are found, FOND-SAT displays the policy in four sections as follows:
+\begin{itemize}
+\item Atom (CS): for each controller state it tells what predicates are true;
+\item (CS, Action with arguments): for each controller state it tells which actions can be applied
+\item (CS, Action name, CS): it tells for each controller state what action is applied in that state and the successor state;
+\item (CS1, CS2): it means that the controller can go from CS1 to CS2. 
+\end{itemize}
+Now, we give an output example.
+
+\begin{example}
+The following result has been obtained running FOND-SAT with the Triangle Tireworld domain and problem with the \LTLf goal $\varphi = \Diamond vehicleAt(l31)$. What follows is only the displayed policy.
+\begin{lstlisting}[numberstyle=\tiny\color{codegray}\noncopynumber,numbers=left,stepnumber=1, escapechar=£]
+Trying with 7 states
+Looking for strong plans: True
+Fair actions: True
+# Atoms: 18
+# Actions: 26
+SAT formula generation time = 0.052484
+# Clauses = 11041
+# Variables = 1225
+Creating formula...
+Done creating formula. Calling solver...
+SAT solver called with 4096 MB and 3599 seconds
+Done solver. Round time: 0.016456
+Cumulated solver time: 0.055322
+===================
+===================
+Controller -- CS = Controller State
+===================
+===================
+Atom (CS)
+___________________
+----------
+Atom q1(l31) (n0)
+Atom vehicleat(l11) (n0)
+Atom not-flattire() (n0)
+Atom spare-in(l21) (n0)
+Atom turndomain() (n0)
+----------
+-NegatedAtom turndomain() (n1)
+Atom q1(l31) (n1)
+Atom vehicleat(l21) (n1)
+Atom not-flattire() (n1)
+----------
+Atom q1(l31) (n2)
+-NegatedAtom turndomain() (n2)
+Atom spare-in(l21) (n2)
+Atom vehicleat(l21) (n2)
+----------
+Atom turndomain() (n3)
+Atom q1(l31) (n3)
+Atom vehicleat(l21) (n3)
+Atom not-flattire() (n3)
+----------
+Atom q1(l31) (n4)
+Atom spare-in(l21) (n4)
+Atom vehicleat(l21) (n4)
+Atom turndomain() (n4)
+----------
+Atom q1(l31) (n5)
+Atom vehicleat(l31) (n5)
+-NegatedAtom turndomain() (n5)
+----------
+Atom turndomain() (ng)
+Atom q2(l31) (ng)
+===================
+===================
+(CS, Action with arguments)£\label{line:cs-actarg}£
+___________________
+(n0,move-car_DETDUP_0(l11,l21))
+(n0,move-car_DETDUP_1)
+(n0,move-car_DETDUP_1(l11,l21))
+(n0,move-car_DETDUP_0)
+(n1,trans-0_v4)
+(n1,trans-0_v4(l31))
+(n2,trans-0_v4(l31))
+(n2,trans-0_v4)
+(n3,move-car_DETDUP_0(l21,l31))
+(n3,move-car_DETDUP_0)
+(n3,move-car_DETDUP_1(l21,l31))
+(n3,move-car_DETDUP_1)
+(n4,changetire(l21))
+(n4,changetire)
+(n5,trans-11)
+(n5,trans-11(l31))
+===================
+===================
+(CS, Action name, CS)
+___________________
+(n0,move-car_DETDUP_0,n1)£\label{line:cs-actarg}£
+(n0,move-car_DETDUP_1,n2)
+(n1,trans-0_v4,n3)
+(n2,trans-0_v4,n4)
+(n3,move-car_DETDUP_0,n5)
+(n3,move-car_DETDUP_1,n5)
+(n4,changetire,n1)
+(n5,trans-11,ng)
+===================
+(CS, CS)
+___________________
+(n2,n4)
+(n5,ng)
+(n3,n5)
+(n1,n3)
+(n0,n2)
+(n4,n1)
+(n0,n1)
+===================
+Solved with 7 states
+Elapsed total time (s): 0.288035
+Elapsed solver time (s): 0.055322
+Elapsed solver time (s): [0.0052, 0.0059, 0.007, 0.009, 0.011, 0.016]
+Looking for strong plans: True
+Fair actions: True
+Done
+
+\end{lstlisting}
+As we can see, operators names are changed due to internal arrangements made by FOND-SAT needed to handle both non determinism and disjunctive preconditions. Here, it is important to observe that, as we expected, there is an alternation of action executions between the original domain actions and the \texttt{trans} operators. Finally, the transition system built by FOND-SAT has $n0$ as initial state and $ng$ as final state. If strong plans are found, it means that every path from $n0$ to $ng$ is a valid plan. We will better explain this later in Section \ref{sec:planning-results}.
+\end{example}
+
+In the following sections, we will describe in details our practical implementation, called \FONDFOR, that automates all the process illustrated in this Section.
 
 \section{Implementation}\label{sec:planning-implementation}
 \subsection{Package Structure}
 \subsection{\PDDL}
 \subsection{Automa}
 \subsection{Main Module}
-\section{Results}
+\section{Results}\label{sec:planning-results}
 \section{Summary}
