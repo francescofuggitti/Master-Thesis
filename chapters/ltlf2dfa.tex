@@ -30,7 +30,7 @@ The structure of the \LTLfToDFA package is quite simple. It consists of a main f
 \item \texttt{DotHandler.py}, where we the \MONA output is post-processed.
 \end{itemize}
 In the following paragraphs we will explore each module in detail.
-\subsection{Lexer.py}
+\subsection{Lexer.py}\label{sec:lexer}
 In the \texttt{Lexer.py} module we can find the declaration of the \texttt{MyLexer} class which is in charge of handling the input string and tokenizing it. Indeed, it implements a tokenizer that splits the input string into declared individual tokens.
 To our extent, we have defined the class as in Listing \ref{code:ltlf2dfa-lexer}
 \begin{lstlisting}[language=Python, style=Python, escapechar = £, label={code:ltlf2dfa-lexer}, caption={\texttt{Lexer.py} module}]
@@ -105,7 +105,7 @@ class MyLexer(object):
 Firstly, we have defined the reserved words within a dictionary so to match each reserved word with its identifier.
 Secondly, we have defined the tokens list with all possible tokens that can be produced by the lexer. This tokens list is always required for the implementation of a lexer.
 Then, each token has to be specified by writing a regular expression rule. If the token is simple it can be specified using only a string. Otherwise, for non trivial tokens we have to write the regular expression in a class method as for our token \texttt{TERM} in line \ref{line:lexer-term}. In that case, defining the token rule as a method is also useful when we would like to perform other actions. After that, we have a method to handle unrecognized tokens and, finally, we have written the function that builds the lexer.
-\subsection{Parser.py}
+\subsection{Parser.py}\label{sec:parser}
 In the \texttt{Parser.py} module we can find the declaration of \texttt{MyParser} class which implements the parsing component of \texttt{PLY}. The \texttt{MyParser} class operates after the Lexer has split the input string into known tokens. The main feature of the parser is to interpret and build the appropriate data structure for the given input. To this extent, the most important aspect of a parser is the definition of the \textit{syntax}, usually specified in terms of a BNF\footnote{The Backus–Naur form is a notation technique for context-free grammars.} grammar, that should be unambiguous. Furthermore, \texttt{Yacc}, the parsing component of \texttt{PLY}, implements a parsing technique known as LR-parsing or shift-reduce parsing. In particular, this parsing technique works on a bottom up fashion that tries to recognize the right-hand-side of various grammar rules. Whenever a valid right-hand-side is found in the input, the appropriate action code is triggered and the grammar symbols are replaced by the grammar symbol on the left-hand-side and so on until there is no more rule to apply. The parser implementation is shown in Listing \ref{code:ltlf2dfa-parser}
 \begin{lstlisting}[language=Python, style=Python, label={code:ltlf2dfa-parser}, caption={\texttt{Parser.py} module}]
 import ply.yacc as yacc
@@ -643,12 +643,12 @@ Let us consider the formula $\varphi = \Box (a \Rightarrow \Diamond b)$ and its 
 \begin{figure}[h]
 \centering
 \includegraphics{images/example2-output.eps}
-\caption{Minimum \DFA for the formula $\varphi = \Diamond g$.} 
+\caption{Minimum \DFA for the formula $\varphi = \Box (a \Rightarrow \Diamond b)$.} 
 \label{fig:automa-example2}
 \end{figure}
 As usual, state $1$ is the starting state. However, this case is a little bit different from the previous one. Indeed, now the formula has two symbols, namely $a$ and $b$. Since the order of declaration is $a,b$, labels on transition has to be read vertically following this order. For instance, the label on transition from state $1$ to state $2$ reports $0 \atop \text{X}$ meaning that the automaton can walk this transition only if $a$ is $\false$ (in this case, $b$ is \emph{don't care}, i.e. it can assume whatever value). Additionally, another interesting transition to comment is the one that goes from state $3$ to state $4$. Its label reports $0 \atop 0$,$1 \atop 0$ meaning that the automaton will do that transition only if either $a$ and $b$ are $\false$ or $a$ is $\true$ and $b$ is $\false$.
 \end{example} 
-\section{Comparison with \FLLOAT}
+\section{Comparison with \FLLOAT}\label{sec:flloat-comparison}
 In this section, we will see how \LTLfToDFA performs compared to \href{https://pypi.org/project/flloat/}{\FLLOAT}\footnote{https://github.com/MarcoFavorito/flloat}, which is another Python package having the conversion of an \LTLf formula to a \DFA as one of its features.
 In particular, \FLLOAT handles \LTLf and \LDLf (\textit{Linear Dynamic Logic on Finite Traces}) formulas, except to \PLTL ones, but it provides support for syntax, semantics and parsing of \PL (\textit{Propositional Logic}), \LTLf and \LDLf formal languages. Additionally, its conversion is based on a different theoretical result with respect to \LTLfToDFA. Especially, \FLLOAT directly implements the algorithm seen in Section \ref{sec:ltlf-delta} and, therefore, it could also accept traces of length $0$ (empty traces). This is not the same for \LTLfToDFA, since it assumes traces to have at least one element. Nevertheless, we can compare them on the generation of a \DFA from an \LTLf formula just by forcing \FLLOAT to produce \DFAs concerning traces with at least one element. This could be achieved adding $\true$ to \FLLOAT formulas with the $\lAND$ connective. For instance, given an \LTLf formula $\varphi$, \FLLOAT will compute the \DFA for $\psi = \true \lAND \varphi$.
 

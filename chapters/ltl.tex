@@ -417,12 +417,12 @@ At the first line, it is declared the intent to use exclusively \wsos. Then, at 
 
 At this point, since we have illustrated all the necessary stuff for the translation, we are able to give the \FOL-to-\MONA encoding with some examples.
 
-To begin with, all usual logic operators can be encoded following the table in Figure \ref{fig:mona-syntax}. Secondly, to encode the \suc and \pre monadic predicates respectively defined in Equations \ref{monadic-predicates} and \ref{prev-predicate} we use the successor and predecessor built-in operators as follows:
+To begin with, all usual logic operators can be encoded following the table in Figure \ref{fig:mona-syntax}. Secondly, to encode the \suc and \pre monadic predicates, respectively defined in Equations \ref{monadic-predicates} and \ref{prev-predicate}, we use the successor and predecessor built-in operators as follows:
 \begin{align*}
 \suc(x,y) \doteq \texttt{y=x+1}\\
 \pre(x,y) \doteq \texttt{y=x-1}
 \end{align*}
-Additionally, the two constants $0$ and $\last$ already defined in \ref{monadic-predicates} are encoded as \texttt{0} and \texttt{max(\$)}, respectively.
+Additionally, the two constants $0$ and $\last$, already defined in \ref{monadic-predicates}, are encoded as \texttt{0} and \texttt{max(\$)}, respectively.
 Thirdly, to express existential and universal quantifiers we use the corresponding syntax as follows:
 \begin{align*}
 \exists p. \doteq \texttt{ex1 p:}\\

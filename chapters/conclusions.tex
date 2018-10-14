@@ -1,6 +1,71 @@
 \chapter{Conclusions and Future Work}\label{ch:conclusion}
-Continue the introduction and possible future work
 \section{Overview}
+This thesis addressed the application of \LTL and \PLTL on finite traces in Planning and Declarative Process Mining. The variant of \LTL evaluated on \textit{finite} traces (\LTLf) and its past counterpart  Past \LTL (\PLTL) have been extensively investigated in \cite{de2013linear,lichtenstein1985glory}. In the CS literature, the modality to obtain a \DFA from any \LTLf/\PLTL formulas consisted of following the Algorithm \ref{alg:ltl2nfa} in Chapter \ref{ch:theory}. On the contrary, in this thesis, we followed the new approach analyzed in \cite{zhu2017symbolic, zpv2018} to attain the corresponding \DFA to a given \LTLf/\PLTL formula. In particular, the translation procedure from an \LTLf/\PLTL formula to its \DFA entails the encoding of the \LTLf/\PLTL formula to \FOL and then feeding the \MONA tool with this encoding. The execution of \MONA with such an input yields the \DFA as expected. Although the latter translation procedure is not straightforward, we have shown that, on a practical perspective, it performs relatively better.
+
+This translation method has been applied both in Planning and Declarative Process Mining. In Planning scenario, while \cite{camacho2017non} analysed non-deterministic planning for \LTL on finite and infinite traces goals, academics did not investigate planning for \PLTL goals. We devised a solution to the problem of Planning for \LTLf/\PLTL goals, that exploits the translation of temporal formulas to \DFA, using \LTLfToDFA. 
+
+Regarding Declarative Process Mining, while \cite{cecconi2018interestingness} introduced the Janus approach to compute the interestingness degree of traces in real event logs, by employing the augmentation of \LTLf with past modalities, we generalized this approach both theoretically and practically, employing the \LTLfToDFA tool.
 \section{Main Contributions}
+In this Section, we list the main contributions of the thesis.
+
+\begin{itemize}
+\item We studied the theory behind the new approach, \LTLfToDFA, for translating an \LTLf/\PLTL formula to the corresponding \DFA, exploiting the power of the \MONA tool. Then, we implemented the \LTLfToDFA tool. \textsc{ltl}$_f2$\textsc{dfa} is relevant in two regards. It is the first tool able to directly convert both \textsc{ltl}$_f$ and \textsc{pltl} formulas to their corresponding \textsc{dfa}. Secondly, it adopts the \textsc{mona} tool for the generation of automata. As a result, we contributed to advance researches in \cite{zhu2017symbolic,zpv2018}. In addition, the \LTLfToDFA is also available on Internet at the following website address: \href{http://ltlf2dfa.diag.uniroma1.it}{http://ltlf2dfa.diag.uniroma1.it};
+
+\item we explored how \textsc{ltl}$_f$ and \textsc{pltl} can be used for expressing extended temporal goals in fully observable \textit{non-deterministic} (\textsc{fond}) planning problems. In these terms, we proposed a new approach, called \FONDFOR, in compiling \LTLf/\PLTL goals along with the original planning domain, specified in \textsc{pddl}.
+The encoding of those temporal goals, directly in the \textsc{pddl} domain and problem, relies on the result given by \textsc{ltl}$_f2$\textsc{dfa}. More precisely, our idea was the following: given a non-deterministic planning domain and an \LTLf/\PLTL formula, we first obtained the corresponding \DFA of the temporal formula through \LTLfToDFA, then, we encoded such a \DFA into the non-deterministic planning domain. As a result, we reduced the original problem to a classic \FOND planning problem. The absolute novelty is that, given the new \textsc{ltl}$_f2$\textsc{dfa} tool, it is now possible to express temporal extended goals not only in \textsc{ltl}$_f$, but also in \textsc{pltl} (i.e. with past modalities), unlike  former researches in this area of application \citep{camacho2017non, camacho2018finite, camacho2018ltl}. Furthermore, in order to integrate the FOND-SAT planner with \FONDFOR, we updated the translation scripts of FOND-SAT. Finally, we developed a script able to parse the FOND-SAT result and build the transition system reporting all policies found;
+
+\item we gave an extension and  generalization of the Janus algorithm in \cite{cecconi2018interestingness}. From a theoretical perspective, we introduced a new Theorem (Section \ref{sec:janus}) that proposes a new representation of the constraint formula allowing propositional formulas as activation condition, rather than a single task as in \cite{cecconi2018interestingness}. Moreover, from a practical perspective, we illustrated the Janus algorithm in \cite{cecconi2018interestingness} modified accordingly with the new proposed theory. In these terms, we implemented this generalized approach by exploiting the power of the \textsc{ltl}$_f2$\textsc{dfa} tool. In such a scenario, \textsc{ltl}$_f2$\textsc{dfa} allowed to generate, at execution time, \textsc{dfa}s for any type of formula, overcoming the original limitation of the Janus approach to \textsc{declare} constraints.
+\end{itemize}
+
 \section{Future Works}
-\section{Final Remarks}
+The research work presented in this thesis seems to have raised more questions that it has answered. There are several lines of research arising from this work which should be pursued.
+
+\begin{itemize}
+\item It is worth to investigate the computational complexity of the translation procedure of an \LTLf/\PLTL specification to a \DFA. Moreover, a future research might be focusing on the development of a technique to convert a \LTLp formula as the one in Example \ref{succinctness-example}, i.e. \LTLf augmented with past modalities, to the corresponding \DFA;
+
+\item the \LTLfToDFA tool, introduced in Chapter \ref{ch:ltlf2dfa}, can be improved in several respects. Firstly, it is possible to improve the \LTLf-to-\FOL translation procedure and to devise a better design and suited data structures for the problem. Secondly, the \LTLfToDFA tool should also be made more independent from hardware components, namely disk speed, as mentioned in Section \ref{sec:flloat-comparison};
+
+\item theoretically, we proposed a new solution to the \FOND planning for \LTLf/\PLTL goals. However, it would be interesting to further our research to Partially Observable Non Deterministic (\POND) planning for extended temporal goals. Next, the \FONDFOR tool, shown in Chapter \ref{ch:planning}, can employ a multitude of planners rather than only FOND-SAT. In these terms, the user could choose among different planners and compare their solutions. Then, the \FONDFOR tool can be extended to support full ADL. Finally, the performance of the \FONDFOR tool should be compared to that of available competitors;
+
+\item finally, regarding the \janus approach, future researches could examine the possibility to directly provide the \LTLp formula rather than its separated formulas as input for the Janus algorithm. Alternatively, it is desirable to design and implement a tool able to automatically separate a given \LTLp formula. We acknowledge that our \janus implementation could be improved in terms of performativity and compare it to other declarative process mining techniques as done in \cite{cecconi2018interestingness}.
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,16 @@
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces The essential {\sc mona}\xspace syntax.\relax }}{20}{figure.caption.7}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces The syntax tree generated for the formula $"G(a \thicksim Xb)"$. Symbols are in green while operators are in blue.\relax }}{28}{figure.caption.8}
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Before and after {\sc dfa}\xspace post-processing\relax }}{40}{figure.caption.12}
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Minimum {\sc dfa}\xspace for the formula $\varphi = \Diamond g$.\relax }}{40}{figure.caption.13}
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Minimum {\sc dfa}\xspace for the formula $\varphi = \Box (a \Rightarrow \Diamond b)$.\relax }}{41}{figure.caption.14}
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Time benchmarking of {\sc ltl}$_f2${\sc dfa}\xspace wrt {\sc flloat}\xspace .\relax }}{42}{figure.caption.15}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces The {\sc dfa}\xspace corresponding to $\mathcal {A}_\mathcal {D}\times \mathcal {A}_\varphi $. Symbol \texttt {a} stands for \textit {alive} and \texttt {w} for \textit {working}\relax }}{52}{figure.caption.18}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces The new transition system corresponding to the Yale shooting domain. Symbol \texttt {a} stands for \textit {alive}, \texttt {w} for \textit {working} and \texttt {t} for \textit {turnDomain}\relax }}{53}{figure.caption.19}
+\contentsline {figure}{\numberline {4.3}{\ignorespaces The parametric {\sc dfa}\xspace corresponding to $\varphi (x_1,x_2) = \Diamond (on(x_1,x_2))$\relax }}{54}{figure.caption.21}
+\contentsline {figure}{\numberline {4.4}{\ignorespaces The parametric {\sc dfa}\xspace corresponding to $\varphi (x) = \Diamond (vehicleAt(x))$\relax }}{56}{figure.caption.22}
+\addvspace {10\p@ }
+\addvspace {10\p@ }
