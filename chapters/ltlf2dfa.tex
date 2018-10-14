@@ -190,8 +190,8 @@ As we can see, as soon as the parser is instantiated it builds the lexer, gets t
 For instance, the \LTLf formula $\varphi= G(a \Rightarrow X b)$ is represented as $('\thicksim', ('U', '\true', ('\thicksim',('|', ('\thicksim', 'a'), ('X', 'b')))))$ and it corresponds to a tree as the one depicted in Figure \ref{fig:formula-syntax-tree}.
 \begin{figure}[h]
 	\centering
-	\includegraphics[height=15em, width=7.5em]{images/formula-syntax-tree}
-	\caption{The syntax tree generated for the formula $"G(a \thicksim Xb)"$. Symbols are in green while operators are in blue.}
+	\includegraphics[height=20em, width=7em]{images/formula-syntax-tree.pdf}
+	\caption{The syntax tree generated for the formula ``$G(a \Rightarrow Xb)$''. Symbols are in green while operators are in blue.}
 	\label{fig:formula-syntax-tree}
 \end{figure}
 Finally, as in the \texttt{MyLexer} class, we have to handle errors defining a specific method.
