@@ -1,5 +1,5 @@
 \chapter{Planning for \LTLf/\PLTL Goals}\label{ch:planning}
-In this chapter, we will define a new approach to the problem of non-deterministic planning for extended temporal goals. In particular, we will give a solution to this problem reducing it to a fully observable non-deterministic (\FOND) problem and taking advantage of our tool \LTLfToDFA, presented in Chapter \ref{ch:ltlf2dfa}. First of all, we will introduce the main idea and motivations supporting our approach. Then, we will give some preliminaries explaining the Planning Domain Definition Language (\PDDL) language and the \FOND planning problem formally. After that, we will illustrate our \FONDFOR approach with the encoding of temporal goals into a \PDDL domain and problem. Finally, we will present our practical implementation of the proposed solution.
+In this chapter, we will define a new approach to the problem of non-deterministic planning for extended temporal goals. In particular, we will give a solution to this problem reducing it to a \textit{fully observable non-deterministic} (\FOND) problem and taking advantage of our tool \LTLfToDFA, presented in Chapter \ref{ch:ltlf2dfa}. First of all, we will introduce the main idea and motivations supporting our approach. Then, we will give some preliminaries explaining the Planning Domain Definition Language (\PDDL) language and the \FOND planning problem formally. After that, we will illustrate our \FONDFOR approach with the encoding of temporal goals into a \PDDL domain and problem. Finally, we will present our practical implementation of the proposed solution.
 \section{Idea and Motivations}\label{sec:plan-idea-motiv}
 Planning for temporally extended goals with \textit{deterministic} actions has been well studied during the years starting from \citep{bacchus1998planning} and \citep{doherty2001talplanner}. Two main reasons why temporally extended goals have been considered over the classical goals, viewed as a desirable set of final states to be reached, are because they are not limited in what they can specify and they allows us to restrict the manner used by the plan to reach the goals. Indeed, temporal extended goals are fundamental for the specification of a collection of real-world planning problems. Yet, many of these real-world planning problems have a \textit{non-deterministic} behavior owing to unpredictable environmental conditions. However, planning for temporally extended goals with \textit{non-deterministic} actions is a more challenging problem and has been of increasingly interest only in recent years with \citep{camacho2017non, de2018automata}.
 
@@ -146,7 +146,7 @@ At line \ref{line:objs-prob}, we have three rods and three disks. At the beginni
 
 Once both \PDDL \textit{domain} and a \textit{problem} are specified, they are given as input to planners.
 \subsection{Fully Observable Non Deterministic Planning}\label{sec:fond}
-In this Section, we formally define what Fully Observable Non Deterministic Planning is giving some notions and definitions. Initially, we recall some concepts of ``classical'' planning while assuming the reader to be acquainted with basics of planning.
+In this Section, we formally define what \textit{Fully Observable Non Deterministic Planning} (\FOND) is giving some notions and definitions. Initially, we recall some concepts of ``classical'' planning while assuming the reader to be acquainted with basics of planning.
 
 Given a \PDDL specification with a \textit{domain} and its corresponding \textit{problem}, we would like to solve this specification in order to find a sequence of actions such that the goal formula holds true at the end of the execution. A \textit{plan} is exactly that sequence of actions which leads the agent to achieve the goal starting from the initial state. Formally, we give the following definition.
 
@@ -195,26 +195,26 @@ Additionally, a \textit{non-deterministic} action $a$ with effect $oneof(E_1,\do
 
 At this point, we can formally define the \FOND planning. Following \citep{ghallab2004automated} and \citep{geffner2013concise}, we give the following definition:
 \begin{definition}
-A \textit{non-deterministic domain} is a tuple $\D = \tup{2^\F, \mathcal{A}, s_0, \delta, \alpha}$ where:
+A \textit{non-deterministic domain} is a tuple $\D = \tup{2^\F, A, s_0, \partial, \alpha}$ where:
 \begin{itemize}
 \item $\F$ is a set of \textit{fluents} (atomic propositions);
-\item $\mathcal{A}$ is a set of \textit{actions} (atomic symbols);
+\item $A$ is a set of \textit{actions} (atomic symbols);
 \item $2^\F$ is the set of states;
 \item $s_0$ is the initial state (initial assignment to fluents);
-\item $\alpha(s) \subseteq \mathcal{A}$ represents \textit{action preconditions};
-\item $(s, a, s') \in \delta$ with $a \in \alpha(s)$ represents \textit{action effects} (including frame assumptions).
+\item $\alpha(s) \subseteq A$ represents \textit{action preconditions};
+\item $(s, a, s') \in \partial$ with $a \in \alpha(s)$ represents \textit{action effects} (including frame assumptions).
 \end{itemize}
 \end{definition}
-\noindent Such domain $\D$ is assumed to be represented compactly (e.g. in \PDDL), therefore, considering the \textit{size} of the domain as the cardinality of $\F$. Intuitively, the evolution of a non-deterministic domain is as follows: from a given state $s$, the agent chooses what action $a \in \alpha(s)$ to execute, then, the environment chooses a \textit{successor state} $s'$ with $(s,a,s') \in \delta$. To this extent, planning can also be seen as a \textit{game} between two players: the agent tries to force eventually reaching the goal no matter how the environment behaves.
+\noindent Such domain $\D$ is assumed to be represented compactly (e.g. in \PDDL), therefore, considering the \textit{size} of the domain as the cardinality of $\F$. Intuitively, the evolution of a non-deterministic domain is as follows: from a given state $s$, the agent chooses what action $a \in \alpha(s)$ to execute, then, the environment chooses a \textit{successor state} $s'$ with $(s,a,s') \in \partial$. To this extent, planning can also be seen as a \textit{game} between two players: the agent tries to force eventually reaching the goal no matter how the environment behaves.
 Moreover, the agent can execute an action having the knowledge of all history of states so far.
 
-Now, we can define the meaning of solving a \FOND planning problem on $\D$. A \textit{trace} of $\D$ is a finite or infinite sequence $s_0,a_0,s_1,a_1, \dots$ where $s_0$ is the initial state, $a_i \in \alpha(s_i)$ and $s_{i+1} \in \delta(s_i,a_i)$ for each $s_i,a_i$ in the trace.
+Now, we can define the meaning of solving a \FOND planning problem on $\D$. A \textit{trace} of $\D$ is a finite or infinite sequence $s_0,a_0,s_1,a_1, \dots$ where $s_0$ is the initial state, $a_i \in \alpha(s_i)$ and $s_{i+1} \in \partial(s_i,a_i)$ for each $s_i,a_i$ in the trace.
 
 Solutions to a \FOND problem $\P$ are called \textit{strategies} (or \textit{policies}). A \textit{strategy} $\trace$ is defined as follows:
 \begin{definition}\label{def:policy}
 Given a \FOND problem $\P$, a \textit{strategy} $\trace$ for $\P$ is a partial function defined as:
 \begin{equation}
-\trace: (2^\F)^+ \rightarrow \mathcal{A}
+\trace: (2^\F)^+ \rightarrow A
 \end{equation}
 such that for every $u \in (2^\F)^+$, if $\trace(u)$ is defined, then $\trace(u) \in \alpha(last(u))$, namely it selects applicable actions, whereas, if $\trace(u)$ is undefined, then $\trace(u) = \bot$.
 \end{definition}
@@ -244,8 +244,18 @@ In this thesis, we propose a new approach, called \FONDFOR, that uses \LTLf and 
 To better understand the powerful of planning with extended temporal goals we give the following example.
 
 \begin{example}\label{ex:pla-temp-simple}
-Considering the well known \texttt{tireworld} \FOND planning task, one of the possible classical goal can be
-*** PUT THE EXAMPLE HERE ***
+Considering the well known \texttt{triangle tireworld} \FOND planning task. The objective is to drive from one location to another, however while driving a tire may be going flat. If there is a spare tire in the location of the car, then the car can use it to fix the flat tire. The task in depicted in Figure \ref{fig:ttireworld-task}, where there are locations arranged as a triangle, arrows representing roads and circles meaning that in a location there is a spare tire. 
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\textwidth]{images/ttireworld-task}
+\caption{A possible Triangle Tireworld task. Locations marked with a circle have a spare tire, arrows represent possible directions} 
+\label{fig:ttireworld-task}
+\end{figure}
+
+A possible classical goal can be $G = vehicleAt(l31)$, namely a propositional formula saying something only about what have to be true at the end of the execution. In the case of $G$, we exclusively require that the vehicle should be in location $l31$.
+
+On the contrary, a goal specification expressed with temporal formalism such as \PLTL could be $\varphi = vehicleAt(l13) \lAND \Once(vehicleAt(l23))$. Such a specification requires to reach position $l13$, imposing the passage through position $l23$ before reaching the goal.
 \end{example}
 
 Planning for \LTLf and \PLTL goals slightly changes the definitions given in Section \ref{sec:fond}. In the following, we give the modified definitions of the concepts seen before.
@@ -254,12 +264,28 @@ Planning for \LTLf and \PLTL goals slightly changes the definitions given in Sec
 Given a domain $\D$ and an \LTLf/\PLTL formula $\varphi$ over atoms $\F \cup \mathcal{A}$, a strategy $\trace$ is a \textit{strong solution} to $\D$ for goal $\varphi$, if every $\trace$-trace is finite and satisfies $\varphi$.
 \end{definition}
 
-About complexity of \FONDS, we have the following Theorem.
+About complexity of \FONDS, we have the following Theorems.
 
-\begin{theorem}\citep{rintanen2004complexity}
-\label{th:fond-complex}
-Solving \FONDS problems for \LTLf/\PLTL goals of the form $\Diamond G$ is \EXPTIME-complete in the size of the domain and \TWOEXPTIME-complete in the size of the goal.
+\begin{theorem}\citep{de2018automata}
+\label{th:fond-ltlf-complex}
+Solving \FONDS for \LTLf goals is:
+\begin{itemize}
+\item \EXPTIME-complete in the size of the domain;
+\item \TWOEXPTIME-complete in the size of the goal.
+\end{itemize}
 \end{theorem}
+
+Furthermore, if the goal has the form of $\Diamond G$, i.e. is a reachability goal, the cost with respect to the goal becomes polynomial because it is just a propositional evaluation. If for a given \LTLf goal the determinization step does not cause a state explosion,  the complexity with respect to the goal is \EXPTIME. 
+On the contrary, if $G$ is a \PLTL formula, from results in \cite{de2018automata}, we can only say that the complexity is \TWOEXPTIME in the size of the goal.
+%\begin{theorem}
+%\label{th:fond-pltl-complex}
+%Solving \FONDS for \PLTL goals is:
+%\begin{itemize}
+%\item \EXPTIME-complete in the size of the domain;
+%\item \TWOEXPTIME-complete in the size of the goal.
+%\end{itemize}
+%\end{theorem}
+Even though we remark that the investigation on planning for \PLTL goals may have a computational advantage since \PLTL formulas can be reduced to \DFA in single exponential time (vs. double-exponential time of \LTLf formulas) \citep{chandra1981acm}, computing the hardness is not obvious because we should evaluate the formula only after the $\Diamond$ operator.
 
 \subsection{Idea}
 Our \FONDFOR approach works as follows: given a non-deterministic planning domain $\D$, an initial state $s_0$ and an \LTLf or \PLTL goal formula $\varphi$ (whose symbols are ground predicates), we first obtain the corresponding \DFA of the temporal formula through \LTLfToDFA, then, we encode such a \DFA into the non-deterministic planning domain $\D$. As a result, we will have a new domain $\D'$ and a new problem $P'$ that can be considered and solved as a classical \FOND planning problem. 
@@ -278,7 +304,7 @@ Let us consider the simplified version of the classical Yale shooting domain \ci
 \label{fig:dfa-game}
 \end{figure}
 
-\noindent As we can see in Figure \ref{fig:dfa-game}, each transition reads both the action and its effect. This is not suitable for a practical implementation. Thus, we do not perform the cartesian product between the two automata. On the contrast, we build a transition system as follows:
+\noindent As we can see in Figure \ref{fig:dfa-game}, each transition reads both the action and its effect. This is not suitable for a practical implementation. Thus, we do not perform the cartesian product between the two automata. On the contrast, we build a transition system as in Figure \ref{fig:yale-our-sol}.
 
 \begin{figure}[h]
 \centering
@@ -292,32 +318,83 @@ The transition system, shown in Figure \ref{fig:yale-our-sol}, expresses the new
 
 In the next Section, we will explain how the new domain $\D'$ and the new problem $\P'$ can be written in \PDDL by showing the encoding of \LTLf/\PLTL goals in \PDDL.
 
-\subsection{Encoding of \LTLf/\PLTL goals in \PDDL}
+\subsection{Encoding of \LTLf/\PLTL goals in \PDDL}\label{sec:encoding-goals}
 In this Section, we describe the process of obtaining the new domain $\D'$ and the new problem $\P'$, both specified in \PDDL. The original \PDDL domain $\D$ and the associated original problem $\P$ change when introducing \LTLf/\PLTL goals. In particular, what changes is the way we encode our \LTLf/\PLTL formula in \PDDL. Firstly, we employ our \LTLfToDFA tool to convert the given goal formula $\varphi$ into the corresponding \DFA. Then, we encode, in a specific way, the resulting \DFA automaton in \PDDL modifying the original domain $\D$ and problem $\P$.
 
-\subsubsection*{Modification of Domain $\D$}
-Regarding $\D$, we add the \texttt{trans} operator and some predicates depending on the resulting \DFA. Specifically, since the goal formula $\varphi$ has instantiated predicates as symbols, to capture the general representation of $\varphi$ we should consider them as variables. Hence, the formula $\varphi$ becomes $\varphi(x_1,x_2,\dots,x_n)$, where $n$ is the number of variables. As a result, the representation of the \DFA, associated to $\varphi(x_1,x_2,\dots,x_n)$, is parametric, namely both states and actions depend on variables as for the automaton in Figure \ref{fig:dfa-parametric}.
+\subsubsection*{Translation of \DFAs to \PDDL in Domain $\D$}
+In order to explain the translation technique of a \DFA to \PDDL, we assume to already have the \DFA generated by \LTLfToDFA. We recall that such a \DFA is formally defined as follows:
+\begin{definition}\label{plan:dfa}
+A \DFA is a tuple $\automaton = \tup{\Sigma, Q, q_0 , \delta, F}$, where:
+\begin{itemize}		
+\item $\Sigma = \{ a_0,a_1,\dots,a_n \}$ is a finite set of symbols;
+\item $Q = \{ q_0,q_1,\dots,q_m \}$ is the finite set of states;
+\item $q_0 \in Q$ is the initial state;
+\item $\delta: Q \times \Sigma \rightarrow Q$ is the transition function;
+\item $F \subseteq Q$ is the set of final states;
+\end{itemize}
+\end{definition}
+Specifically, since the automaton $\automaton$ corresponds to the goal formula $\varphi$, which has grounded predicates as symbols, we can represent them as $\{a_0(o_0,\dots,o_j),\dots, a_n(o_0,\dots,o_w)\}$, where $o_0,\dots,o_k \in \O$ and $0 \leq j,w \leq k$ represents objects of the domain $\D$. To capture the general representation of $\varphi$ in $\D$, we have to modify $\automaton$ to $\automaton'$ performing a transformation explained below. We give the following definitions.
+
+\begin{definition}\label{plan:automaton-prime}
+$\automaton'$ is a tuple $\automaton' = \tup{\Sigma', Q', q'_0 , \delta', F'}$, where:
+\begin{itemize}		
+\item $\Sigma' = \{ a'_0,a'_1,\dots,a'_n \}$ is a finite set of symbols;
+\item $Q' = \{ q'_0,q'_1,\dots,q'_m \}$ is the finite set of states;
+\item $q'_0 \in Q$ is the initial state;
+\item $\delta': Q' \times \Sigma' \rightarrow Q'$ is the transition function;
+\item $F' \subseteq Q'$ is the set of final states;
+\end{itemize}
+\end{definition}
+
+\begin{definition}\label{plan:mapfunc}
+Given the set of \DFA symbols $\Sigma$, we define a mapping function $f$ as follows:
+\begin{equation}
+f: \O \rightarrow \V
+\end{equation}
+where $\O$ is the set of objects $\{o_0,\dots,o_k\}$ and $\V$ is a set of variables $\{x_0,\dots,x_k\}$
+\end{definition}
+
+The transformation from $\automaton$ and $\automaton'$ is carried out with the mapping function $f$ as follows:
+\begin{itemize}
+\item $\Sigma' = \{ a'_0,\dots,a'_n \}$, where $a'_i \doteq a_i(x_0,\dots,x_j)$ and $x_0,\dots,x_j \subseteq \V$;
+\item $Q' = \{ q'_0,\dots,q'_m \}$, where $q'_i \doteq q_i(x_0\dots, x_k)$.
+\end{itemize}
+Then, $q'_0, \delta' \text{ and } F'$ are modified accordingly.
+
+Once the transformation is done, we have obtained a parametric \DFA which is a general representation with respect to the original one. After that, for representing the \DFA transitions in the domain $\D$, we should encode the new \textit{transition function} $\delta'$ into \PDDL. To this extent, the $\delta'$ function is represented as a new \PDDL operator, called \texttt{trans} having  these properties:
+
+\begin{itemize}
+\item all variables in $\V$ are parameters;
+\item the negation of the \texttt{turnDomain} predicate is a precondition;
+\item effects represent the $\delta'$ function.
+\end{itemize}
+Moreover, effects are expressed as conditional effects. The general encoding would be as follows:
+\begin{lstlisting}[escapechar=£]
+Action £\texttt{trans}£:
+  parameters: £$(x_0, \dots, x_k)$, where $x_i \in \V$£
+  preconditions: £$\lnot turnDomain$£
+  effects: £when $(q_i(x_0, \dots, x_k) \lAND a'_j)$ then $(\delta'(q'_i, a'_j)=q''_i(x_0, \dots, x_k) \lAND (\lnot q, \forall q \in Q \text{ s.t. } q \neq q''_i) \lAND turnDomain),\; \forall i,j: 0\leq i \leq m, 0\leq j \leq n$£
+\end{lstlisting}
+
+Additionally, in \PDDL, especially in the effect formula of a conditional effect, we should specify that if the automaton is in a state, it is not in other states. This is captured by adding the negation of all other automaton states. In the following, we give an example showing the translation of \DFAs to \PDDL step-by-step.
+%At this point, after the construction of the \texttt{trans} operator, we add it to the domain $\D$, thus obtaining the new domain $\D'$. As a result, the representation of the \DFA, associated to $\varphi(x_1,x_2,\dots,x_n)$, is parametric, namely both states and actions depend on variables as for the automaton in Figure \ref{fig:dfa-parametric}.
 
 \begin{example}\label{ex:param-formula}
-Let us consider the goal formula $\varphi = \Diamond(on(d3,rod3))$ for the Tower of Hanoi planning problem. The predicate \texttt{on} is instantiated on objects \texttt{d3} and \texttt{rod3}. By considering them as variables, $\varphi$ becomes $\varphi(x_1,x_2) = \Diamond(on(x_1,x_2))$, where we know that $x_1$ will correspond to $d3$ and $x_2$ to $rod3$. 
+Let us consider the goal formula $\varphi = \Diamond(on(d3,rod3))$ for the Tower of Hanoi planning problem. The predicate \texttt{on} is instantiated on objects \texttt{d3} and \texttt{rod3}. By applying the mapping function $f$ we have the corresponding variables and $\varphi$ becomes $\varphi(x_1,x_2) = \Diamond(on(x_1,x_2))$, where we know that $x_1 = f(d_3)$ and  $x_2 = f(rod_3)$. In this case, the modified \DFA $\automaton'$ is depicted in Figure \ref{fig:dfa-parametric}.
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.7\textwidth]{images/automa-param}
 \caption{The parametric \DFA corresponding to $\varphi(x_1,x_2) = \Diamond(on(x_1,x_2))$} 
 \label{fig:dfa-parametric}
 \end{figure}
-\end{example}
-
-At this point, we can explain how we build the new operator \texttt{trans}. Since this operator has been introduced to simulate moves of the automaton related to the goal formula, the operator will have:
-\begin{itemize}
-\item variables as parameters;
-\item the negation of the \texttt{turnDomain} predicate as precondition;
-\item transitions encoded as conditional effects as effect.
-\end{itemize}
-We give the following example:
-
-\begin{example}\label{ex:trans-op-adl}
-Consider the \DFA in Figure \ref{fig:dfa-parametric}, the \texttt{trans} operator built from that automaton is the following:
+%At this point, we can explain how we build the new operator \texttt{trans}. Since this operator has been introduced to simulate moves of the automaton related to the goal formula, the operator will have:
+%\begin{itemize}
+%\item variables as parameters;
+%\item the negation of the \texttt{turnDomain} predicate as precondition;
+%\item transitions encoded as conditional effects as effect.
+%\end{itemize}
+%We give the following example:
+At this point, consider the new \DFA, the \texttt{trans} operator built from that automaton is the following:
 \begin{lstlisting}[language=PDDL, escapechar=£]
 (:action trans
   :parameters (?x1 ?x2)
@@ -331,19 +408,20 @@ Consider the \DFA in Figure \ref{fig:dfa-parametric}, the \texttt{trans} operato
 \end{lstlisting}
 \end{example}
 
-As shown in Example \ref{ex:trans-op-adl}, transitions, with source state and destination state, are encoded as conditional effects, where the condition formula includes source state and formula symbols whereas the effect formula includes the destination state, the negation of all other states and \texttt{turnDomain}. Moreover, in order to get a compact encoding of \texttt{trans} effects, conditional effects are brought together by destination state as happens, for instance, at line \ref{line:cond-eff-ex}.
+As just shown in Example \ref{ex:param-formula}, transitions, with source state and destination state, are encoded as conditional effects, where the condition formula includes source state and formula symbols whereas the effect formula includes the destination state, the negation of all other states and \texttt{turnDomain}. Moreover, in order to get a compact encoding of \texttt{trans} effects, conditional effects are brought together by destination state as happens, for instance, at line \ref{line:cond-eff-ex}.
 
 After the \texttt{trans} operator has been built, we change $\D$ as follows:
 \begin{enumerate}
-\item add \texttt{turnDomain} to all actions precondition and negated \texttt{turnDomain} to all actions effects;
+\item $\forall a \in A$: add \texttt{turnDomain} to $\alpha(s)$, i.e add \texttt{turnDomain} predicate to all actions precondition $\alpha(s)$;
+\item $\forall a \in A$: add \texttt{(not (turnDomain))} to $(s,a,s') \in \partial$ with $a \in \alpha(s)$, i.e add negated \texttt{turnDomain} to all actions effects $(s,a,s')$;
 \item add \texttt{trans} operator;
-\item add all automaton state predicates to the domain predicates definition.
+\item $\forall q' \in Q'$: add $q'$ to predicates definition of $\D$, i.e. add all automaton state predicates to the domain predicates definition.
 \end{enumerate}
 
 \noindent We have thus obtained the new domain $\D'$. In the following, we show an example.
 
 \begin{example}\label{ex:new-dom}
-Let consider the Triangle Tireworld scenario. The objective is to drive from one location to another, however while driving a tire may be going flat. If there is a spare tire in the location of the car, then the car can use it to fix the flat tire. The original \PDDL domain is:
+Let consider again the Triangle Tireworld scenario. The original \PDDL domain is:
 \begin{lstlisting}[language=PDDL, escapechar=£]
 (define (domain triangle-tire)
   (:requirements :typing :strips :non-deterministic)
@@ -429,10 +507,18 @@ Finally, putting together all pieces and carrying out changes described above, w
 \end{lstlisting}
 \end{example}
 
-\subsubsection*{Modification of Problem $\P$}
-Concerning the planning problem $\P$, we completely discard the goal specification, whereas the initial state description is slightly modified. Moreover, the problem name, the associated domain name and all defined objects remain unchanged. We have to modify both the initial state and the goal state specifications to make them compliant with $\D'$, containing all changes introduced in the planning domain $\D$. To this extent, in the initial state description, we should add to the original specification the new predicate \texttt{turnDomain}, meaning that it is $true$ at the beginning, and the initial state of the automaton instantiated on the objects of interest, i.e. those specified in the \LTLf/\PLTL formula $\varphi$. 
+\subsubsection*{Change in Problem $\P$}
+Concerning the planning problem $\P$, we completely discard the goal specification, whereas the initial state description is slightly modified. Moreover, the problem name, the associated domain name and all defined objects remain unchanged. We have to modify both the initial state and the goal state specifications to make them compliant with $\D'$, containing all changes introduced in the planning domain $\D$. To this extent, we formally define the new initial state as follows:
+\begin{equation}
+\text{Init: } s_0 \lAND \text{\texttt{turnDomain}} \lAND \hat{q}'_0
+\end{equation}
+where $\hat{q}'_0 \doteq q_0(f^{-1}(x_0),\dots,f^{-1}(x_k)) = q_0(o_0,\dots,o_k)$. In other words, we put together the original initial specification $s_0$, the new predicate \texttt{turnDomain}, meaning that it is $true$ at the beginning, and the initial state of the automaton instantiated on the objects of interest, i.e. those specified in the \LTLf/\PLTL formula $\varphi$. 
 
-On the other hand, the goal description is built from scratch by putting together the \texttt{turnDomain} predicate, meaning that it must be $true$ at the end of the execution, and the final state(s) of the automaton always instantiated on the objects of interest. Here, it is important to notice that if the automaton has two or more final states, they should be put in disjunction.
+On the other hand, the goal description is built from scratch as follows:
+\begin{equation}
+\text{Goal: } \text{\texttt{turnDomain}} \lAND (\bigvee_{\hat{q}' \in F} \hat{q}')
+\end{equation}
+where $\hat{q}' \doteq q(f^{-1}(x_0),\dots,f^{-1}(x_k)) = q(o_0,\dots,o_k)$. In other words, we place  together the \texttt{turnDomain} predicate, meaning that it must be $true$ at the end of the execution, and the final state(s) of the automaton always instantiated on the objects of interest. Here, it is important to notice that if the automaton has two or more final states, they should be put in disjunction.
 
 We can give the following example.
 
@@ -678,20 +764,21 @@ Secondly, \FONDFOR requires Python>=3.6 and has the following dependencies:
 \begin{itemize}
 \item \LTLfToDFA, presented in Chapter \ref{ch:ltlf2dfa}. It has been used for the generation of \DFAs corresponding to \LTLf/\PLTL goal formulas;
 \item \href{http://www.dabeaz.com/ply/ply.html}{PLY}, a pure-Python implementation of the popular compiler construction tools \href{http://dinosaur.compilertools.net/}{Lex and Yacc}. It has been employed for \PDDL parsing;
-\item \href{https://pypi.org/project/pydot/}{pydot}, a Python interface to GraphViz format language. It has been employed for \DFAs parsing.
+\item \href{https://pypi.org/project/pydot/}{pydot}, a Python interface to GraphViz format language. It has been employed for \DFAs parsing;
+\item possible other dependencies linked to the employed planner. In the case of FOND-SAT, it has MINISAT as dependency.
 \end{itemize} 
 The \FONDFOR software is an open-source project and available to download on GitHub\footnote{https://github.com/Francesco17/FOND4LTLfPLTL}.
 
-Additionally, \FONDFOR will soon be available as an online tool at the website address \href{fond4ltlfpltl.diag.uniroma1.it}{fond4ltlfpltl.diag.uniroma1.it}.
+Additionally, \FONDFOR will soon be available as an online tool at the website address \href{http://fond4ltlfpltl.diag.uniroma1.it}{http://fond4ltlfpltl.diag.uniroma1.it}.
 \subsection{Package Structure}
 The structure of the \FONDFOR package is ordered and divided according to the scope of each single module. It consists of the following:
 \begin{itemize}
-\item \texttt{fond4ltlfpltl.py}: it is the main module of the package;
 \item \texttt{pddl/}: it is the directory containing all the necessary code for parsing the \PDDL standard and all data structures designed and implemented to handle \PDDL;
 \item  \texttt{automa/}: it consists of the \texttt{automa.py} file, the \texttt{aparser.py} file and the \texttt{symbol.py} file. In this folder, we find all the code for dealing with automata.
+\item \texttt{fond4ltlfpltl.py}: it is the main module of the package;
 \end{itemize}
 \subsection{\PDDL}
-In this section, we illustrate the code pertaining to handle the \PDDL standard. More specifically, we talk about the parsing of \PDDL domains and problems showing all implemented data structures.
+In this section, we illustrate the code that handles the \PDDL standard. More specifically, we talk about the parsing of \PDDL domains and problems showing all implemented data structures.
 
 First of all, thanks to the PLY library we have implemented the \texttt{lexer.py} and the \texttt{parser.py} modules enabling the parsing of a \PDDL document. For a brief overview of the functioning of PLY we refer the reader to Sections \ref{sec:lexer} and \ref{sec:parser}. Indeed, the operation is exactly the same. In the following, we show the listing of the two modules focusing only on the most important parts. Three dots $\dots$ represent omitted code.
 
@@ -1007,41 +1094,696 @@ In Listing \ref{code:fond-parser}, there are all methods definition that are in 
 
 At this point, we are going to describe one after the other the implemented data structure of the main \PDDL components.
 
-Firstly, a \PDDL domain
+Firstly, variables and constants are represented by the \texttt{Term} class in Listing \ref{code:fond-term}.
 
+\begin{lstlisting}[language=Python, style=Python, escapechar = £,  label={code:fond-term}, caption={The \texttt{Term} class.}]
+class Term:
 
+    def __init__(self, **kwargs):
+        self._name  = kwargs.get('name',  None)
+        self._type  = kwargs.get('type',  None)
+        self._value = kwargs.get('value', None)
 
+    @property
+    def name(self):
+        return self._name
 
+    @property
+    def type(self):
+        return self._type
 
+    @property
+    def value(self):
+        return self._value
+...
+    @classmethod
+    def variable(cls, name, type=None):
+        return Term(name=name, type=type)
 
+    @classmethod
+    def constant(cls, value, type=None):
+        return Term(value=value, type=type)
 
+    def __str__(self):
+        if self.is_variable() and self.is_typed():
+            return '{0} - {1}'.format(self._name, self._type)
+        if self.is_variable():
+            return '{0}'.format(self._name)
+        if self.is_constant() and self.is_typed():
+            return '{0} - {1}'.format(self._value, self._type)
+        if self.is_constant():
+            return '{0}'.format(self._value)
+\end{lstlisting}
+A \texttt{Term} object is instantiated with three optional arguments: a name, a type and a value, respectively. As said before, a term can represent a variable or a constant. In each of these cases, it handles a possible typing and/or a possible value.
 
+Secondly, we have the \texttt{Predicate} and the \texttt{Literal} classes. The former is used to represent \PDDL fluents, whereas the latter distinguishes between positive and negative fluents. Additionally, the \texttt{Predicate} class can also handle the equality predicates. In the following Listing we propose a glimpse of both the \texttt{Predicate} and the \texttt{Literal} classes.
+\begin{lstlisting}[language=Python, style=Python, escapechar = £,  label={code:fond-pred-lit}, caption={The \texttt{Predicate} and the \texttt{Literal} classes.}]
+class Predicate:
 
+    def __init__(self, name, args=[]):
+        self._name = name
+        self._args = args
 
+    @property
+    def name(self):
+        return self._name
 
+    @property
+    def args(self):
+        return self._args[:]
+...
+    def __str__(self):
+        if self.name == '=':
+            return '(= {0} {1})'.format(str(self._args[0]), 
+            str(self._args[1]))
+        elif self.arity == 0:
+            return '('+self.name+')'
+        else:
+            return '({0} {1})'.format(self.name, ' '.join(map(str, 
+            self._args)))
+...
 
+class Literal:
 
+    def __init__(self, predicate, positiveness):
+        self.predicate = predicate
+        self.positiveness = positiveness
+...
+    @classmethod
+    def positive(cls, predicate):
+        return Literal(predicate, True)
 
+    @classmethod
+    def negative(cls, predicate):
+        return Literal(predicate, False)
 
+    def get_vars(self):
+        return self.predicate.args
 
+    def __str__(self):
+        if self.is_positive():
+            return str(self.predicate)
+        if not self.is_positive() and self.predicate.name == '=':
+            lhs = str(self.predicate.args[0])
+            rhs = str(self.predicate.args[1])
+            return '(not (= {0} {1}))'.format(lhs, rhs)
+        if not self.is_positive():
+            return '(not {})'.format(str(self.predicate))
+\end{lstlisting}
 
+After seeing the data structure for low level objects that we have just presented, we are going to illustrate the implementation of data structure for the rest, namely the \texttt{Action} class, the \texttt{Domain} class and, finally, the \texttt{Problem} class. Here, we skip the implementation of each formula since it simply consists of initializing and representing the corresponding object.
 
+Firstly, we show main methods of the \texttt{Action} class in Listing \ref{code:fond-act}.
 
+\begin{lstlisting}[language=Python, style=Python, escapechar = £,  label={code:fond-act}, caption={The \texttt{Action} class.}]
+from dfagame.PDDLparser.formula import FormulaAnd, FormulaOneOf
+from dfagame.PDDLparser.literal import Literal
+from dfagame.PDDLparser.predicate import Predicate
 
+class Action:
 
+    def __init__(self, name, parameters, preconditions, effects):
+        self.name = name #string
+        self.parameters = parameters #list
+        self.preconditions = preconditions #formula.FormulaXXX
+        self.effects = effects #formula.FormulaXXX
 
+    def __str__(self):
+        operator_str = '{0}\n'.format(self.name)
+        operator_str += '\t:parameters ({0})\n'.format(' '.join(map(str, 
+        self.parameters)))
+        operator_str += '\t:precondition {0}\n'.format(self.preconditions)
+        operator_str += '\t:effect {0}\n'.format(self.effects)
+        return operator_str
 
+    def add_to_precond(self):
+        if isinstance(self.preconditions, FormulaAnd):
+            self.preconditions.complete_domain_turn(True)
+        else:
+            old_formula = self.preconditions
+            precond_to_be_added = Literal.positive(Predicate('turnDomain'))
+            self.preconditions = FormulaAnd([old_formula,precond_to_be_added])
 
+    def add_to_effect(self):
+        if isinstance(self.effects, FormulaAnd):
+            self.effects.complete_domain_turn(False)
+        else:
+            old_formula = self.effects
+            effect_to_be_added = Literal.negative(Predicate('turnDomain'))
+            self.effects = FormulaAnd([old_formula,effect_to_be_added])
 
+    def add_turn_domain(self):£\label{line:add-turn-domain}£
+        self.add_to_precond()
+        self.add_to_effect()
+\end{lstlisting}
 
+As we can see from the Listing, the \texttt{Action} class contains all main properties, i.e. the name, parameters, preconditions and effects. Moreover, as done for all classes, the \texttt{Action} class has its string representation that convert the operator itself in \PDDL notation. As last remark, notice the \texttt{add\_turn\_domain} method which performs the addition to each operator (except from \texttt{trans} operators) of the domain of the new predicate \texttt{turnDomain}. In particular, we remind the reader that \texttt{turnDomain} is put positive in preconditions and negative on effects.
 
+Secondly, we describe the two main data structures representing \PDDL elements: the \texttt{Domain} class and the \texttt{Problem} class, respectively. Both represent a complete planning task. In Listing \ref{code:fond-dom}, we can see the definition of the \texttt{Domain} class.
 
+\begin{lstlisting}[language=Python, style=Python, escapechar = £,  label={code:fond-dom}, caption={The \texttt{Domain} class.}]
+from dfagame.PDDLparser.formula import *
+from dfagame.PDDLparser.action import Action
+import copy
 
+class Domain:
 
+    def __init__(self, name, requirements, types, constants, predicates, 
+    operators):
+        self.name = name #string
+        self.requirements = requirements #list
+        self.types = types #list
+        self.constants = constants #list
+        self.predicates = predicates #list
+        self.operators = operators #list
+...
+    def add_operators_trans(self, transition_operators):
+        for operator in transition_operators:
+            self.operators.append(operator)
+
+    def add_predicates(self, parameters, states):
+        self.predicates.append('(turnDomain)')
+        for state in states:
+            self.predicates.append('(q{0} {1})'.format(str(state), 
+            ' '.join(map(str, parameters))))
+...
+    def add_precond_effect(self):
+        for op in self.operators:
+            op.add_turn_domain()
+
+    def get_new_domain(self, parameters, states, transition_operators):£\label{line:new-dom}£
+        self.compile_simple_adl()
+        self.add_predicates(parameters, states)
+        self.add_precond_effect()
+        self.add_operators_trans(transition_operators)
+        return self
+
+    def modify_operator(self, op_copy, condition, formula):
+        if isinstance(op_copy.preconditions, FormulaAnd):
+            op_copy.preconditions.andList.append(condition)
+            new_preconditions = op_copy.preconditions.andList
+            new_effects = formula
+        else:
+            new_preconditions = FormulaAnd([op_copy.preconditions,condition])
+            new_effects = formula
+        new_op = Action(op_copy.name, op_copy.parameters,
+         new_preconditions, new_effects)
+        return new_op
+
+    def compile_simple_adl(self):£\label{line:compile-adl}£
+        i = 0
+        for op in self.operators:
+            if isinstance(op.effects, FormulaWhen):
+                # it remains only one operator, but we need to modify it
+                condition_formula = op.effects.condition
+                statement_formula = op.effects.formula
+                new_op = self.modify_operator(copy.deepcopy(op),
+                condition_formula, statement_formula)
+                self.operators[i] = new_op
+                continue
+            elif isinstance(op.effects, FormulaAnd):
+                no_of_whens = op.effects.count_whens()
+                if no_of_whens == 0:
+                    continue
+                else:
+                    pos = self.operators.index(op)
+                    new_op_list = self.split_operator(copy.deepcopy(op),
+                    no_of_whens)
+                    self.operators[pos:pos+1] = new_op_list
+            i +=1
+
+    def split_operator(self, op, number):
+        '''
+        given a simple adl operator it returns
+        a list of operators without adl
+        '''
+        new_op_list = []
+        pair_precond_effect = []
+        additionals = []
+        formula = op.effects
+
+        for item in formula.andList:
+            if isinstance(item, FormulaWhen):
+                formula_condition = item.condition
+                formula_statement = item.formula
+                pair_precond_effect.append([FormulaAnd([op.preconditions,
+                formula_condition]), formula_statement])
+            else:
+                additionals.append(item)
+        k = 1
+        for j in range(len(pair_precond_effect)):
+            pair_precond_effect[j][k] = FormulaAnd([pair_precond_effect[j]
+            [k]]+additionals)
+
+        for u in range(number):
+            new_op = Action(op.name+'-'+str(u), op.parameters,
+             pair_precond_effect[u][0], pair_precond_effect[u][1])
+            new_op_list.append(new_op)
+
+        return new_op_list
+\end{lstlisting}
+As seen in Section \ref{sec:pddl}, a \PDDL domain consists of a name,
+the list of requirements, the list of types, the list of constants, the list of predicates and, finally, the list of operators. All items of these list, are instantiations of classes previously seen.
+Regarding the \texttt{Domain} class, it comprises a couple of methods that contribute to the creation of the new domain in which we encode temporal goals. Additionally, at line \ref{line:compile-adl}, the class provides a method to compile away simple conditional effects in operators. This functionality simply splits operators containing conditional effects as many times as the number of conditional effects appearing in the action. More specifically, for each conditional effect we put the condition in action's preconditions and leave the effect-formula in the action's effect. Finally, we have the \texttt{get\_new\_domain} method, at line \ref{line:new-dom}, that gathers and invokes all methods for obtaining the new domain with encoded temporal goals.
+
+Finally, we present the \texttt{Problem} class in Listing \ref{code:fond-prob}.
+
+\begin{lstlisting}[language=Python, style=Python, escapechar = £,  label={code:fond-prob}, caption={The \texttt{Problem} class.}]
+from dfagame.PDDLparser.formula import FormulaOr
+
+class Problem(object):
+
+    new_goal = set()
+
+    def __init__(self, name, domain, objects, init, goal):
+        self._name = name
+        self._domain = domain
+        self._objects = {}
+        for obj in objects:
+            self._objects[obj.type] = self._objects.get(obj.type, [])
+            self._objects[obj.type].append(str(obj.value))
+        self._init = set(map(str, init))
+        self._goal = set(map(str, goal))
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def domain(self):
+        return self._domain
+
+    @property
+    def objects(self):
+        return self._objects.copy()
+
+    @property
+    def init(self):
+        return self._init.copy()
+
+    @property
+    def goal(self):
+        return self._goal.copy()
+
+    def __str__(self):
+        problem_str  = '(define (problem {0})\n'.format(self._name)
+        problem_str += '\t(:domain {0})\n'.format(self._domain)
+        problem_str += '\t(:objects'
+        for type, objects in self._objects.items():
+            problem_str += ' {0} - {1}'.format(' '.join(sorted(objects)), 
+            type)
+        problem_str += ')\n'
+        problem_str += '\t(:init {0})\n'.format(' '.join(sorted(
+        self._init)))
+        problem_str += '(:goal (and {0}))\n'.format(
+        ' '.join(sorted(self.new_goal)))
+        problem_str += ')'
+        return problem_str
+
+    def make_new_init(self, obj_list):£\label{line:new-init}£
+        self._init.add('(turnDomain)')
+        if obj_list:
+            self._init.add('(q1 {0})'.format(' '.join(obj_list)))
+        else:
+            self._init.add('(q1)')
+        return self._init
+
+    def make_new_goal(self, final_states, obj_list):£\label{line:new-goal}£
+        self.new_goal.add('(turnDomain)')
+        if len(final_states) > 1:
+            or_list = []
+            for state in final_states:
+                if obj_list:
+                    or_list.append('(q{0} {1})'.format(str(state), 
+                    ' '.join(obj_list)))
+                else:
+                    or_list.append('(q{0})'.format(str(state)))
+            new_formula = FormulaOr(or_list)
+            self.new_goal.add(str(new_formula))
+        else:
+            if obj_list:
+                self.new_goal.add('(q{0} {1})'.format(final_states[0], 
+                ' '.join(obj_list)))
+            else:
+                self.new_goal.add('(q{0})'.format(final_states[0]))
+
+    def get_new_problem(self, final_states, symbols_list):£\label{line:new-prob}£
+        obj_list = self.extract_object_list(symbols_list)
+        self.objects_are_upper(obj_list)
+        self.make_new_init(obj_list)
+        self.make_new_goal(final_states, obj_list)
+        return self
+
+    def extract_object_list(self, symbols_list):
+        already_seen = set()
+        obj_list = []
+        for symbol in symbols_list:
+            if symbol.objects:
+                for obj in symbol.objects:
+                    if obj not in already_seen:
+                        already_seen.add(obj)
+                        obj_list.append(obj)
+                    else:
+                        pass
+            else:
+                continue
+        return obj_list
+
+    def objects_are_upper(self, objects):
+        for value_list in self.objects.values():
+            for val in value_list:
+                if val.isupper() and val.lower() in objects:
+                    objects[objects.index(val.lower())] = 
+                    objects[objects.index(val.lower())].upper()
+                else:
+                    pass
+\end{lstlisting}
+The main methods are:
+\begin{itemize}
+\item \texttt{make\_new\_init} (line \ref{line:new-init});
+\item \texttt{make\_new\_goal} (line \ref{line:new-goal});
+\item \texttt{get\_new\_problem} (line \ref{line:new-prob}).
+\end{itemize}
+Having the informations about the \DFA encoding, the first method computes the new initial specification by adding the \texttt{turnDomain} predicates and the initial state predicate of the automaton. Likewise, the second method assembles the new goal specification accordingly with the theory illustrated in Section \ref{sec:encoding-goals}. Finally, the third method simply returns the new problem encoded in standard \PDDL.
 
 \subsection{Automa}
+In this section, we illustrate the code that handles extended temporal goals treated as automata. More specifically, we talk about the generation of \DFA corresponding to the \LTLf/\PLTL goal, the parsing and managing of such generated \DFA showing all implemented data structures.
+
+First of all, as stated before, given an \LTLf/\PLTL goal formula, we employ the \LTLfToDFA tool to generate the \DFA. Secondly, as soon as the \DFA is generated, we parse it with the \texttt{aparser.py} module and then, we instantiate an \texttt{Automa} object for it. In the following, we will discuss more about the \texttt{Automa} class, since the \texttt{aparser.py} module is pretty much the same discussed in Section \ref{sec:janus-impl-automa}.
+
+\begin{lstlisting}[language=Python, style=Python, escapechar = £,  label={code:fond-automa}, caption={The \texttt{Automa} class.}]
+...
+class Automa:
+    def __init__(self, alphabet, states, initial_state, accepting_states,
+     transitions):
+        self.alphabet = alphabet
+        self.states = states
+        self.initial_state = initial_state
+        self.accepting_states = accepting_states
+        self.transitions = transitions
+        self.trans_by_dest = self.group_conditions_by_consequence()£\label{line:trans-by-dest}£
+        self.validate()
+...
+    def validate(self):
+        self.validate_initial_state()
+        self.validate_accepting_states()
+        self.valide_transition_start_states()
+        self.validate_input_symbols()
+        return True
+
+    def __str__(self):
+        automa = 'alphabet: {}\n'.format(str(self.alphabet))
+        automa += 'states: {}\n'.format(str(self.states))
+        automa += 'init_state: {}\n'.format(str(self.initial_state))
+        automa += 'accepting_states: {}\n'.format(str(self.accepting_states))
+        automa += 'transitions: {}'.format(str(self.transitions))
+        return automa
+
+    def create_operators_trans(self, domain_predicates,£\label{line:op-trans}£ grounded_symbols):
+        new_operators = []
+        my_predicates = []
+        for symbol in grounded_symbols:
+            my_predicates.append(symbol.name)
+        (parameters, obj_mapping) = £\label{line:trans-param}£ self.compute_parameters(domain_predicates, 
+        grounded_symbols)
+        vars_mapping = self.compute_varsMapping(grounded_symbols,£\label{line:trans-vars-map}£
+         obj_mapping)
+        my_variables = self.compute_variables(parameters)
+        counter = 0
+        for destination, source_action in self.trans_by_dest.items():£\label{line:trans-prec-eff}£
+            if source_action:
+                fluents_list_precond = self.compute_preconditions(source_action,
+                 vars_mapping, my_predicates, my_variables)
+                if isinstance(fluents_list_precond, FormulaAnd):
+                    new_precondition = fluents_list_precond
+                else:
+                    new_precondition = FormulaAnd([fluents_list_precond] 
+                    + [Literal.negative(Predicate('turnDomain'))])
+                new_effects = self.compute_effects(destination, my_variables)
+                new_operators.append(Action('trans-'+str(counter),
+                 parameters, new_precondition, new_effects))
+            else:
+                pass
+            counter += 1
+        return (new_operators, parameters)
+
+    def compute_type(self, all_predicates, name, position):
+        for predicate in all_predicates:
+            if predicate.name == name:
+                if predicate.args:
+                    return (predicate.args[position].name +
+                     ''.join(random.choices(string.digits, k=2)),
+                      predicate.args[position].type)
+                else:
+                    raise ValueError('[ERROR]: Please check the formula')
+            else:
+                pass
+
+    def compute_parameters(self,domain_predicates, grounded_symbols):
+        objs_set = set()
+        obj_mapping = {}
+        parameters = []
+        for symbol in grounded_symbols:
+            if symbol.objects:
+                i = 0
+                for obj in symbol.objects:
+                    if obj not in objs_set:
+                        objs_set.add(obj)
+                        (name_var, type_) = self.compute_type(domain_predicates, 
+                        symbol.name, i)
+                        obj_mapping[obj] = [name_var, type_]
+                        parameters.append(Term.variable(name_var, type_))
+                    else:
+                        pass
+                    i += 1
+        return (parameters, obj_mapping)
+
+    def compute_varsMapping(self, grounded_symbols, obj_mapping):
+        temp = []
+        vars_mapping = {}
+        for symbol in grounded_symbols:
+            if symbol.objects:
+                for obj in symbol.objects:
+                    temp.append((obj_mapping[obj][0], obj_mapping[obj][1]))
+            else:
+                vars_mapping[symbol] = []
+            vars_mapping[symbol] = temp
+            temp = []
+        return vars_mapping
+
+    def compute_preconditions(self, source_action, vars_mapping,
+     predicates_name, variables):
+        if len(source_action) == 1:
+            if self.get_automaton_formula(vars_mapping, predicates_name,
+             source_action[0][1]) == []:
+                formula = Literal.positive(Predicate('q'+
+                str(source_action[0][0]), variables))
+            else:
+                automaton_state = [Literal.positive(Predicate('q'+
+                str(source_action[0][0]), variables))]
+                formula = FormulaAnd(automaton_state+
+                self.get_automaton_formula(vars_mapping, predicates_name,
+                 source_action[0][1])+[Literal.negative(Predicate('turnDomain'))])
+        else:
+            formula = FormulaOr(self.get_or_conditions(vars_mapping,
+             predicates_name, variables, source_action))
+        return formula
+
+    def compute_effects(self, destination, variables):
+        negated_states = []
+        for state in self.states:
+            if state != destination:
+                negated_states.append(Literal.negative(Predicate('q'+
+                str(state), variables)))
+            else:
+                pass
+        automaton_destination = [Literal.positive(Predicate('q'+
+        str(destination), variables))]
+        turnDomain = [Literal.positive(Predicate('turnDomain'))]
+        formula = FormulaAnd(automaton_destination+negated_states+turnDomain)
+        return formula
+
+    def get_or_conditions(self, vars_mapping, predicates_name, variables,
+     source_action_list):
+        items = []
+        for source, action in source_action_list:
+            formula = self.get_automaton_formula(vars_mapping,
+             predicates_name, action)
+            if formula == []:
+                items.append(Literal.positive(Predicate('q'+str(source),
+                 variables)))
+            else:
+                automaton_state = [Literal.positive(Predicate('q'+
+                str(source), variables))]
+                items.append(FormulaAnd(automaton_state+
+                self.get_automaton_formula(vars_mapping, predicates_name, 
+                action)))
+        return items
+
+    def get_automaton_formula(self, vars_mapping, predicates_name, action):
+        temp = []
+        i = 0
+        for char in action:
+            if char == '1':
+ list(vars_mapping)]:
+                temp.append(Literal.positive(Predicate(predicates_name[i],
+                 [x[0] for x in vars_mapping[list(vars_mapping)[i]]] )))
+ temp.append(Literal.positive(Predicate(predicates_name[i])))
+            elif char == '0':
+                temp.append(Literal.negative(Predicate(predicates_name[i],
+                 [x[0] for x in vars_mapping[list(vars_mapping)[i]]] )))
+ temp.append(Literal.negative(Predicate(predicates_name[i])))
+            else:
+                pass
+            i += 1
+        return temp
+
+    def compute_variables(self, parameters_list):
+        my_variables = []
+        for param in parameters_list:
+            my_variables.append(param.name)
+        return my_variables
+
+    def create_dict_by_destination(self):
+        trans_by_dest = {}
+        for state in self.states:
+            trans_by_dest[state] = []
+        return trans_by_dest
+
+    def group_conditions_by_consequence(self):
+        group_by_dest = self.create_dict_by_destination()
+        for source, trans in self.transitions.items():
+            i = 0
+            for dest in trans.values():
+                group_by_dest[dest].append((source, list(trans.keys())[i]))
+                i +=1
+        return group_by_dest
+\end{lstlisting}
+In Listing \ref{code:fond-automa}, we have the main data structure representing the \DFA generated by \LTLfToDFA. As soon as an object is instantiated, transitions are grouped by destination state by a method at line \ref{line:trans-by-dest}. This operation is useful to get a compact representation of each \texttt{trans} operator created. We recall that, the \texttt{trans} operator, created in Section \ref{sec:encoding-goals}, is then split in multiple \texttt{trans} operators because not all planners support conditional effects.
+
+The main method of the \texttt{Automa} class is obviously the \texttt{create\_operators\_trans} which gather all other methods. It takes as input the domain predicates and the grounded symbols of the goal formula. Moreover, the method consists of the operations explained theoretically. In particular, we have:
+\begin{itemize}
+\item it computes all parameters involved by the grounded symbols of the formula, at line \ref{line:trans-param}, using the \texttt{compute\_parameters} method;
+\item it implements the function $f$, defined in \ref{plan:mapfunc}, mapping objects to variables at line \ref{line:trans-vars-map};
+\item it computes variables;
+\item at line \ref{line:trans-prec-eff}, it builds preconditions and effects for each transition of the \DFA;
+\item for each \texttt{trans} operator created, it is added to a the list of trans operators.
+\end{itemize}
+
+In the next Section, we will see the main module, which implements all the high level procedure illustrated previously in Section \ref{sec:fond-plan-appr}.
 \subsection{Main Module}
+
+
 \section{Results}\label{sec:planning-results}
+In this Section, we show two executions of the \FONDFOR tool as example of result. In particular, we show an execution with an \LTLf goal and another execution with a \PLTL goal. In both cases, we go step-by-step through each solution and we pay particular attention to the \texttt{trans} operator.
+
+Regarding \PLTL goals, we remind the reader that \FONDS planning for \PLTL goals is interpreted as reaching a final state such that the history leading to such a state satisfies the given \PLTL formula.
+For instance, here we show an execution of the \FONDFOR tool on the Triangle Tireworld planning task partly illustrated in Example \ref{ex:new-dom}. Indeed, the original domain is the same of the one in Example \ref{ex:new-dom} whereas the original initial state is as follows:
+\begin{lstlisting}[language=PDDL, escapechar=£]
+(define (problem triangle-tire-1)
+  (:domain triangle-tire)
+  (:objects l11 l12 l13 l21 l22 l23 l31 l32 l33 - location)
+  (:init (vehicle-at l11)
+    (road l11 l12) (road l12 l13) (road l11 l21) (road l12 l22)
+    (road l21 l12) (road l22 l13) (road l21 l31) (road l31 l22)
+    (spare-in l21) (spare-in l22) (spare-in l31)
+    (not-flattire))
+  (:goal (vehicle-at l13))
+)
+\end{lstlisting}
+In this case, we choose the \PLTL goal formula $\varphi = vehicleAt(l13) \lAND \Once(vehicleAt(l23))$. Such a formula means \emph{reach location l13 passing through location l23 at least once}. The \DFA corresponding to $\varphi$ is depicted in Figure \ref{fig:dfa-result-pltl}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.7\textwidth]{images/automa-param2}
+\caption{The \DFA corresponding to $\varphi$} 
+\label{fig:dfa-result-pltl}
+\end{figure}
+
+After the execution of \FONDFOR, we obtain the following:
+\begin{enumerate}
+\item a new planning domain;
+\item a new planning problem;
+\item a transition system showing all policies, if found.
+\end{enumerate}
+Firstly, the new domain $\D'$ is:
+\begin{lstlisting}[language=PDDL, escapechar=£]
+(define (domain triangle-tire)
+  (:requirements :typing :strips :non-deterministic)
+  (:types location)
+  (:predicates (vehicleat ?loc - location) (spare-in ?loc - location) 
+  (road ?from - location ?to - location) (not-flattire) (turnDomain) 
+  (q2 ?loc30 - location ?loc53 - location) 
+  (q1 ?loc30 - location ?loc53 - location) 
+  (q3 ?loc30 - location ?loc53 - location))
+  (:action move-car
+    :parameters (?from - location ?to - location)
+    :precondition (and (vehicleat ?from) (road ?from ?to) 
+    (not-flattire) (turnDomain))
+    :effect (and (oneof (and (vehicleat ?to) 
+    (not (vehicleat ?from))) (and (vehicleat ?to) 
+    (not (vehicleat ?from)) (not (not-flattire)))) 
+    (not (turnDomain)))
+  )
+  (:action changetire
+    :parameters (?loc - location)
+    :precondition (and (spare-in ?loc) (vehicleat ?loc) 
+    (turnDomain))
+    :effect (and (not (spare-in ?loc)) (not-flattire) 
+    (not (turnDomain)))
+  )
+  (:action trans-0
+    :parameters (?loc30 - location ?loc53 - location)
+    :precondition (and (or (and (q1 ?loc30 ?loc53) 
+    (not (vehicleat ?loc30)) (vehicleat ?loc53)) 
+    (and (q2 ?loc30 ?loc53) (not (vehicleat ?loc30))) 
+    (and (q3 ?loc30 ?loc53) (not (vehicleat ?loc30)))) 
+    (not (turnDomain)))
+    :effect (and (q2 ?loc30 ?loc53) 
+    (not (q1 ?loc30 ?loc53)) (not (q3 ?loc30 ?loc53)) 
+    (turnDomain))
+  )
+  (:action trans-1
+    :parameters (?loc30 - location ?loc53 - location)
+    :precondition (and (or (and (q1 ?loc30 ?loc53) 
+    (not (vehicleat ?loc30)) (not (vehicleat ?loc53))) 
+    (and (q1 ?loc30 ?loc53) (vehicleat ?loc30) 
+    (not (vehicleat ?loc53)))) (not (turnDomain)))
+    :effect (and (q1 ?loc30 ?loc53) 
+    (not (q2 ?loc30 ?loc53)) (not (q3 ?loc30 ?loc53)) 
+    (turnDomain))
+  )
+  (:action trans-2
+    :parameters (?loc30 - location ?loc53 - location)
+    :precondition (and (or (and (q1 ?loc30 ?loc53) 
+    (vehicleat ?loc30) (vehicleat ?loc53)) 
+    (and (q2 ?loc30 ?loc53) (vehicleat ?loc30)) 
+    (and (q3 ?loc30 ?loc53) (vehicleat ?loc30))) 
+    (not (turnDomain)))
+    :effect (and (q3 ?loc30 ?loc53) 
+    (not (q2 ?loc30 ?loc53)) (not (q1 ?loc30 ?loc53)) 
+    (turnDomain))
+  )
+)
+\end{lstlisting}
+
+Secondly, the new problem $\P'$ is:
+\begin{lstlisting}[language=PDDL, escapechar=£]
+(define (problem triangle-tire-1)
+	(:domain triangle-tire)
+	(:objects l11 l12 l13 l21 l22 l23 l31 l32 l33 - location)
+	(:init (not-flattire) (q1 13 23) (road l11 l12) (road l11 l21) 
+	(road l12 l13) (road l12 l22) (road l21 l12) (road l21 l31) 
+	(road l22 l13) (road l22 l23) (road l23 l13) (road l31 l22) 
+	(spare-in l21) (spare-in l22) (spare-in l23) (spare-in l31)
+	(turnDomain) (vehicleat l11))
+(:goal (and (q3 13 23) (turnDomain)))
+)
+\end{lstlisting}
+
+Finally, feeding FOND-SAT with $\D'$ and $\P'$ we obtain the following transition system:
+
+
 \section{Summary}
 In this chapter, we have faced the problem of \FOND Planning for \LTLf/\PLTL goals. In particular, we have proposed a new solution, called \FONDFOR, that essentially reduces the problem to a ``classical'' \FOND planning problem. This has been possible thanks to our \LTLfToDFA Python tool which has been employed for the encoding of temporally extended goals into standard \PDDL. Then, we have also described in details the \FONDFOR implementation, highlighting all its main features. Finally, we have seen examples of execution results.
 
