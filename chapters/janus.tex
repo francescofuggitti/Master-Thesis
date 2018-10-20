@@ -940,7 +940,7 @@ for trace in log_set:
 As we can see, the practical implementation of the Janus algorithm directly reflects the pseudocode illustrated in \ref{alg:janus}. 
 
 Firstly, at line \ref{line:input-log} we use the \texttt{InputHandler} class to parse and get the event log. Then, starting from line \ref{line:sep-formulas} we manually define our separated formulas composing the constraint. As a consequence, at lines \ref{line:constraint} and \ref{line:sep-aut-set}, we define the constraint formula and the separated automata set, respectively. In particular, by defining the separated automata set we use our tool \LTLfToDFA for the automatic generation of automata. Finally, at this point (line \ref{line:janus-alg}), the computation of the \textit{interestingness degree} can start.
-\subsection{Results}
+\section{Results}
 After having illustrated the whole implementation of \janus, we are ready to present results of its execution where we have evaluated our tool against a real-world event log. Hence, we have analyzed the real-world event log called \textit{Sepsis}\footnote{https://doi.org/10.4121/uuid:915d2bfb- 7e84- 49ad- a286- dc35f063a460}, which reports trajectories of patients showing symptoms of sepsis in a Dutch hospital.
 
 Since the \textit{Sepsis} event log contains a lot of trajectories, we discuss, in the following example, the execution of \janus only on a few of them.
@@ -965,7 +965,7 @@ Secondly, in trace \ref{list:trace-2}, the constraint is never activated because
 Lastly, in trace \ref{list:trace-3}, the constraint is activated three times, respectively at instants $t_3(4)$,  $t_3(9)$ and $t_3(12)$. Similarly to what happens in trace \ref{list:trace-1}, here only the first two activations fulfill the constraint formula. In particular, also in this case, the triple of $\Psi$ that is satisfied is $(True \lAND Leucocytes \lAND \Diamond CRP)$. As a result, the \textit{interestingness degree} of this trace is $\dfrac{2}{3} = 0.667$.
 \end{example}
 
-Although the example \ref{ex:traces} is a proof-of-concept of the theory given in previous sections, it does not show clearly the actual potential of the \janus implementation given by the generalization theorem \ref{th:my-theorem} and the integration of our \LTLfToDFA, both introduced in this thesis. To this extent, we describe an \textit{ad-hoc} example in which all contributions given in this thesis appear.
+Although Example \ref{ex:sepsis-result} is a proof-of-concept of the theory given in previous sections, it does not show clearly the actual potential of the \janus implementation given by the generalization Theorem \ref{th:my-theorem} and the integration of our \LTLfToDFA, both introduced in this thesis. To this extent, we describe an \textit{ad-hoc} example in which all contributions given in this thesis appear.
 
 \begin{example}\label{ex:adhoc-result}
 In this example, we show how \janus computes the \textit{interestingness degree} over \textit{ad-hoc} traces without having restrictions, namely:

@@ -154,7 +154,7 @@
 	\vskip 0.5cm
 	\item Provide an approach to \FOND Planning for \LTLf/\PLTL goals:
 		\begin{itemize}
-			\item 	reduce the problem standard \FOND planning
+			\item 	reduce the problem to standard \FOND planning
 			\item 	working with \FOND domains instead of automata
 		\end{itemize}
 	
@@ -213,9 +213,157 @@
 	\end{itemize}
 \end{frame}
 
-\section{\FONDFOR}
+\begin{frame}{Translation of \LTLf and \PLTL formulas to \DFA}
+	\begin{itemize}
+		\item Translation Procedure
+		\begin{enumerate}
+		\item starting from an \LTLf/\PLTL formula $\varphi$ we translate it to \FOL on finite sequences (De Giacomo and Vardi 2013; Zhu et al. 2018)
+		\item apply the highly optimized tool \MONA able to transform Monadic Second Order Logic (and hence \FOL as well) on finite strings to \DFA automata		
+		\end{enumerate}
+	\end{itemize}
+	
+	\begin{itemize}
+	\item Example: $\varphi = \Diamond G$
+	\begin{enumerate}
+	\item \FOL translation: $fol(\varphi, x) = \exists y. x \leq y \leq last \lAND G(y)$, where $[x/0]$
+	\item \MONA program: \texttt{m2l-str; var2 G; ex1 y: 0<=y \& y<=max(\$) \& y in G}
+	\end{enumerate}
+	\end{itemize}
+\end{frame}
 
-\section{A generalization of Janus approach}
+\begin{frame}{The implementation of the translation procedure: \LTLfToDFA}
+Python package supporting:
+	\begin{itemize}
+		\item \LTLf/\PLTL formulas parsing
+		\item translation to \FOL, \DFA
+		\item option for \declare assumption (De Giacomo et al. 2014)
+	\end{itemize}
+	Output examples:
+\begin{table}
+	\centering
+\begin{tabular}{c c} 
+	$\varphi_1 = \Box(a \Rightarrow b)$ & $\varphi_2 = \Once g$\\
+    \includegraphics[width=.5\textwidth]{../images/future-pres} & \includegraphics[width=.5\textwidth]{../images/future-pres}\\
+%   	$\Box A$ & $\Diamond A$\\
+%   	\emph{Always A} & \emph{Eventually A}\\ 
+\end{tabular}\\
+\end{table}
+
+\end{frame}
+
+\section{\FONDFOR}
+\begin{frame}{\FOND Planning for Extended Temporal Goals}
+\begin{itemize}
+\item A \textit{non-deterministic} domain with initial state is a tuple $\D = \tup{2^\F, A, s_0, \partial, \alpha}$, specified in \PDDL
+
+\item Who controls what?
+\begin{itemize}
+\item Fluents controlled by the environment
+\item Actions controlled by the agent
+\end{itemize}
+
+\item Goals, planning and plans
+\begin{itemize}
+\item Goal: an \LTLf/\PLTL formula $\varphi$
+\item Planning: a \emph{game} between two players
+\item Plan: \emph{strategy} to \emph{win} the game
+\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+The \FONDFOR approach: Given a \PDDL domain $\D$, the initial state $s_0$ and a goal formula $\varphi$, we obtain $\automaton_\varphi = \tup{\Sigma, Q, q_0 , \delta, F}$ through \LTLfToDFA and we encode $\automaton_\varphi$ into $\D$
+\begin{itemize}
+\item We need to perform an action on the domain and then update the automaton state. It is achieved through the \textit{turnDomain} predicate
+
+\item Encoding of automaton $\automaton_\varphi$ to \PDDL in domain $\D$:
+\begin{block}{Action \texttt{trans}}
+parameters: $(x_0, \dots, x_k)$, where $x_i \in \V$\\
+preconditions: $\lnot turnDomain$\\
+effects: $when\; (q_i(x_0, \dots, x_k) \lAND a'_j)\; then\; (\delta'(q'_i, a'_j)=q''_i(x_0, \dots, x_k) \lAND (\lnot q, \forall q \in Q \text{ s.t. } q \neq q''_i) \lAND turnDomain),\; \forall i,j: 0\leq i \leq m, 0\leq j \leq n$
+\end{block}
+
+\item New initial state: $s_0 \lAND \text{\texttt{turnDomain}} \lAND q_0(o_0,\dots,o_k)$
+\item New goal specification: $\text{\texttt{turnDomain}} \lAND (\bigvee_{q \in F} q(o_0,\dots,o_k))$
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Results: the Triangle Tireworld example}
+\begin{itemize}
+\item Objective: Drive from one location to another. A tire may be going flat. If there is a spare tire in the location of the car, then the car can use it to fix the flat tire.
+
+\item Goal: $\varphi = vehicleAt(l13) \lAND \Once (vehicleAt(l23))$
+
+\item Result:
+\end{itemize}
+
+%\begin{figure}[h]
+%\centering
+%\includegraphics[width=0.5\textwidth]{../images/ttireworld-task}
+%\caption{A possible Triangle Tireworld task. Locations marked with a circle have a spare tire, arrows represent possible directions} 
+%\label{fig:ttireworld-task}
+%\end{figure}
+
+\end{frame}
+
+
+\section{\janus}
+\begin{frame}{The Janus approach for Declarative Process Mining}
+\begin{itemize}
+\item Declarative Process Mining is the set of techniques aimed at extracting and validating temporal constraints out of event logs (i.e. multi-sets of \emph{finite} traces). The Janus approach (Cecconi et al. 2018) allows to compute the \emph{interestingness degree} of traces in event logs
+
+\item Determine if a trace is ``relevant'' or ``interesting'' wrt a given temporal specification
+
+\end{itemize}
+
+\begin{exampleblock}{Example}
+\begin{itemize}
+\item Given a trace $t = \tup{d,f,a,f,c,a,f,b,a,f}$
+\item Given a constraint $\Psi = a \mapsto (\Yesterday b \lOR \Diamond c)$, where $a$ is the activation condition and $(\Yesterday b \lOR \Diamond c)$ is the formula to be validated
+\item Result: the \emph{interestingness degree} is $\dfrac{2}{3} = 0.667$
+\end{itemize}
+\end{exampleblock}
+
+\end{frame}
+
+\begin{frame}
+Our generalization of the Janus approach extends the original Janus approach in the following terms:
+\begin{itemize}
+\item provide a new constraint representation:
+\begin{align}
+\Psi \doteq \bigvee^{m}_{j=1} (\varphi^{\blacktriangleleft} \lAND \varphi^{\blacktriangledown} \lAND \varphi^{\blacktriangleright})_j
+\end{align}
+\begin{itemize}
+\item $\varphi^{\blacktriangleleft}$ a formula on the past that checks if the past makes the triggering relevant
+\item $\varphi^{\blacktriangledown}$ a propositional formula on the current instant that triggers potential interest on the instant itself
+\item $\varphi^{\blacktriangleright}$ a formula on the future that must be satisfied for considering the current instant interesting
+\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\section{Conclusions}
+\begin{frame}{Conclusions}
+	Thesis results:
+	\begin{itemize}
+		\item Extended (Brafman et al. 2018) to the context of RL;
+		\item Formalization of \emph{RL for \LLf goals}, devising of a solution and analysis of the advantages;
+		\item Provided an implementation and given experimental evidence of the goodness of our approach.
+	\end{itemize}
+	Future works:
+	\begin{itemize}
+		\item Minimal low-level representation to tackle \LLf goals;
+		\item Optimize FLLOAT, enrich RLTG;
+		\item Try the approach in several real world applications;
+		\item Design of ad-hoc algorithms (e.g. "automata-aware" exploration);
+		\item Extend the approach to the framework of Multi-Agent Systems.
+	\end{itemize}
+	Publication: \href{https://arxiv.org/abs/1807.06333}{https://arxiv.org/abs/1807.06333}. Status: submitted
+	
+\end{frame}
+
 %
 %%\begin{block}{Examples}
 %%Some examples of commonly used commands and features are included, to help you get started.

@@ -777,7 +777,7 @@ The structure of the \FONDFOR package is ordered and divided according to the sc
 \item  \texttt{automa/}: it consists of the \texttt{automa.py} file, the \texttt{aparser.py} file and the \texttt{symbol.py} file. In this folder, we find all the code for dealing with automata.
 \item \texttt{fond4ltlfpltl.py}: it is the main module of the package;
 \end{itemize}
-\subsection{\PDDL}
+\subsection{\PDDL}\label{sec:impl-pddl}
 In this section, we illustrate the code that handles the \PDDL standard. More specifically, we talk about the parsing of \PDDL domains and problems showing all implemented data structures.
 
 First of all, thanks to the PLY library we have implemented the \texttt{lexer.py} and the \texttt{parser.py} modules enabling the parsing of a \PDDL document. For a brief overview of the functioning of PLY we refer the reader to Sections \ref{sec:lexer} and \ref{sec:parser}. Indeed, the operation is exactly the same. In the following, we show the listing of the two modules focusing only on the most important parts. Three dots $\dots$ represent omitted code.
@@ -1196,9 +1196,9 @@ After seeing the data structure for low level objects that we have just presente
 Firstly, we show main methods of the \texttt{Action} class in Listing \ref{code:fond-act}.
 
 \begin{lstlisting}[language=Python, style=Python, escapechar = £,  label={code:fond-act}, caption={The \texttt{Action} class.}]
-from dfagame.PDDLparser.formula import FormulaAnd, FormulaOneOf
-from dfagame.PDDLparser.literal import Literal
-from dfagame.PDDLparser.predicate import Predicate
+from fond4ltlfpltl.PDDLparser.formula import FormulaAnd, FormulaOneOf
+from fond4ltlfpltl.PDDLparser.literal import Literal
+from fond4ltlfpltl.PDDLparser.predicate import Predicate
 
 class Action:
 
@@ -1242,8 +1242,8 @@ As we can see from the Listing, the \texttt{Action} class contains all main prop
 Secondly, we describe the two main data structures representing \PDDL elements: the \texttt{Domain} class and the \texttt{Problem} class, respectively. Both represent a complete planning task. In Listing \ref{code:fond-dom}, we can see the definition of the \texttt{Domain} class.
 
 \begin{lstlisting}[language=Python, style=Python, escapechar = £,  label={code:fond-dom}, caption={The \texttt{Domain} class.}]
-from dfagame.PDDLparser.formula import *
-from dfagame.PDDLparser.action import Action
+from fond4ltlfpltl.PDDLparser.formula import *
+from fond4ltlfpltl.PDDLparser.action import Action
 import copy
 
 class Domain:
@@ -1349,7 +1349,7 @@ Regarding the \texttt{Domain} class, it comprises a couple of methods that contr
 Finally, we present the \texttt{Problem} class in Listing \ref{code:fond-prob}.
 
 \begin{lstlisting}[language=Python, style=Python, escapechar = £,  label={code:fond-prob}, caption={The \texttt{Problem} class.}]
-from dfagame.PDDLparser.formula import FormulaOr
+from fond4ltlfpltl.PDDLparser.formula import FormulaOr
 
 class Problem(object):
 
@@ -1466,7 +1466,7 @@ The main methods are:
 \end{itemize}
 Having the informations about the \DFA encoding, the first method computes the new initial specification by adding the \texttt{turnDomain} predicates and the initial state predicate of the automaton. Likewise, the second method assembles the new goal specification accordingly with the theory illustrated in Section \ref{sec:encoding-goals}. Finally, the third method simply returns the new problem encoded in standard \PDDL.
 
-\subsection{Automa}
+\subsection{Automa}\label{sec:impl-automa}
 In this section, we illustrate the code that handles extended temporal goals treated as automata. More specifically, we talk about the generation of \DFA corresponding to the \LTLf/\PLTL goal, the parsing and managing of such generated \DFA showing all implemented data structures.
 
 First of all, as stated before, given an \LTLf/\PLTL goal formula, we employ the \LTLfToDFA tool to generate the \DFA. Secondly, as soon as the \DFA is generated, we parse it with the \texttt{aparser.py} module and then, we instantiate an \texttt{Automa} object for it. In the following, we will discuss more about the \texttt{Automa} class, since the \texttt{aparser.py} module is pretty much the same discussed in Section \ref{sec:janus-impl-automa}.
@@ -1672,12 +1672,84 @@ The main method of the \texttt{Automa} class is obviously the \texttt{create\_op
 
 In the next Section, we will see the main module, which implements all the high level procedure illustrated previously in Section \ref{sec:fond-plan-appr}.
 \subsection{Main Module}
+Here, we describe the main module of the \FONDFOR package. It is called \texttt{fond4ltlfpltl.py} and it contains the principal logic covering the \FONDFOR theoretical approach illustrated in Section \ref{sec:fond-plan-appr}. In Listing \ref{code:fond-main}, we show the implementation.
 
+\begin{lstlisting}[language=Python, style=Python, escapechar = £,  label={code:fond-main}, caption={The \texttt{fond4ltlfpltl.py} module.}]
+from fond4ltlfpltl.PDDLparser.parser import MyParser
+from ltlf2dfa.Translator import Translator
+from ltlf2dfa.DotHandler import DotHandler
+from fond4ltlfpltl.AutomaParser.symbol import Symbol
+from fond4ltlfpltl.AutomaParser.aparser import parse_dot
+import argparse, os, subprocess, copy, re
+
+args_parser = argparse.ArgumentParser(...)£\label{line:main-argparser}£
+
+params = vars(args_parser.parse_args())
+pddl_parser = MyParser()
+
+try:
+    with open(params['<planning_domain>'], 'r') as f:
+        domain = f.read()
+        f.close()
+    parsed_domain = pddl_parser(domain)£\label{line:main-parse-dom}£
+except:
+    raise ValueError('[ERROR]: Could not parse domain')
+
+try:
+    with open(params['<planning_problem>'], 'r') as f:
+        problem = f.read()
+        f.close()
+    parsed_problem = pddl_parser(problem)£\label{line:main-parse-prob}£
+except:
+    raise ValueError('[ERROR]: Could not parse problem')
+...
+try:
+    translator = Translator(params['<goal_formula>'])£\label{line:main-dfa}£
+    translator.formula_parser()
+    translator.translate()
+    translator.createMonafile(False)
+    translator.invoke_mona()
+    dot_handler = DotHandler()
+    dot_handler.modify_dot()
+    dot_handler.output_dot()
+    dfa_automaton = parse_dot("automa.dot")
+    operators_trans, parameters = dfa_automaton.create_operators_trans(...)£\label{line:main-transs}£
+    os.remove('automa.mona')
+    os.remove('automa.dot')
+except:
+    os.remove('automa.mona')
+    os.remove('automa.dot')
+    raise ValueError('[ERROR]: Could not create DFA')
+
+old_domain = copy.deepcopy(parsed_domain)
+
+new_domain = parsed_domain.get_new_domain(...)£\label{line:main-new-dom}£
+new_problem = parsed_problem.get_new_problem(...)£\label{line:main-new-prob}£
+
+try:
+    with open("./new-dom.pddl", 'w+') as dom:
+        dom.write(str(new_domain))
+        dom.close()
+    with open("./new-prob.pddl", 'w+') as prob:
+        prob.write(str(new_problem))
+        prob.close()
+except:
+    raise IOError('[ERROR]: Something wrong occurred')
+    
+...    
+\end{lstlisting}
+To begin with, the main module accepts as input a \PDDL domain, a \PDDL problem and a goal formula. All these arguments are handled by the argument parser at line \ref{line:main-argparser}.
+
+After gathered all inputs, we proceed by parsing both the \PDDL domain and the \PDDL problem (lines \ref{line:main-parse-dom} and \ref{line:main-parse-prob}). The parsing phase is carried out by module illustrated in Section \ref{sec:impl-pddl}.
+
+Then, we translate the \LTLf/\PLTL goal formula into the corresponding \DFA employing \LTLfToDFA. The code that is in charge of doing that starts at line \ref{line:main-dfa}. Once the \DFA is built, we can construct the new \texttt{trans} operator at line \ref{line:main-transs}.
+
+Consequently, we put all things together and we create the new domain $\D'$ and the problem $\P'$ (lines \ref{line:main-new-dom} and \ref{line:main-new-prob}). Finally, we invoke the FOND-SAT planner feeding it with $\D'$ and $\P'$. If a strong plan is found we obtain it in a file on the working directory.
 
 \section{Results}\label{sec:planning-results}
-In this Section, we show two executions of the \FONDFOR tool as example of result. In particular, we show an execution with an \LTLf goal and another execution with a \PLTL goal. In both cases, we go step-by-step through each solution and we pay particular attention to the \texttt{trans} operator.
+In this Section, we show an execution of the \FONDFOR tool as example of result. In particular, we show an execution involving a \PLTL goal. We go step-by-step through the solution and we pay  attention to the \texttt{trans} operator.
 
-Regarding \PLTL goals, we remind the reader that \FONDS planning for \PLTL goals is interpreted as reaching a final state such that the history leading to such a state satisfies the given \PLTL formula.
+We remind the reader that \FONDS planning for \PLTL goals is interpreted as reaching a final state such that the history leading to such a state satisfies the given \PLTL formula.
 For instance, here we show an execution of the \FONDFOR tool on the Triangle Tireworld planning task partly illustrated in Example \ref{ex:new-dom}. Indeed, the original domain is the same of the one in Example \ref{ex:new-dom} whereas the original initial state is as follows:
 \begin{lstlisting}[language=PDDL, escapechar=£]
 (define (problem triangle-tire-1)
@@ -1691,11 +1763,11 @@ For instance, here we show an execution of the \FONDFOR tool on the Triangle Tir
   (:goal (vehicle-at l13))
 )
 \end{lstlisting}
-In this case, we choose the \PLTL goal formula $\varphi = vehicleAt(l13) \lAND \Once(vehicleAt(l23))$. Such a formula means \emph{reach location l13 passing through location l23 at least once}. The \DFA corresponding to $\varphi$ is depicted in Figure \ref{fig:dfa-result-pltl}.
+In this case, we choose the \PLTL goal formula $\varphi = vehicleAt(l13) \lAND \Once(vehicleAt(l23))$. Such a formula means \emph{reach location l13 passing through location l23 at least once}. The \DFA corresponding to $\varphi$, generated with \LTLfToDFA, is depicted in Figure \ref{fig:dfa-result-pltl}.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.7\textwidth]{images/automa-param2}
+\includegraphics[width=0.58\textwidth]{images/automa-param3}
 \caption{The \DFA corresponding to $\varphi$} 
 \label{fig:dfa-result-pltl}
 \end{figure}
@@ -1772,17 +1844,33 @@ Secondly, the new problem $\P'$ is:
 (define (problem triangle-tire-1)
 	(:domain triangle-tire)
 	(:objects l11 l12 l13 l21 l22 l23 l31 l32 l33 - location)
-	(:init (not-flattire) (q1 13 23) (road l11 l12) (road l11 l21) 
+	(:init (not-flattire) (q1 l13 l23) (road l11 l12) (road l11 l21) 
 	(road l12 l13) (road l12 l22) (road l21 l12) (road l21 l31) 
 	(road l22 l13) (road l22 l23) (road l23 l13) (road l31 l22) 
 	(spare-in l21) (spare-in l22) (spare-in l23) (spare-in l31)
 	(turnDomain) (vehicleat l11))
-(:goal (and (q3 13 23) (turnDomain)))
+(:goal (and (q3 l13 l23) (turnDomain)))
 )
 \end{lstlisting}
 
-Finally, feeding FOND-SAT with $\D'$ and $\P'$ we obtain the following transition system:
+Finally, feeding FOND-SAT with $\D'$ and $\P'$ we obtain the following transition system depicted in Figure \ref{fig:policy-trans}, thanks to another Python script, developed in this thesis, for converting a written policy into a graph.
 
+\begin{figure}[h]
+\centering
+\includegraphics[]{images/graph-policy-trans1}
+\caption{The transition system showing policies found with the \texttt{trans} operator} 
+\label{fig:policy-trans}
+\end{figure}
+
+A plan is whatever path from $n0$ leading to state $ng$. 
+Moreover, as we can see from Figure \ref{fig:policy-trans}, there is a perfect alternation between domain's actions and the \texttt{trans} action. Additionally, the above-mentioned script could also remove transitions involving the \texttt{trans} action getting the final plan. We can see it in Figure \ref{fig:policy-no-trans}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[]{images/graph-policy1}
+\caption{The transition system showing policies found without the \texttt{trans} operator} 
+\label{fig:policy-no-trans}
+\end{figure}
 
 \section{Summary}
 In this chapter, we have faced the problem of \FOND Planning for \LTLf/\PLTL goals. In particular, we have proposed a new solution, called \FONDFOR, that essentially reduces the problem to a ``classical'' \FOND planning problem. This has been possible thanks to our \LTLfToDFA Python tool which has been employed for the encoding of temporally extended goals into standard \PDDL. Then, we have also described in details the \FONDFOR implementation, highlighting all its main features. Finally, we have seen examples of execution results.
