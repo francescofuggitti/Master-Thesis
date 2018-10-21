@@ -195,20 +195,20 @@ Additionally, a \textit{non-deterministic} action $a$ with effect $oneof(E_1,\do
 
 At this point, we can formally define the \FOND planning. Following \citep{ghallab2004automated} and \citep{geffner2013concise}, we give the following definition:
 \begin{definition}
-A \textit{non-deterministic domain} is a tuple $\D = \tup{2^\F, A, s_0, \partial, \alpha}$ where:
+A \textit{non-deterministic domain} is a tuple $\D = \tup{2^\F, A, s_0, \varrho, \alpha}$ where:
 \begin{itemize}
 \item $\F$ is a set of \textit{fluents} (atomic propositions);
 \item $A$ is a set of \textit{actions} (atomic symbols);
 \item $2^\F$ is the set of states;
 \item $s_0$ is the initial state (initial assignment to fluents);
 \item $\alpha(s) \subseteq A$ represents \textit{action preconditions};
-\item $(s, a, s') \in \partial$ with $a \in \alpha(s)$ represents \textit{action effects} (including frame assumptions).
+\item $(s, a, s') \in \varrho$ with $a \in \alpha(s)$ represents \textit{action effects} (including frame assumptions).
 \end{itemize}
 \end{definition}
-\noindent Such domain $\D$ is assumed to be represented compactly (e.g. in \PDDL), therefore, considering the \textit{size} of the domain as the cardinality of $\F$. Intuitively, the evolution of a non-deterministic domain is as follows: from a given state $s$, the agent chooses what action $a \in \alpha(s)$ to execute, then, the environment chooses a \textit{successor state} $s'$ with $(s,a,s') \in \partial$. To this extent, planning can also be seen as a \textit{game} between two players: the agent tries to force eventually reaching the goal no matter how the environment behaves.
+\noindent Such domain $\D$ is assumed to be represented compactly (e.g. in \PDDL), therefore, considering the \textit{size} of the domain as the cardinality of $\F$. Intuitively, the evolution of a non-deterministic domain is as follows: from a given state $s$, the agent chooses what action $a \in \alpha(s)$ to execute, then, the environment chooses a \textit{successor state} $s'$ with $(s,a,s') \in \varrho$. To this extent, planning can also be seen as a \textit{game} between two players: the agent tries to force eventually reaching the goal no matter how the environment behaves.
 Moreover, the agent can execute an action having the knowledge of all history of states so far.
 
-Now, we can define the meaning of solving a \FOND planning problem on $\D$. A \textit{trace} of $\D$ is a finite or infinite sequence $s_0,a_0,s_1,a_1, \dots$ where $s_0$ is the initial state, $a_i \in \alpha(s_i)$ and $s_{i+1} \in \partial(s_i,a_i)$ for each $s_i,a_i$ in the trace.
+Now, we can define the meaning of solving a \FOND planning problem on $\D$. A \textit{trace} of $\D$ is a finite or infinite sequence $s_0,a_0,s_1,a_1, \dots$ where $s_0$ is the initial state, $a_i \in \alpha(s_i)$ and $s_{i+1} \in \varrho(s_i,a_i)$ for each $s_i,a_i$ in the trace.
 
 Solutions to a \FOND problem $\P$ are called \textit{strategies} (or \textit{policies}). A \textit{strategy} $\trace$ is defined as follows:
 \begin{definition}\label{def:policy}
@@ -413,7 +413,7 @@ As just shown in Example \ref{ex:param-formula}, transitions, with source state 
 After the \texttt{trans} operator has been built, we change $\D$ as follows:
 \begin{enumerate}
 \item $\forall a \in A$: add \texttt{turnDomain} to $\alpha(s)$, i.e add \texttt{turnDomain} predicate to all actions precondition $\alpha(s)$;
-\item $\forall a \in A$: add \texttt{(not (turnDomain))} to $(s,a,s') \in \partial$ with $a \in \alpha(s)$, i.e add negated \texttt{turnDomain} to all actions effects $(s,a,s')$;
+\item $\forall a \in A$: add \texttt{(not (turnDomain))} to $(s,a,s') \in \varrho$ with $a \in \alpha(s)$, i.e add negated \texttt{turnDomain} to all actions effects $(s,a,s')$;
 \item add \texttt{trans} operator;
 \item $\forall q' \in Q'$: add $q'$ to predicates definition of $\D$, i.e. add all automaton state predicates to the domain predicates definition.
 \end{enumerate}

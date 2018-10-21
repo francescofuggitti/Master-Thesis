@@ -1,5 +1,5 @@
-\documentclass{beamer}
-%
+\documentclass[10pt]{beamer}
+% 8pt, 9pt, 10pt, 11pt, 12pt, 14pt, 17pt and 20pt.
 % Choose how your presentation looks.
 %
 % For more themes, color themes and font themes, see:
@@ -33,8 +33,8 @@
 \usepackage{hyperref}
 \usepackage{xspace}
 \usepackage{tabularx} % in the preamble
-%\usepackage{subfigure}
-\usepackage{subfig}
+\usepackage{subfigure}
+%\usepackage{subfig}
 %\usepackage{chngcntr}
 %\counterwithin{subfigure}{figure}
 % The algorithm packages have to be after hyperref.
@@ -104,7 +104,11 @@
 \date{\scriptsize A.Y. 2017/2018}
 %Advisor: prof. Giuseppe De Giacomo
 
+\newcounter{saveenumi}
+\newcommand{\seti}{\setcounter{saveenumi}{\value{enumi}}}
+\newcommand{\conti}{\setcounter{enumi}{\value{saveenumi}}}
 
+\resetcounteronoverlays{saveenumi}
 
 \begin{document}
 
@@ -121,28 +125,18 @@
 \section{Introduction}
 \begin{frame}{Introduction}
 \begin{itemize}
-	\item Classic Reinforcement Learning:
-		\begin{itemize}
-			\item 	An \emph{agent} interacts with an \emph{environment} by taking \emph{actions} so to maximize \emph{rewards};
-			\item 	No knowledge about the transition model, but assume Markov property (history does not matter): Markov Decision Process (MDP)
-			\item 	Solution: (Markovian) policy $\Policy: \States\to\Actions$
-		\end{itemize}
-		
-	\vskip 0.5cm
-	\item RL for Non-Markovian Decision Process (NMRDP):
-		\begin{itemize}
-			\item 	Rewards depend from history, not just the last transition;
-			\item 	Specify proper behaviours by using temporal logic formulas;
-			\item 	Solution: (Non-Markovian) policy $\Policy: \States^* \to\Actions$
-			\item 	Reduce the problem to MDP (with extended state space)
-		\end{itemize}
+	\item \textit{Linear Temporal Logic} (\LTL) is a simple formal language for expressing temporal specifications both in Artificial Intelligence (AI) and in Business Process Management (BPM)
+	\begin{itemize}
+	\item \LTL on \emph{finite} traces (\LTLf) (De Giacomo and Vardi, 2013)
+	\item Past \LTL on \emph{finite} traces (\PLTL) (Lichtenstein et al. 1985)
+	\end{itemize}
 	
 	\vskip 0.5cm
-	\item In (Brafman et al. 2018) specify reward using:
-			\begin{itemize}
-				\item 	Linear-time Temporal Logic on Finite Traces \LTLf 
-				\item 	Linear-time Dynamic Logic on Finite Traces  \LDLf
-			\end{itemize}	
+	\item In AI: planning for temporally extended goals from Bacchus and Kabanza, (1998) to
+	Camacho et al. (2017/2018)
+	
+	\vskip 0.5cm
+	\item In BPM: temporal specification of the constraint formula in Declarative Process Mining from Pesic and van der Aalst (2006) to Cecconi et al. (2018)
 
 \end{itemize}
 \end{frame}
@@ -150,19 +144,22 @@
 \section{Objectives}
 \begin{frame}{Objectives}
 \begin{itemize}
-	\item Provide an efficient technique to transform \LTLf/\PLTL formulas into \DFAs		
+	\item Provide a new efficient technique to transform \LTLf/\PLTL formulas into \DFAs		
 	\vskip 0.5cm
 	\item Provide an approach to \FOND Planning for \LTLf/\PLTL goals:
 		\begin{itemize}
-			\item 	reduce the problem to standard \FOND planning
+			\item 	reducing the problem to standard \FOND planning
 			\item 	working with \FOND domains instead of automata
 		\end{itemize}
 	
 	\vskip 0.5cm
 	\item Provide a generalization of the Janus approach to declarative process mining:
 			\begin{itemize}
-				\item 	generalization of the constraint formula
+				\item 	generalization of the constraint formula representation
 			\end{itemize}	
+		
+	\vskip 0.5cm	
+	\item Implementation of all above-mentioned topics
 
 \end{itemize}
 \end{frame}
@@ -208,96 +205,193 @@
 		\item Reasoning in \LTLf/\PLTL:
 			\begin{itemize}
 				\item transform formulas $\varphi$ into DFAs $\automaton_\varphi$
-				\item for every trace $\trace$ an \LTLf/\PLTL formula $\varphi$: \[\trace \models \varphi \iff \trace \in \L(\automaton_\varphi)\]
+				\item for every trace $\trace$, an \LTLf/\PLTL formula $\varphi$ is such that: \[\trace \models \varphi \iff \trace \in \L(\automaton_\varphi)\]
 			\end{itemize}
 	\end{itemize}
 \end{frame}
 
 \begin{frame}{Translation of \LTLf and \PLTL formulas to \DFA}
 	\begin{itemize}
-		\item Translation Procedure
+		\item Translation procedure
 		\begin{enumerate}
-		\item starting from an \LTLf/\PLTL formula $\varphi$ we translate it to \FOL on finite sequences (De Giacomo and Vardi 2013; Zhu et al. 2018)
-		\item apply the highly optimized tool \MONA able to transform Monadic Second Order Logic (and hence \FOL as well) on finite strings to \DFA automata		
+		\item starting from an \LTLf/\PLTL formula $\varphi$, we translate it to \FOL on finite sequences (De Giacomo and Vardi 2013; Zhu et al. 2018) through $fol(\varphi, x)$ and $fol_p(\varphi, x)$ translation functions:
+	\begin{itemize}
+	\item \LTLf formulas evaluated in $x = 0$, hence $fol(\varphi, 0)$, since they look at the future
+	\item \PLTL formulas evaluated in $x = last$, hence $fol_p(\varphi, last)$ with $last = | \trace | - 1$, since they look at the past
+	\end{itemize}
+		\item apply the highly optimized tool \MONA able to transform Monadic Second Order Logic (and hence \FOL as well) on finite strings to minimum \DFA automata		
 		\end{enumerate}
 	\end{itemize}
 	
-	\begin{itemize}
-	\item Example: $\varphi = \Diamond G$
+	\begin{exampleblock}{Example: $\varphi = \Diamond G$}
 	\begin{enumerate}
 	\item \FOL translation: $fol(\varphi, x) = \exists y. x \leq y \leq last \lAND G(y)$, where $[x/0]$
 	\item \MONA program: \texttt{m2l-str; var2 G; ex1 y: 0<=y \& y<=max(\$) \& y in G}
 	\end{enumerate}
-	\end{itemize}
+	\end{exampleblock}
 \end{frame}
 
-\begin{frame}{The implementation of the translation procedure: \LTLfToDFA}
+\begin{frame}{\LTLfToDFA: the implementation of the translation procedure}
 Python package supporting:
 	\begin{itemize}
-		\item \LTLf/\PLTL formulas parsing
+		\item parsing of \LTLf/\PLTL formulas 
 		\item translation to \FOL, \DFA
 		\item option for \declare assumption (De Giacomo et al. 2014)
+		\item available online at \href{http://ltlf2dfa.diag.uniroma1.it}{http://ltlf2dfa.diag.uniroma1.it}
 	\end{itemize}
+	
+%\begin{example}{Output examples}	
+%	\begin{table}
+%	\centering
+%\begin{tabular}{c c} 
+%	$\varphi_1 = \Box(a \Rightarrow \Next b)$ & $\varphi_2 = \Once g$\\
+%    \includegraphics[width=.5\textwidth]{../images/future-slide} & \includegraphics[width=.5\textwidth]{../images/past-slide}\\
+%\end{tabular}\\
+%\end{table}
+%%\begin{figure}
+%%\centering
+%%\begin{subfigure}{0.5\textwidth}
+%%  \centering
+%% \includegraphics[]{../images/future-slide}
+%%\end{subfigure}%
+%%\begin{subfigure}{0.5\textwidth}
+%%  \centering
+%%\includegraphics[]{../images/past-slide}
+%%\end{subfigure}
+%%\caption{A figure with two subfigures}
+%%\label{fig:test}
+%%\end{figure}
+%\end{example}
+	
 	Output examples:
 \begin{table}
 	\centering
 \begin{tabular}{c c} 
-	$\varphi_1 = \Box(a \Rightarrow b)$ & $\varphi_2 = \Once g$\\
-    \includegraphics[width=.5\textwidth]{../images/future-pres} & \includegraphics[width=.5\textwidth]{../images/future-pres}\\
+	$\varphi_1 = \Box(a \Rightarrow \Next b)$ & $\varphi_2 = \Once g$\\
+    \includegraphics[width=.5\textwidth]{../images/future-slide} & \includegraphics[width=.5\textwidth]{../images/future-pres}\\
 %   	$\Box A$ & $\Diamond A$\\
 %   	\emph{Always A} & \emph{Eventually A}\\ 
 \end{tabular}\\
 \end{table}
-
 \end{frame}
 
 \section{\FONDFOR}
+
 \begin{frame}{\FOND Planning for Extended Temporal Goals}
 \begin{itemize}
-\item A \textit{non-deterministic} domain with initial state is a tuple $\D = \tup{2^\F, A, s_0, \partial, \alpha}$, specified in \PDDL
+\item A \textit{fully observable non-deterministic} (\FOND) domain with initial state is a tuple $\D = \tup{2^\F, A, s_0, \varrho, \alpha}$, specified in \PDDL as domain $\D$ and problem $\P$
 
-\item Who controls what?
+\item Actions effects are \emph{non-deterministic}: who chooses what?
 \begin{itemize}
-\item Fluents controlled by the environment
-\item Actions controlled by the agent
+\item the \textcolor{blue}{Agent} chooses the \textcolor{blue}{action} to execute
+\item the \textcolor{red}{Environment} chooses the \textcolor{red}{successor state}
 \end{itemize}
 
 \item Goals, planning and plans
 \begin{itemize}
 \item Goal: an \LTLf/\PLTL formula $\varphi$
-\item Planning: a \emph{game} between two players
+\item Planning: a \emph{game} between the two players
 \item Plan: \emph{strategy} to \emph{win} the game
 \end{itemize}
 \end{itemize}
 
 \end{frame}
 
-\begin{frame}
-The \FONDFOR approach: Given a \PDDL domain $\D$, the initial state $s_0$ and a goal formula $\varphi$, we obtain $\automaton_\varphi = \tup{\Sigma, Q, q_0 , \delta, F}$ through \LTLfToDFA and we encode $\automaton_\varphi$ into $\D$
+\begin{frame}{The \FONDFOR approach:}
+%\fontsize{10}{9}\selectfont
 \begin{itemize}
-\item We need to perform an action on the domain and then update the automaton state. It is achieved through the \textit{turnDomain} predicate
+\item Idea: reduce the problem to standard \FOND planning
+\item How to deal with \LTLf/\PLTL goal:
+\begin{enumerate}
+\item transform the goal $\varphi$ into the \DFA $\automaton_\varphi = \tup{\Sigma, Q, q_0 , \delta, F}$, through \LTLfToDFA
+\item to capture the general representation of $\automaton_\varphi$ in the $\D$, we modify $\automaton_\varphi$ to $\automaton'_\varphi$
+\begin{block}{\normalsize The parametrization of $\automaton_\varphi$: $\automaton'_\varphi$}
+\begin{itemize}
+\item $\Sigma = \{a_0(\vec{o}), \dots, a_n(\vec{o})\}$ to $\Sigma' = \{a'_0(\vec{x}), \dots, a'_n(\vec{x})\}$
+\item $Q = \{q_0, \dots, q_n\}$ to $Q' = \{q'_0(\vec{x}), \dots, q'_n(\vec{x})\}$
+\end{itemize}
+where $\vec{o} = (o_0,\dots,o_k)$ and $\vec{x} = (x_0,\dots,x_k)$ 
+\end{block}
+\seti
 
-\item Encoding of automaton $\automaton_\varphi$ to \PDDL in domain $\D$:
-\begin{block}{Action \texttt{trans}}
+\end{enumerate}
+\end{itemize}
+
+
+%\begin{block}{}
+%Given a \PDDL domain $\D$, an initial state $s_0$ and a goal formula $\varphi$, we obtain $\automaton_\varphi = \tup{\Sigma, Q, q_0 , \delta, F}$ through \LTLfToDFA and we encode $\automaton_\varphi$ into $\D$
+%\end{block}
+%\begin{itemize}
+%\item We perform an action on the domain and then update the automaton state. The \textit{turnDomain} predicate achieves this
+%
+%\item Encoding of automaton $\automaton_\varphi$ to \PDDL in domain $\D$:
+%\begin{block}{Action \texttt{trans}}
+%parameters: $(x_0, \dots, x_k)$, where $x_i \in \V$\\
+%preconditions: $\lnot turnDomain$\\
+%effects: $when\; (q_i(x_0, \dots, x_k) \lAND a'_j)\; then\; (\delta'(q'_i, a'_j)=q''_i(x_0, \dots, x_k) \lAND (\lnot q, \forall q \in Q \text{ s.t. } q \neq q''_i) \lAND turnDomain),\; \forall i,j: 0\leq i \leq m, 0\leq j \leq n$
+%\end{block}
+%
+%\item New initial state: $s_0 \lAND \text{\texttt{turnDomain}} \lAND q_0(o_0,\dots,o_k)$
+%%\item New goal specification: $\text{\texttt{turnDomain}} \lAND (\bigvee_{q \in F} q(o_0,\dots,o_k))$
+%\end{itemize}
+
+\end{frame}
+
+\begin{frame}{}
+%\begin{block}{}
+%Given a \PDDL domain $\D$, an initial state $s_0$ and a goal formula $\varphi$, we obtain $\automaton_\varphi = \tup{\Sigma, Q, q_0 , \delta, F}$ through \LTLfToDFA and we encode $\automaton_\varphi$ into $\D$
+%\end{block}
+%\begin{itemize}
+%\item We perform an action on the domain and then update the automaton state. The \textit{turnDomain} predicate achieves this
+%
+%\item Encoding of automaton $\automaton_\varphi$ to \PDDL in domain $\D$:
+%\begin{block}{Action \texttt{trans}: encoding of $\delta'$ into domain $\D$}
+%parameters: $(x_0, \dots, x_k)$, where $x_i \in \V$\\
+%preconditions: $\lnot turnDomain$\\
+%effects: $when\; (q_i(x_0, \dots, x_k) \lAND a'_j)\; then\; (\delta'(q'_i, a'_j)=q''_i(x_0, \dots, x_k) \lAND (\lnot q, \forall q \in Q \text{ s.t. } q \neq q''_i) \lAND turnDomain),\; \forall i,j: 0\leq i \leq m, 0\leq j \leq n$
+%\end{block}
+
+%\item New initial state: $s_0 \lAND \text{\texttt{turnDomain}} \lAND q_0(o_0,\dots,o_k)$
+%\item New goal specification: $\text{\texttt{turnDomain}} \lAND (\bigvee_{q \in F} q(o_0,\dots,o_k))$
+%\end{itemize}
+
+\begin{enumerate}
+\conti
+\item introduce the \textit{turnDomain} predicate that enables to perform a step on the domain and another step on the \DFA alternatively
+\item encode $\delta'$ of $\automaton'_\varphi$ in \PDDL:
+\begin{block}{\normalsize Action \texttt{trans}: encoding of $\delta'$ into domain $\D$}
 parameters: $(x_0, \dots, x_k)$, where $x_i \in \V$\\
 preconditions: $\lnot turnDomain$\\
 effects: $when\; (q_i(x_0, \dots, x_k) \lAND a'_j)\; then\; (\delta'(q'_i, a'_j)=q''_i(x_0, \dots, x_k) \lAND (\lnot q, \forall q \in Q \text{ s.t. } q \neq q''_i) \lAND turnDomain),\; \forall i,j: 0\leq i \leq m, 0\leq j \leq n$
 \end{block}
-
+\item in problem $\P$, produce a new initial state and new goal state accordingly
+\begin{itemize}
 \item New initial state: $s_0 \lAND \text{\texttt{turnDomain}} \lAND q_0(o_0,\dots,o_k)$
 \item New goal specification: $\text{\texttt{turnDomain}} \lAND (\bigvee_{q \in F} q(o_0,\dots,o_k))$
 \end{itemize}
-
+\end{enumerate}
 \end{frame}
 
-\begin{frame}{Results: the Triangle Tireworld example}
+\begin{frame}{Implementation and Results}
 \begin{itemize}
-\item Objective: Drive from one location to another. A tire may be going flat. If there is a spare tire in the location of the car, then the car can use it to fix the flat tire.
-
-\item Goal: $\varphi = vehicleAt(l13) \lAND \Once (vehicleAt(l23))$
-
-\item Result:
+\item \FONDFOR Python package using FOND-SAT planner
+\item soon available online at \href{http://fond4ltlfpltl.diag.uniroma1.it}{http://fond4ltlfpltl.diag.uniroma1.it}
 \end{itemize}
+
+\begin{example}
+Objective: Drive from one location to another. A tire may be going flat. If there is a spare tire in the location of the car, then the car can use it to fix the flat tire.
+
+Goal: $\varphi = vehicleAt(l22) \lAND \Once (vehicleAt(l31))$
+
+\textit{Strong Plan}: any path from state $0$ to state $5$ leads to the goal
+\begin{figure}[h]
+\centering
+\subfigure{\includegraphics[width=.7\textwidth]{../images/result-plan-slide}}
+\subfigure{\includegraphics[width=.25\textwidth]{../images/plan-ex-slide}}
+\end{figure}
+
+%\includegraphics[width=.7\textwidth]{../images/result-plan-slide}
+\end{example}
 
 %\begin{figure}[h]
 %\centering
@@ -310,58 +404,93 @@ effects: $when\; (q_i(x_0, \dots, x_k) \lAND a'_j)\; then\; (\delta'(q'_i, a'_j)
 
 
 \section{\janus}
+\fontsize{10}{10}\selectfont
 \begin{frame}{The Janus approach for Declarative Process Mining}
+\begin{block}{}
+Declarative Process Mining is the set of techniques aimed at determining if a trace $t$ is \emph{interesting} wrt a given temporal specification $\varphi$, called a constraint. 
+\end{block}
 \begin{itemize}
-\item Declarative Process Mining is the set of techniques aimed at extracting and validating temporal constraints out of event logs (i.e. multi-sets of \emph{finite} traces). The Janus approach (Cecconi et al. 2018) allows to compute the \emph{interestingness degree} of traces in event logs
-
-\item Determine if a trace is ``relevant'' or ``interesting'' wrt a given temporal specification
-
+\item \textbf{Problem}: \emph{``ex falso quod libet''}, i.e. a constraint can be satisfied even though it is never activated
+\item \textbf{Solution}: the Janus approach (Cecconi et al. 2018) proposed the \textit{reactive constraint} (\rcon\xspace) as $\Psi \doteq \alpha \mapsto \varphi$ where:
+\begin{itemize}
+\item $\alpha$ is the activation condition
+\item $\varphi$ is an \LTLp formula (i.e. \LTLf augmented with \PLTL)
+\end{itemize}
+for computing the \emph{interestingness degree} function $\zeta(\Psi, t)$
 \end{itemize}
 
-\begin{exampleblock}{Example}
-\begin{itemize}
-\item Given a trace $t = \tup{d,f,a,f,c,a,f,b,a,f}$
-\item Given a constraint $\Psi = a \mapsto (\Yesterday b \lOR \Diamond c)$, where $a$ is the activation condition and $(\Yesterday b \lOR \Diamond c)$ is the formula to be validated
-\item Result: the \emph{interestingness degree} is $\dfrac{2}{3} = 0.667$
-\end{itemize}
+\begin{exampleblock}{Example: $\Psi = a \mapsto (\Yesterday b \lOR \Diamond c)$}
+Given a trace $t = \tup{d,f,a,f,c,a,f,b,a,f}$, the $\zeta(\Psi, t) = \tfrac{2}{3} = 0.667$
 \end{exampleblock}
+
+\begin{alertblock}{Two main drawbacks:}
+$\alpha$ only a single task and implementation limited to \declare constraints
+\end{alertblock}
 
 \end{frame}
 
 \begin{frame}
-Our generalization of the Janus approach extends the original Janus approach in the following terms:
-\begin{itemize}
-\item provide a new constraint representation:
-\begin{align}
-\Psi \doteq \bigvee^{m}_{j=1} (\varphi^{\blacktriangleleft} \lAND \varphi^{\blacktriangledown} \lAND \varphi^{\blacktriangleright})_j
-\end{align}
-\begin{itemize}
-\item $\varphi^{\blacktriangleleft}$ a formula on the past that checks if the past makes the triggering relevant
-\item $\varphi^{\blacktriangledown}$ a propositional formula on the current instant that triggers potential interest on the instant itself
-\item $\varphi^{\blacktriangleright}$ a formula on the future that must be satisfied for considering the current instant interesting
-\end{itemize}
-\end{itemize}
+\fontsize{10}{9.2}\selectfont
+Our generalization of the Janus approach extends the original approach:
+\begin{block}{New constraint representation - \rcon\xspace}
+\[\Psi \doteq \bigvee^{m}_{j=1} (\varphi^{\blacktriangleleft} \lAND \varphi^{\blacktriangledown} \lAND \varphi^{\blacktriangleright})_j\]
+where $\varphi^{\blacktriangleleft}$ is a pure past formula, $\varphi^{\blacktriangledown}$ is a \textcolor{red}{propositional formula} on the current instant that triggers potential interest and $\varphi^{\blacktriangleright}$ is a pure future formula
+\end{block}
 
+\begin{block}{New \emph{interestingness degree} function $\eta(\Psi, t)$}
+\[   
+\eta(\Psi,t) = 
+     \begin{cases}
+       \dfrac{\lvert \{t \models \bigvee^{m}_{j=1} (\varphi^{\blacktriangleleft} \lAND \varphi^{\blacktriangledown} \lAND \varphi^{\blacktriangleright})_j\} \rvert}{\lvert \{t \models \bigvee^{m}_{j=1} \varphi^{\blacktriangledown}\} \rvert}, &\quad\text{if } \lvert \{t \models \bigvee^{m}_{j=1} \varphi^{\blacktriangledown}\} \rvert \neq 0 ;\\
+       0, &\quad\text{otherwise} \\
+     \end{cases}
+\]
+\end{block}
+
+\begin{theorem}
+The $\eta(\Psi, t)$ function is a generalization of the $\zeta(\Psi, t)$ function
+\end{theorem}
+
+\end{frame}
+
+\begin{frame}{Implementation and Results}
+\janus Python package:
+	\begin{itemize}
+		\item any type of constraint formula
+		\item automata generation through \LTLfToDFA
+	\end{itemize}
+Results:
+\begin{exampleblock}{Example taken from \textit{Sepsis}\footnotemark event log}
+\begin{itemize}
+\item Given an \rcon\xspace:
+\begin{align*}
+\Psi = \;& (\Yesterday ER\; Registration \lAND (Leucocytes \lAND LacticAcid) \lAND True) \lOR\\
+& (True \lAND (Leucocytes \lAND LacticAcid) \lAND \Diamond CRP)
+\end{align*}
+\item $t$ = \{'ER Registration', ('ER Triage','ER Sepsis Triage), ('LacticAcid', 'IV Liquid'),  ('Leucocytes', 'LacticAcid'), 'CRP', 'LacticAcid', ('Leucocytes', 'LacticAcid'), ('Leucocytes', 'IV Antibiotics'),'IV Liquid', 'Release A'\}
+\item $\eta(\Psi, t) = \tfrac{1}{2} = 0.5$
+\end{itemize}
+\end{exampleblock}
+\footnotetext{\textit{Sepsis} reports trajectories of patients showing symptoms of sepsis in a Dutch hospital}
 \end{frame}
 
 \section{Conclusions}
 \begin{frame}{Conclusions}
-	Thesis results:
+	\textbf{Thesis results}:
 	\begin{itemize}
-		\item Extended (Brafman et al. 2018) to the context of RL;
-		\item Formalization of \emph{RL for \LLf goals}, devising of a solution and analysis of the advantages;
-		\item Provided an implementation and given experimental evidence of the goodness of our approach.
+		\item Provided the \LTLfToDFA tool which implements the translation procedure from \LTLf/\PLTL to \DFA
+		\item Proposed and implemented the \FONDFOR approach in compiling \LTLf/\PLTL goals along with the original planning domain, specified in \PDDL
+		\item Extended the Janus approach both theoretically and practically
 	\end{itemize}
-	Future works:
+	\vspace{0.5cm}
+\textbf{Future works}:
 	\begin{itemize}
-		\item Minimal low-level representation to tackle \LLf goals;
-		\item Optimize FLLOAT, enrich RLTG;
-		\item Try the approach in several real world applications;
-		\item Design of ad-hoc algorithms (e.g. "automata-aware" exploration);
-		\item Extend the approach to the framework of Multi-Agent Systems.
+		\item Investigate the \LTLp logic (i.e. \LTLf and \PLTL merged) for dealing directly with mixed formulas 
+		\item Extend our research to \textit{Partially Observable Non Deterministic} (\POND) domains
+		\item Provide a tool that automatically separates \LTLp formulas
+		\item Optimize and enrich all tools developed.
 	\end{itemize}
-	Publication: \href{https://arxiv.org/abs/1807.06333}{https://arxiv.org/abs/1807.06333}. Status: submitted
-	
+%Some of the topics described will be published
 \end{frame}
 
 %
