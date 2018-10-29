@@ -144,16 +144,16 @@
 \section{Objectives}
 \begin{frame}{Objectives}
 \begin{itemize}
-	\item Provide a new efficient technique to transform \LTLf/\PLTL formulas into \DFAs		
+	\item Provide a new efficient technique to transform \LTLf/\PLTL formulas into \textit{Deterministic Finite-state Automaton} (\DFAs)		
 	\vskip 0.5cm
-	\item Provide an approach to \FOND Planning for \LTLf/\PLTL goals:
+	\item Provide an approach to (\FOND) Planning for \LTLf/\PLTL goals:
 		\begin{itemize}
-			\item 	reducing the problem to standard \FOND planning
-			\item 	working with \FOND domains instead of automata
+			\item 	reducing the problem to standard (\FOND) planning
+			\item 	working with (\FOND) domains instead of automata
 		\end{itemize}
 	
 	\vskip 0.5cm
-	\item Provide a generalization of the Janus approach to declarative process mining:
+	\item Provide a generalization of an approach to declarative process mining:
 			\begin{itemize}
 				\item 	generalization of the constraint formula representation
 			\end{itemize}	
@@ -212,23 +212,31 @@
 
 \begin{frame}{Translation of \LTLf and \PLTL formulas to \DFA}
 	\begin{itemize}
-		\item Translation procedure
+		\item Technique based on a translation procedure:
+		\vspace{0.3cm}
 		\begin{enumerate}
 		\item starting from an \LTLf/\PLTL formula $\varphi$, we translate it to \FOL on finite sequences (De Giacomo and Vardi 2013; Zhu et al. 2018) through $fol(\varphi, x)$ and $fol_p(\varphi, x)$ translation functions:
 	\begin{itemize}
 	\item \LTLf formulas evaluated in $x = 0$, hence $fol(\varphi, 0)$, since they look at the future
 	\item \PLTL formulas evaluated in $x = last$, hence $fol_p(\varphi, last)$ with $last = | \trace | - 1$, since they look at the past
+%			\begin{exampleblock}{\normalsize Example: $\varphi = \Diamond G$}
+%\FOL translation: $fol(\varphi, x) = \exists y. x \leq y \leq last \lAND G(y)$, where $[x/0]$
+%	\end{exampleblock}
 	\end{itemize}
+	\vspace{0.3cm}
 		\item apply the highly optimized tool \MONA able to transform Monadic Second Order Logic (and hence \FOL as well) on finite strings to minimum \DFA automata		
 		\end{enumerate}
 	\end{itemize}
 	
-	\begin{exampleblock}{Example: $\varphi = \Diamond G$}
-	\begin{enumerate}
-	\item \FOL translation: $fol(\varphi, x) = \exists y. x \leq y \leq last \lAND G(y)$, where $[x/0]$
-	\item \MONA program: \texttt{m2l-str; var2 G; ex1 y: 0<=y \& y<=max(\$) \& y in G}
-	\end{enumerate}
-	\end{exampleblock}
+%	\begin{exampleblock}{\normalsize Example: $\varphi = \Diamond G$}
+%\MONA program: \texttt{m2l-str;} \texttt{var2 G;} \texttt{ex1 y:} \texttt{0<=y \& y<=max(\$)} \texttt{\& y in G}
+%	\end{exampleblock}
+%	\begin{exampleblock}{Example: $\varphi = \Diamond G$}
+%	\begin{enumerate}
+%	\item \FOL translation: $fol(\varphi, x) = \exists y. x \leq y \leq last \lAND G(y)$, where $[x/0]$
+%	\item \MONA program: \texttt{m2l-str; var2 G; ex1 y: 0<=y \& y<=max(\$) \& y in G}
+%	\end{enumerate}
+%	\end{exampleblock}
 \end{frame}
 
 \begin{frame}{\LTLfToDFA: the implementation of the translation procedure}
@@ -238,7 +246,7 @@ Python package supporting:
 		\item translation to \FOL, \DFA
 		\item option for \declare assumption (De Giacomo et al. 2014)
 		\item available online at \href{http://ltlf2dfa.diag.uniroma1.it}{http://ltlf2dfa.diag.uniroma1.it}
-	\end{itemize}
+\end{itemize}
 	
 %\begin{example}{Output examples}	
 %	\begin{table}
@@ -279,7 +287,16 @@ Python package supporting:
 
 \begin{frame}{\FOND Planning for Extended Temporal Goals}
 \begin{itemize}
-\item A \textit{fully observable non-deterministic} (\FOND) domain with initial state is a tuple $\D = \tup{2^\F, A, s_0, \varrho, \alpha}$, specified in \PDDL as domain $\D$ and problem $\P$
+\item A \textit{fully observable non-deterministic} (\FOND) domain with initial state is a tuple $\D = \tup{2^\F, A, s_0, \varrho, \alpha}$ where:
+\begin{itemize}
+\item $\F$ is a set of \textit{fluents} (atomic propositions);
+\item $A$ is a set of \textit{actions} (atomic symbols);
+\item $2^\F$ is the set of states;
+\item $s_0$ is the initial state (initial assignment to fluents);
+\item $\alpha(s) \subseteq A$ represents \textit{action preconditions};
+\item $(s, \color{blue}a, \color{red}s'\color{black}) \in \varrho$ with $a \in \alpha(s)$ represents \textit{action effects} (including frame)
+\end{itemize}
+\item Specified in \PDDL as domain $\D$ and problem $\P$
 
 \item Actions effects are \emph{non-deterministic}: who chooses what?
 \begin{itemize}
@@ -301,16 +318,17 @@ Python package supporting:
 %\fontsize{10}{9}\selectfont
 \begin{itemize}
 \item Idea: reduce the problem to standard \FOND planning
+\vspace{0.5cm}
 \item How to deal with \LTLf/\PLTL goal:
 \begin{enumerate}
 \item transform the goal $\varphi$ into the \DFA $\automaton_\varphi = \tup{\Sigma, Q, q_0 , \delta, F}$, through \LTLfToDFA
 \item to capture the general representation of $\automaton_\varphi$ in the $\D$, we modify $\automaton_\varphi$ to $\automaton'_\varphi$
 \begin{block}{\normalsize The parametrization of $\automaton_\varphi$: $\automaton'_\varphi$}
 \begin{itemize}
-\item $\Sigma = \{a_0(\vec{o}), \dots, a_n(\vec{o})\}$ to $\Sigma' = \{a'_0(\vec{x}), \dots, a'_n(\vec{x})\}$
-\item $Q = \{q_0, \dots, q_n\}$ to $Q' = \{q'_0(\vec{x}), \dots, q'_n(\vec{x})\}$
+\item from $\Sigma = \{a_0(\vec{o}), \dots, a_n(\vec{o})\}$ to $\Sigma' = \{a'_0, \dots, a'_n\} = \{a_0(\vec{x}), \dots, a_n(\vec{x}) \}$
+\item  from $Q = \{q_0, \dots, q_n\}$ to $Q' = \{q'_0(\vec{x}), \dots, q'_n(\vec{x})\}$
 \end{itemize}
-where $\vec{o} = (o_0,\dots,o_k)$ and $\vec{x} = (x_0,\dots,x_k)$ 
+where $\vec{o} = (o_0,\dots,o_k)$ are objects of interest and $\vec{x} = (x_0,\dots,x_k)$ are the corresponding variables
 \end{block}
 \seti
 
@@ -358,17 +376,25 @@ where $\vec{o} = (o_0,\dots,o_k)$ and $\vec{x} = (x_0,\dots,x_k)$
 \begin{enumerate}
 \conti
 \item introduce the \textit{turnDomain} predicate that enables to perform a step on the domain and another step on the \DFA alternatively
-\item encode $\delta'$ of $\automaton'_\varphi$ in \PDDL:
+\item encode $\delta'$ of $\automaton'_\varphi$ in \PDDL as a new operator:
 \begin{block}{\normalsize Action \texttt{trans}: encoding of $\delta'$ into domain $\D$}
-parameters: $(x_0, \dots, x_k)$, where $x_i \in \V$\\
-preconditions: $\lnot turnDomain$\\
-effects: $when\; (q_i(x_0, \dots, x_k) \lAND a'_j)\; then\; (\delta'(q'_i, a'_j)=q''_i(x_0, \dots, x_k) \lAND (\lnot q, \forall q \in Q \text{ s.t. } q \neq q''_i) \lAND turnDomain),\; \forall i,j: 0\leq i \leq m, 0\leq j \leq n$
+\texttt{parameters}: $(x_0, \dots, x_k)$, where $x_i \in \V$\\
+\texttt{precondition}: $\lnot turnDomain$\\
+\texttt{effect}: $when\; (q_i(x_0, \dots, x_k) \lAND a'_j)\; then\; (\delta'(q'_i, a'_j)=q''_i(x_0, \dots, x_k) \lAND (\lnot q, \forall q \in Q \text{ s.t. } q \neq q''_i) \lAND turnDomain),\; \forall i,j: 0\leq i \leq m, 0\leq j \leq n$
 \end{block}
 \item in problem $\P$, produce a new initial state and new goal state accordingly
-\begin{itemize}
-\item New initial state: $s_0 \lAND \text{\texttt{turnDomain}} \lAND q_0(o_0,\dots,o_k)$
-\item New goal specification: $\text{\texttt{turnDomain}} \lAND (\bigvee_{q \in F} q(o_0,\dots,o_k))$
-\end{itemize}
+%\begin{itemize}
+%\item New initial state: $s_0 \lAND \text{\texttt{turnDomain}} \lAND q_0(o_0,\dots,o_k)$
+%\item New goal specification: $\text{\texttt{turnDomain}} \lAND (\bigvee_{q \in F} q(o_0,\dots,o_k))$
+%\end{itemize}
+
+\begin{block}{\normalsize New initial state}
+\[s_0 \lAND \text{\textit{turnDomain}} \lAND q_0(o_0,\dots,o_k)\]
+\end{block}
+\begin{block}{\normalsize New goal specification}
+\[\text{\textit{turnDomain}} \lAND (\bigvee\nolimits_{q \in F}q(o_0,\dots,o_k))\]
+\end{block}
+
 \end{enumerate}
 \end{frame}
 
@@ -378,12 +404,12 @@ effects: $when\; (q_i(x_0, \dots, x_k) \lAND a'_j)\; then\; (\delta'(q'_i, a'_j)
 \item soon available online at \href{http://fond4ltlfpltl.diag.uniroma1.it}{http://fond4ltlfpltl.diag.uniroma1.it}
 \end{itemize}
 
-\begin{example}
+\begin{exampleblock}{Example: the Triangle Tireworld domain}
 Objective: Drive from one location to another. A tire may be going flat. If there is a spare tire in the location of the car, then the car can use it to fix the flat tire.
 
 Goal: $\varphi = vehicleAt(l22) \lAND \Once (vehicleAt(l31))$
 
-\textit{Strong Plan}: any path from state $0$ to state $5$ leads to the goal
+\textit{(Strong) Plan}: any path from state $0$ to state $5$ achieves to the goal
 \begin{figure}[h]
 \centering
 \subfigure{\includegraphics[width=.7\textwidth]{../images/result-plan-slide}}
@@ -391,7 +417,7 @@ Goal: $\varphi = vehicleAt(l22) \lAND \Once (vehicleAt(l31))$
 \end{figure}
 
 %\includegraphics[width=.7\textwidth]{../images/result-plan-slide}
-\end{example}
+\end{exampleblock}
 
 %\begin{figure}[h]
 %\centering
@@ -460,12 +486,12 @@ The $\eta(\Psi, t)$ function is a generalization of the $\zeta(\Psi, t)$ functio
 		\item automata generation through \LTLfToDFA
 	\end{itemize}
 Results:
-\begin{exampleblock}{Example taken from \textit{Sepsis}\footnotemark event log}
+\begin{exampleblock}{Example: the \textit{Sepsis}\footnotemark\xspace event log}
 \begin{itemize}
 \item Given an \rcon\xspace:
 \begin{align*}
-\Psi = \;& (\Yesterday ER\; Registration \lAND (Leucocytes \lAND LacticAcid) \lAND True) \lOR\\
-& (True \lAND (Leucocytes \lAND LacticAcid) \lAND \Diamond CRP)
+\Psi = \;& (\Yesterday ER\; Registration \lAND \color{red}(Leucocytes \lAND LacticAcid) \color{black} \lAND True) \lOR\\
+& (True \lAND \color{red}(Leucocytes \lAND LacticAcid) \color{black} \lAND \Diamond CRP)
 \end{align*}
 \item $t$ = \{'ER Registration', ('ER Triage','ER Sepsis Triage), ('LacticAcid', 'IV Liquid'),  ('Leucocytes', 'LacticAcid'), 'CRP', 'LacticAcid', ('Leucocytes', 'LacticAcid'), ('Leucocytes', 'IV Antibiotics'),'IV Liquid', 'Release A'\}
 \item $\eta(\Psi, t) = \tfrac{1}{2} = 0.5$
@@ -491,6 +517,66 @@ Results:
 		\item Optimize and enrich all tools developed.
 	\end{itemize}
 %Some of the topics described will be published
+\end{frame}
+
+\section*{}
+\begin{frame}{Appendix A}
+\begin{itemize}
+\item Finite trace $\trace$: denotes a finite sequence of consecutive instants of time
+\vspace{0.2cm}
+\item An \LTLf formula $\varphi$ is $\true$ in $\trace$, in notation $\trace \models \varphi$, if $\trace, 0 \models \varphi$
+\vspace{0.2cm}
+\item A \PLTL formula $\varphi$ is $\true$ in $\trace$, in notation $\trace \models \varphi$, if $\trace, last \models \varphi$
+
+\end{itemize}
+	\begin{exampleblock}{\normalsize Example: translation procedure for $\varphi = \Diamond G$}
+\FOL translation: $fol(\varphi, 0) = \exists y. 0 \leq y \leq last \lAND G(y)$\\
+\medskip
+\MONA program: \texttt{m2l-str;} \texttt{var2 G;} \texttt{ex1 y:} \texttt{0<=y \& y<=max(\$)} \texttt{\& y in G}
+	\end{exampleblock}
+\begin{block}{Results}
+\begin{itemize}
+\item an \LTLf formula can be reduced to \DFA in double-exponential time
+\item a \PLTL formula can be reduced to \DFA in single exponential time
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{Appendix A1}
+	\LTLfToDFA vs \FLLOAT:
+	\includegraphics[width=\textwidth]{../images/new-time-comp-eps-converted-to}
+\end{frame}
+
+\begin{frame}{Appendix B}
+	\begin{definition}
+We define a mapping function $f$ as follows:
+\begin{equation}
+f: \O \rightarrow \V
+\end{equation}
+where $\O$ is the set of objects $\{o_0,\dots,o_k\}$ and $\V$ is a set of variables $\{x_0,\dots,x_k\}$
+\end{definition}
+
+\begin{exampleblock}{Example of parametric \DFA: $\varphi = \Diamond vehicleAt(l22)$}
+\centering
+\includegraphics[width=0.7\textwidth]{../images/automa-param4}
+\end{exampleblock}
+
+\end{frame}
+
+\begin{frame}{Appendix B1}
+\begin{block}{Strong Plan - Pure adversarial game}
+A strong plan is a strategy that is guaranteed to achieve the goal regardless of non-determinism.
+\end{block}
+\begin{block}{Strong Cyclic Plan - Fairness}
+Strong cyclic solutions guarantee goal reachability only under the assumption of \textit{fairness}. In the presence of fairness it is supposed that all action outcomes, in a given state, would occur infinitely often.
+\end{block}
+%\begin{block}{Results for \FONDS}
+%Solving \FONDS for \LTLf goals is:
+%\begin{itemize}
+%\item \EXPTIME-complete in the size of the domain
+%\item \TWOEXPTIME-complete in the size of the goal
+%\end{itemize}
+%\end{block}
 \end{frame}
 
 %

@@ -116,11 +116,11 @@
 	hyperfootnotes=true,            
 	bookmarks=true,         
 	colorlinks=true,
-	linkcolor=red,
+	linkcolor=black, %red
 	linktoc=page,
 	anchorcolor=black,
-	citecolor=red,
-	urlcolor=blue,
+	citecolor=black, %red
+	urlcolor=black, %blue
 	pdftitle={\thesistitle},
 	pdfsubject = {Master Thesis, University of Rome ``Sapienza''},
 	pdfauthor={Francesco Fuggitti},
@@ -168,11 +168,28 @@
 The application of \LTL and Past \LTL on Finite Traces is of particular interest for different fields in Artificial Intelligence (AI) and Computer Science (CS). In this thesis, we focus on the application of these two formal languages to Planning and Declarative Process Mining. For this purpose, the design and implementation of the \LTLfToDFA framework has been crucial to the application of \LTLf and \PLTL in both research fields. In Planning, we direct our attention to \FOND planning for \LTLf and \PLTL goals showing a new encoding of those temporal goals in standard \PDDL. We formally provide experimental evidence that it is possible to restrict the manner used by the plan to reach the goal specified in future and past modalities. With respect to Declarative Process Mining, we generalize the Janus approach for computing the interestingness of traces out of event logs, giving a new representation of the constraint formula allowing propositional formulas as activation condition.
 \end{abstract}
 	
-%\dedication{To my parents and grandparents}
+\dedication{To my parents and grandparents}
 %	
-%\begin{acknowledgments}
-%Vorrei ringraziare
-%\end{acknowledgments}
+\begin{acknowledgments}
+I would like to acknowledge all people that helped me most during this thesis. To begin with, I am sincerely grateful to Shufang Zhu and Alessio Cecconi for introducing me in using the MONA tool for temporal formulas translation and in the theory and implementation of the Janus approach, respectively. 
+
+I wish also to thank Prof. Anders M{\o}ller for clarifications on MONA, Prof. Jörg Hoffmann for insights of ADL2STRIPS, Prof. Hector Geffner for his suggestions on FOND-SAT planner, Prof. Malte Helmert and Dr. Patrik Haslum for advices on grounding tools, Dr. Fabio Patrizi for valuable exchange of ideas and Prof. Riccardo Rosati for his considerable remarks about the presentation.
+ 
+Then, I would like to acknowledge all my friends and all my fellows of the Master course, especially Marco with whom I discussed in detail many technical points about implementations.
+
+%Finally, I would like to express my deepest gratitude to Prof. Giuseppe De Giacomo, who has been
+%a great advisor and mentor. He strongly encouraged me in developing this work and in furthering researches in this area, always ready to steer me to the right direction. He also gave me invaluable advices during this thesis journey.
+
+Finally, I would like to express my deepest gratitude to Prof. Giuseppe De Giacomo, who has been
+a great advisor and mentor. He strongly encouraged me in developing this work and in furthering researches in this area, always ready to steer me to the right direction by providing invaluable advices.
+
+\bigskip
+Special thanks to my brothers, Filippo and Federico, and to my lovely girlfriend, Federica, for supporting me all the time.
+
+\begin{flushright}
+Francesco Fuggitti
+\end{flushright}
+\end{acknowledgments}
 	
 	\tableofcontents
 %	\listoffigures
