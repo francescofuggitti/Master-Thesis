@@ -579,6 +579,27 @@ Strong cyclic solutions guarantee goal reachability only under the assumption of
 %\end{block}
 \end{frame}
 
+\begin{frame}{Appendix C}
+\begin{theorem}
+Any propositional temporal formula $\varphi$ can be rewritten as a boolean combination of pure temporal formulas. (Gabbay, 1989)
+\end{theorem}
+
+\begin{block}{Definition of $\zeta$}
+$\zeta: \mathcal{R} \times \Sigma^* \rightarrow [0,1] \subseteq \mathbb{R}$ is defined as follows:
+\[   
+\zeta(\Psi,t) = 
+     \begin{cases}
+       \dfrac{\lvert \{ i: t,i \models \alpha \text{ and } t,i \models \varphi\} \rvert}{\lvert \{ i: t,i \models \alpha\} \rvert}, &\quad\text{if } \lvert \{ i: t,i \models \alpha\} \rvert \neq 0 ;\\
+       0, &\quad\text{otherwise} \\
+     \end{cases}
+\]
+\end{block}
+
+\begin{block}{Equivalence between \textit{reactive constraints}}
+$\alpha \mapsto \varphi \equiv \bigvee\nolimits^{m}_{j=1} (\varphi^{\blacktriangleleft} \lAND (\varphi^{\blacktriangledown} \lAND \alpha) \lAND \varphi^{\blacktriangleright})_j$
+\end{block}
+\end{frame}
+
 %
 %%\begin{block}{Examples}
 %%Some examples of commonly used commands and features are included, to help you get started.
