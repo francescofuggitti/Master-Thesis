@@ -14,5 +14,5 @@ macros_.tex
 *.nav
 *.snm
 *.vrb
-
+.texpadtmp
 presentation/speech
